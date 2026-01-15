@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Aegis Operations Center</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f4f7f6; }
+        h1 { color: #2c3e50; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #2c3e50; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .high { color: #dc3545; font-weight: bold; }
+        .medium { color: #ffc107; font-weight: bold; }
+        .section-title { margin-top: 40px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; color: #34495e; }
+        .btn { padding: 5px 10px; cursor: pointer; border: none; border-radius: 3px; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-action { background-color: #007bff; color: white; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; }
+        a.logout { color: #dc3545; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h1>🛡️ Aegis EDR - Operations Center</h1>
+        <a href="/logout" class="logout">Logout</a>
+    </div>
+
+    <h2 class="section-title">Active Assets (Endpoints)</h2>
+    <table>
+        <tr>
+            <th>Hostname</th>
+            <th>IP Address</th>
+            <th>Resource Usage</th>
+            <th>Security Posture (AV)</th>
+            <th>Last Heartbeat</th>
+            <th>Remote Actions</th>
+        </tr>
+        {% for agent in agents %}
+        <tr>
+            <td>{{ agent.hostname }}</td>
+            <td>{{ agent.ip_address }}</td>
+            <td>CPU: {{ agent.cpu_usage }}% | RAM: {{ agent.ram_usage }}%</td>
+            <td>{{ agent.av_status }}</td>
+            <td>{{ agent.last_seen.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>
+                <form action="/command/{{ agent.id }}/restart" method="POST" style="display:inline;">
+                    <button class="btn btn-danger" onclick="return confirm('Confirm remote reboot?');">Reboot</button>
+                </form>
+                <form action="/command/{{ agent.id }}/rename" method="POST" style="display:inline;">
+                    <input type="text" name="new_name" placeholder="New Hostname" size="12">
+                    <button class="btn btn-action">Rename</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2 class="section-title">Security Incidents & Alerts</h2>
+    <table>
+        <tr>
+            <th>Timestamp</th>
+            <th>Source Asset</th>
+            <th>Severity</th>
+            <th>Alert Type</th>
+            <th>Message</th>
+            <th>Triage</th>
+        </tr>
+        {% for alert in alerts %}
+        <tr>
+            <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ alert.agent.hostname }}</td>
+            <td class="{{ alert.severity }}">{{ alert.severity.upper() }}</td>
+            <td>{{ alert.alert_type }}</td>
+            <td>
+                <strong>{{ alert.message }}</strong>
+                {% if alert.ai_analysis %}
+                    <br><br>
+                    <details>
+                        <summary style="cursor:pointer; color:blue;">🤖 View AI Analysis</summary>
+                        <div style="background:#f0f0f0; padding:10px; border-radius:5px; margin-top:5px; white-space: pre-wrap;">{{ alert.ai_analysis }}</div>
+                    </details>
+                {% endif %}
+            </td>
+            <td>
+                <form action="/alert/resolve/{{ alert.id }}" method="POST">
+                    <button class="btn btn-action">Mark Resolved</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
