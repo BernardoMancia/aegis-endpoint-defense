@@ -45,6 +45,7 @@ class Agent(db.Model):
     av_status = db.Column(db.String(100))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     pending_command = db.Column(db.String(100), default=None)
+    software_inventory = db.Column(db.Text, default="")
     alerts = db.relationship('Alert', backref='agent', lazy=True)
 
 class Alert(db.Model):
@@ -121,6 +122,7 @@ def api_report():
     agent.cpu_usage = data.get('cpu')
     agent.ram_usage = data.get('ram')
     agent.av_status = data.get('firewall')
+    agent.software_inventory = data.get('software', '')
     agent.last_seen = datetime.utcnow()
     
     command = agent.pending_command

