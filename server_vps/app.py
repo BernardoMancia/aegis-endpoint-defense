@@ -1,34 +1,33 @@
-import os
-import logging
-from datetime import datetime
-from dotenv import load_dotenv
 import openai
+import json
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
-load_dotenv()
+SERVER_HOST = '0.0.0.0'
+SERVER_PORT = 0000
+OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+FLASK_SECRET_KEY = "sk_auth_0000000000000000"
+DB_URI = 'sqlite:///database.db'
 
 app = Flask(__name__)
-
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///aegis.db')
+app.config['SECRET_KEY'] = FLASK_SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = OPENAI_API_KEY
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -38,55 +37,29 @@ class User(UserMixin, db.Model):
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hostname = db.Column(db.String(100))
-    ip_address = db.Column(db.String(50))
-    os_info = db.Column(db.String(100))
-    antivirus_status = db.Column(db.String(200), default="Unknown")
-    status = db.Column(db.String(20), default='Offline')
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Telemetry(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'))
+    hostname = db.Column(db.String(100), nullable=False)
+    ip_address = db.Column(db.String(50), nullable=False)
+    mac_address = db.Column(db.String(50), nullable=True) 
     cpu_usage = db.Column(db.Float)
     ram_usage = db.Column(db.Float)
-    disk_usage = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    av_status = db.Column(db.String(100))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    pending_command = db.Column(db.String(100), default=None)
+    alerts = db.relationship('Alert', backref='agent', lazy=True)
 
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'))
-    severity = db.Column(db.String(20))
-    message = db.Column(db.String(500))
-    resolved = db.Column(db.Boolean, default=False)
+    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
+    alert_type = db.Column(db.String(50), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    severity = db.Column(db.String(20), default='medium')
+    ai_analysis = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    resolved = db.Column(db.Boolean, default=False)
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-def analyze_threat_ai(telemetry_data):
-    if not openai.api_key or "sk-" not in openai.api_key:
-        return None
-    try:
-        prompt = (f"Analyze metrics: CPU {telemetry_data['cpu']}%, RAM {telemetry_data['ram']}%. "
-                  "Reply 'NORMAL' or 'ALERT: [reason]' if suspicious.")
-        response = openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",
-            prompt=prompt,
-            max_tokens=20
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        logging.error(f"AI Error: {e}")
-        return None
-
-@app.route('/')
-@login_required
-def dashboard():
-    agents = Agent.query.all()
-    alerts = Alert.query.filter_by(resolved=False).order_by(Alert.timestamp.desc()).limit(10).all()
-    return render_template('dashboard.html', agents=agents, alerts=alerts, user=current_user)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -98,7 +71,7 @@ def login():
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
-            flash('Invalid Credentials', 'danger')
+            flash('Invalid credentials. Access denied.')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -107,53 +80,95 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/api/telemetry', methods=['POST'])
-def receive_telemetry():
-    data = request.json
-    if not data:
-        return jsonify({"error": "No data"}), 400
+@app.route('/')
+@login_required
+def dashboard():
+    agents = Agent.query.all()
+    alerts = Alert.query.filter_by(resolved=False).order_by(Alert.timestamp.desc()).limit(20).all()
+    return render_template('dashboard.html', agents=agents, alerts=alerts)
 
-    hostname = data.get('hostname', 'Unknown')
-    ip = request.remote_addr
+@app.route('/command/<int:agent_id>/<action>', methods=['POST'])
+@login_required
+def send_command(agent_id, action):
+    agent = Agent.query.get_or_404(agent_id)
+    if action == 'restart':
+        agent.pending_command = 'restart'
+    elif action == 'rename':
+        new_name = request.form.get('new_name')
+        if new_name:
+            agent.pending_command = f'rename:{new_name}'
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/alert/resolve/<int:alert_id>', methods=['POST'])
+@login_required
+def resolve_alert(alert_id):
+    alert = Alert.query.get_or_404(alert_id)
+    alert.resolved = True
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/api/report', methods=['POST'])
+def api_report():
+    data = request.json
+    agent = Agent.query.filter_by(hostname=data.get('hostname')).first()
     
-    agent = Agent.query.filter_by(hostname=hostname).first()
     if not agent:
-        agent = Agent(hostname=hostname)
+        agent = Agent(hostname=data.get('hostname'), ip_address=data.get('ip'))
         db.session.add(agent)
     
-    agent.ip_address = ip
-    agent.os_info = data.get('os', 'Unknown')
-    agent.antivirus_status = data.get('antivirus', 'Unknown')
+    agent.ip_address = data.get('ip')
+    agent.cpu_usage = data.get('cpu')
+    agent.ram_usage = data.get('ram')
+    agent.av_status = data.get('firewall')
     agent.last_seen = datetime.utcnow()
-    agent.status = 'Online'
+    
+    command = agent.pending_command
+    agent.pending_command = None 
     db.session.commit()
+    
+    return jsonify({'status': 'ok', 'command': command})
 
-    cpu = data.get('cpu', 0)
-    telemetry = Telemetry(
-        agent_id=agent.id,
-        cpu_usage=cpu,
-        ram_usage=data.get('ram', 0),
-        disk_usage=data.get('disk', 0)
-    )
-    db.session.add(telemetry)
+@app.route('/api/analyze', methods=['POST'])
+def api_analyze():
+    data = request.json
+    
+    system_prompt = """
+    You are a Tier 3 Cybersecurity Analyst. 
+    Analyze the telemetry. Return ONLY JSON with keys: 
+    "summary", "details" (with CVE references if possible), "remediation".
+    """
+    
+    user_message = f"Telemetry: {json.dumps(data)}"
+    
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        ai_text = response.choices[0].message['content']
+        
+        agent = Agent.query.filter_by(hostname=data['hostname']).first()
+        if agent:
+            new_alert = Alert(
+                agent_id=agent.id,
+                alert_type="AI_SECURITY_INCIDENT",
+                message=f"Threats: {data.get('threats_found')}",
+                severity="high",
+                ai_analysis=ai_text
+            )
+            db.session.add(new_alert)
+            db.session.commit()
+            
+        return jsonify({"status": "analyzed", "data": ai_text})
 
-    if cpu > 90:
-        db.session.add(Alert(agent_id=agent.id, severity="High", message=f"Critical CPU Spike: {cpu}%"))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    db.session.commit()
-    return jsonify({"status": "received", "command": "continue"})
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        if not User.query.first():
-            default_user = User(username='admin')
-            default_user.set_password('admin')
-            db.session.add(default_user)
-            db.session.commit()
-
-    host_env = os.getenv('SERVER_HOST', '0.0.0.0')
-    port_env = int(os.getenv('SERVER_PORT', 5000))
-    
-    print(f"[*] Starting Server on {host_env}:{port_env}")
-    app.run(host=host_env, port=port_env, debug=False)
+    app.run(host=SERVER_HOST, port=SERVER_PORT)
