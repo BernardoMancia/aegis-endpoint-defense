@@ -4,176 +4,164 @@ import time
 import requests
 import psutil
 import socket
-import platform
-import wmi
 import os
 import sys
 import winreg
 import subprocess
+import io
+import base64
+import platform
+from PIL import ImageGrab
+from dotenv import load_dotenv
 
-SERVER_IP = "000.000.000.000"
-SERVER_PORT = 0000
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
+SERVER_IP = os.getenv('SERVER_IP')
+SERVER_PORT = os.getenv('SERVER_PORT')
+API_TOKEN = os.getenv('API_TOKEN')
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
-REPORT_ENDPOINT = f"{BASE_URL}/api/report"
-ANALYZE_ENDPOINT = f"{BASE_URL}/api/analyze"
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-class SecurityScanner(ctk.CTk):
+class AegisAgent(ctk.CTk):
     def __init__(self):
         super().__init__()
-
-        self.enable_persistence()
-
-        self.title("Aegis EDR - Endpoint Security")
-        self.geometry("700x550")
-        self.resizable(False, False)
-
+        self.hostname = socket.gethostname()
+        self.os_version = f"{platform.system()} {platform.release()} ({platform.version()})"
+        self.pid = os.getpid()
+        
+        self.setup_persistence()
+        
+        self.title(f"Aegis EDR - {self.hostname}")
+        self.geometry("800x600")
+        
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
+        ctk.CTkLabel(self.sidebar, text="🛡️ AEGIS", font=("Arial", 20, "bold")).pack(pady=20)
+        self.status_lbl = ctk.CTkLabel(self.sidebar, text="PROTECTED", text_color="#00ff00")
+        self.status_lbl.pack(pady=10)
+
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         
-        self.logo_label = ctk.CTkLabel(self.sidebar, text="🛡️ AEGIS EDR", font=ctk.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+        self.console = ctk.CTkTextbox(self.main_frame, height=250)
+        self.console.pack(fill="x", padx=10, pady=5)
+        
+        self.chat_frame = ctk.CTkFrame(self.main_frame)
+        self.chat_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        ctk.CTkLabel(self.chat_frame, text="Chat Suporte").pack(anchor="w", padx=5)
+        
+        self.chat_history = ctk.CTkTextbox(self.chat_frame, state="disabled", height=150)
+        self.chat_history.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        self.chat_input = ctk.CTkEntry(self.chat_frame, placeholder_text="Mensagem...")
+        self.chat_input.pack(side="left", fill="x", expand=True, padx=5, pady=5)
+        ctk.CTkButton(self.chat_frame, text="Enviar", width=80, command=self.send_chat).pack(side="right", padx=5)
 
-        self.status_label = ctk.CTkLabel(self.sidebar, text="SYSTEM SECURE", text_color="#2cc985", font=ctk.CTkFont(size=14, weight="bold"))
-        self.status_label.grid(row=1, column=0, padx=20, pady=10)
+        self.log(f"Agente Ativo (PID: {self.pid})")
+        threading.Thread(target=self.heartbeat_loop, daemon=True).start()
 
-        self.scan_button = ctk.CTkButton(self.sidebar, text="Start Deep Scan", command=self.start_scan_thread, fg_color="#3B8ED0")
-        self.scan_button.grid(row=2, column=0, padx=20, pady=10)
-
-        self.main_area = ctk.CTkFrame(self, corner_radius=10)
-        self.main_area.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
-
-        self.info_label = ctk.CTkLabel(self.main_area, text="System Status Monitor", font=ctk.CTkFont(size=24))
-        self.info_label.pack(pady=20)
-
-        self.progress_bar = ctk.CTkProgressBar(self.main_area, width=400)
-        self.progress_bar.pack(pady=20)
-        self.progress_bar.set(0)
-
-        self.log_box = ctk.CTkTextbox(self.main_area, width=450, height=250)
-        self.log_box.pack(pady=10)
-        self.log_box.insert("0.0", "System initialized. Persistence enabled.\n")
-
-        self.start_scan_thread()
-
-    def enable_persistence(self):
+    def setup_persistence(self):
         try:
-            exe_path = os.path.abspath(sys.argv[0])
+            path = os.path.abspath(sys.argv[0])
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-            winreg.SetValueEx(key, "AegisEDR", 0, winreg.REG_SZ, exe_path)
+            winreg.SetValueEx(key, "AegisEDR", 0, winreg.REG_SZ, path)
             winreg.CloseKey(key)
-        except Exception:
-            pass
+        except: pass
 
-    def log(self, message):
-        self.log_box.insert("end", f"> {message}\n")
-        self.log_box.see("end")
-
-    def check_firewall(self):
+    def log(self, msg):
         try:
-            w = wmi.WMI(namespace=r"root\SecurityCenter2")
-            fw = w.Query("Select * from FirewallProduct")
-            if len(fw) > 0:
-                return "Active", "Low"
-            return "Disabled", "High"
-        except:
-            return "Unknown", "Medium"
+            self.console.insert("end", f"> {msg}\n")
+            self.console.see("end")
+        except: pass
 
-    def check_suspicious_processes(self):
-        suspicious = []
-        targets = ['mimikatz.exe', 'ncat.exe', 'powershell.exe', 'cmd.exe'] 
-        for proc in psutil.process_iter(['name']):
-            try:
-                if proc.info['name'] in targets:
-                    suspicious.append(proc.info['name'])
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                pass
-        
-        if suspicious:
-            return suspicious, "Critical"
-        return [], "Low"
+    def add_chat_msg(self, sender, msg):
+        self.chat_history.configure(state="normal")
+        self.chat_history.insert("end", f"[{sender}]: {msg}\n")
+        self.chat_history.configure(state="disabled")
+        self.chat_history.see("end")
 
-    def get_installed_software(self):
+    def send_chat(self):
+        msg = self.chat_input.get()
+        if not msg: return
+        self.add_chat_msg("Eu", msg)
+        try:
+            requests.post(f"{BASE_URL}/api/send_chat", json={'hostname': self.hostname, 'message': msg})
+            self.chat_input.delete(0, 'end')
+        except: self.log("Erro de conexão chat")
+
+    def execute_system_command(self, cmd):
+        self.log(f"Comando recebido: {cmd}")
+        if cmd == 'restart':
+            os.system("shutdown /r /t 5")
+        elif cmd == 'shutdown':
+            os.system("shutdown /s /t 5")
+        elif cmd.startswith('rename:'):
+            new_name = cmd.split(':')[1]
+            subprocess.run(["powershell", "-Command", f'Rename-Computer -NewName "{new_name}" -Force'], capture_output=True)
+            self.log(f"Renomeando para {new_name}")
+        elif cmd == 'screenshot':
+            self.capture_screen()
+
+    def capture_screen(self):
+        try:
+            screenshot = ImageGrab.grab()
+            buffer = io.BytesIO()
+            screenshot.save(buffer, format="PNG", optimize=True, quality=50)
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            requests.post(f"{BASE_URL}/api/upload_screenshot", json={'hostname': self.hostname, 'image_data': img_str})
+            self.log("Screenshot enviada")
+        except: self.log("Falha no screenshot")
+
+    def get_software(self):
         try:
             cmd = 'powershell "Get-ItemProperty HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | Select-Object DisplayName"'
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, error = proc.communicate()
-            
-            apps = []
-            if output:
-                for line in output.decode(errors='ignore').split('\r\n'):
-                    clean_line = line.strip()
-                    if clean_line and "DisplayName" not in clean_line and "---" not in clean_line:
-                        apps.append(clean_line)
-            return ", ".join(apps[:50]) 
-        except:
-            return "Error listing software"
+            out = subprocess.check_output(cmd, shell=True).decode(errors='ignore')
+            return ", ".join([l.strip() for l in out.split('\r\n') if l.strip() and "DisplayName" not in l and "---" not in l][:20])
+        except: return ""
 
-    def run_scan(self):
-        self.progress_bar.set(0.1)
-        self.log("Scanning System Integrity...")
-        self.status_label.configure(text="SCANNING...", text_color="orange")
-        time.sleep(1)
+    def check_threats(self):
+        suspicious = []
+        targets = ['mimikatz.exe', 'ncat.exe', 'keylogger.exe']
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['pid'] == self.pid: continue 
+                if proc.info['name'] in targets: suspicious.append(proc.info['name'])
+            except: pass
+        return suspicious if suspicious else None
 
-        cpu = psutil.cpu_percent()
-        ram = psutil.virtual_memory().percent
-        self.progress_bar.set(0.3)
-        self.log(f"Resources: CPU {cpu}% | RAM {ram}%")
-
-        fw_status, fw_risk = self.check_firewall()
-        self.progress_bar.set(0.5)
-        self.log(f"Firewall Status: {fw_status}")
-
-        self.log("Indexing Installed Software...")
-        software_list = self.get_installed_software()
-        self.progress_bar.set(0.7)
-
-        threats, proc_risk = self.check_suspicious_processes()
-        self.progress_bar.set(0.9)
-        
-        risk_level = "Low"
-        if fw_risk == "High" or proc_risk == "Critical":
-            risk_level = "High"
-            self.status_label.configure(text="THREAT DETECTED", text_color="#ff4d4d")
-        else:
-            self.status_label.configure(text="SYSTEM SECURE", text_color="#2cc985")
-
-        report_data = {
-            'hostname': socket.gethostname(),
-            'ip': socket.gethostbyname(socket.gethostname()),
-            'cpu': cpu,
-            'ram': ram,
-            'firewall': fw_status,
-            'threats_found': threats,
-            'risk_level': risk_level,
-            'software': software_list
-        }
-        
-        try:
-            self.log("Uploading telemetry to HQ...")
-            requests.post(REPORT_ENDPOINT, json=report_data, timeout=10)
-            
-            if risk_level == "High":
-                self.log("Requesting AI Forensics Analysis...")
-                requests.post(ANALYZE_ENDPOINT, json=report_data, timeout=10)
-                
-            self.log("Sync Complete.")
-        except Exception as e:
-            self.log(f"Error contacting server: {e}")
-
-        self.progress_bar.set(1.0)
-        time.sleep(1)
-        self.progress_bar.set(0)
-
-    def start_scan_thread(self):
-        threading.Thread(target=self.run_scan).start()
+    def heartbeat_loop(self):
+        software = self.get_software()
+        while True:
+            try:
+                payload = {
+                    'token': API_TOKEN,
+                    'hostname': self.hostname,
+                    'os_version': self.os_version,
+                    'ip': socket.gethostbyname(self.hostname),
+                    'cpu': psutil.cpu_percent(),
+                    'ram': psutil.virtual_memory().percent,
+                    'software': software,
+                    'threats': self.check_threats()
+                }
+                res = requests.post(f"{BASE_URL}/api/heartbeat", json=payload, timeout=5)
+                if res.status_code == 200:
+                    self.status_lbl.configure(text="CONECTADO", text_color="#00ff00")
+                    data = res.json()
+                    if data.get('command'): self.execute_system_command(data['command'])
+                    if data.get('chat'):
+                        for m in data['chat']: 
+                            self.add_chat_msg("Admin", m)
+                            self.deiconify()
+                            self.lift()
+                else: self.status_lbl.configure(text="ERRO TOKEN", text_color="orange")
+            except: self.status_lbl.configure(text="DESCONECTADO", text_color="red")
+            time.sleep(5)
 
 if __name__ == "__main__":
-    app = SecurityScanner()
+    app = AegisAgent()
     app.mainloop()
