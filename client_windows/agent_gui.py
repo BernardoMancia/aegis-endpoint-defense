@@ -14,9 +14,9 @@ import platform
 import uuid
 from PIL import ImageGrab
 
-SERVER_IP = "127.0.0.1" 
-SERVER_PORT = 7070
-API_TOKEN = "aegis_secure_8f2a9b1c7d3e4f5a6b0c8d1e9f2a3b4c" 
+SERVER_IP = "0.0.0.0" 
+SERVER_PORT = 0000
+API_TOKEN = "" 
 
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
 
