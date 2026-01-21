@@ -9,10 +9,16 @@ from dotenv import load_dotenv
 import openai
 import nvdlib
 
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
+secret_key = os.getenv('FLASK_SECRET_KEY')
+if not secret_key:
+    print("AVISO: .env não encontrado ou sem FLASK_SECRET_KEY. Usando chave de emergência.")
+    secret_key = 'chave_de_emergencia_temporaria_12345'
+
+app.config['SECRET_KEY'] = secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -23,14 +29,13 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# --- MODELOS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -75,13 +80,16 @@ class AgentCVE(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 def log_event(agent_id, type, msg):
-    log = AgentLog(agent_id=agent_id, log_type=type, message=msg)
-    db.session.add(log)
+    try:
+        log = AgentLog(agent_id=agent_id, log_type=type, message=msg)
+        db.session.add(log)
+    except: pass
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# --- ROTAS ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -107,7 +115,9 @@ def dashboard():
 @app.route('/api/heartbeat', methods=['POST'])
 def heartbeat():
     data = request.json
-    if data.get('token') != os.getenv('API_TOKEN'):
+    env_token = os.getenv('API_TOKEN', '')
+    
+    if data.get('token') != env_token:
         return jsonify({'status': 'forbidden'}), 403
 
     agent = Agent.query.filter_by(hostname=data.get('hostname')).first()
@@ -228,28 +238,34 @@ def generate_analysis(agent):
         log_event(agent.id, "AI", "Gerando relatório amigável com OpenAI...")
         
         prompt = f"""
-        Você é um consultor de Cibersegurança. Escreva um relatório curto, direto e amigável para um gerente não-técnico sobre este computador:
-        Nome: {agent.hostname}
-        Sistema: {agent.os_version}
-        Softwares Instalados (Amostra): {agent.software_list[:200]}...
-        Vulnerabilidades Recentes Encontradas no Banco Oficial:
-        {chr(10).join(cve_text_list)}
-
-        Dê um parecer sobre a saúde da máquina e uma recomendação final simples.
+        Analise este PC: {agent.hostname} ({agent.os_version}).
+        Softwares: {agent.software_list[:200]}...
+        CVEs: {chr(10).join(cve_text_list)}
+        Dê um parecer curto e direto.
         """
-
         response = openai.ChatCompletion.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "Seja profissional, claro e fale português."},
+            messages=[{"role": "system", "content": "Seja um analista de segurança."},
                       {"role": "user", "content": prompt}]
         )
-        
         agent.ai_summary = response.choices[0].message['content']
-        log_event(agent.id, "SUCCESS", "Análise completa finalizada.")
-        
+        log_event(agent.id, "SUCCESS", "Análise completa.")
     except Exception as e:
         log_event(agent.id, "ERROR", f"Falha na análise: {str(e)}")
-        agent.ai_summary = f"Erro ao gerar relatório: {str(e)}"
+        agent.ai_summary = f"Erro: {str(e)}"
 
+# --- INICIALIZAÇÃO SEGURA ---
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('SERVER_PORT', 5000)))
+    with app.app_context():
+        db.create_all()
+    
+    # Define a porta com fallback seguro
+    target_port = int(os.getenv('SERVER_PORT', 7070))
+    
+    print("="*40)
+    print(f"AEGIS EDR SERVER INICIANDO...")
+    print(f"STATUS .ENV: {'Carregado' if os.getenv('FLASK_SECRET_KEY') else 'NÃO ENCONTRADO - Usando padrões'}")
+    print(f"PORTA ALVO: {target_port}")
+    print("="*40)
+    
+    app.run(host='0.0.0.0', port=target_port)

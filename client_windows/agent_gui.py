@@ -12,13 +12,13 @@ import io
 import base64
 import platform
 from PIL import ImageGrab
-from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+# ========================================================
+SERVER_IP = ""
+SERVER_PORT = 5000
+API_TOKEN = ""     
+# ========================================================
 
-SERVER_IP = os.getenv('SERVER_IP')
-SERVER_PORT = os.getenv('SERVER_PORT')
-API_TOKEN = os.getenv('API_TOKEN')
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
 
 ctk.set_appearance_mode("Dark")
@@ -39,18 +39,22 @@ class AegisAgent(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
+        # Barra Lateral
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         ctk.CTkLabel(self.sidebar, text="🛡️ AEGIS", font=("Arial", 20, "bold")).pack(pady=20)
         self.status_lbl = ctk.CTkLabel(self.sidebar, text="PROTECTED", text_color="#00ff00")
         self.status_lbl.pack(pady=10)
 
+        # Área Principal
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         
+        # Console
         self.console = ctk.CTkTextbox(self.main_frame, height=250)
         self.console.pack(fill="x", padx=10, pady=5)
         
+        # Chat
         self.chat_frame = ctk.CTkFrame(self.main_frame)
         self.chat_frame.pack(fill="both", expand=True, padx=10, pady=10)
         ctk.CTkLabel(self.chat_frame, text="Chat Suporte").pack(anchor="w", padx=5)
@@ -62,7 +66,9 @@ class AegisAgent(ctk.CTk):
         self.chat_input.pack(side="left", fill="x", expand=True, padx=5, pady=5)
         ctk.CTkButton(self.chat_frame, text="Enviar", width=80, command=self.send_chat).pack(side="right", padx=5)
 
-        self.log(f"Agente Ativo (PID: {self.pid})")
+        self.log(f"Agente Iniciado (PID: {self.pid})")
+        self.log(f"Conectando a {BASE_URL}...")
+        
         threading.Thread(target=self.heartbeat_loop, daemon=True).start()
 
     def setup_persistence(self):
@@ -159,7 +165,9 @@ class AegisAgent(ctk.CTk):
                             self.deiconify()
                             self.lift()
                 else: self.status_lbl.configure(text="ERRO TOKEN", text_color="orange")
-            except: self.status_lbl.configure(text="DESCONECTADO", text_color="red")
+            except Exception as e:
+                self.status_lbl.configure(text="DESCONECTADO", text_color="red")
+            
             time.sleep(5)
 
 if __name__ == "__main__":
