@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -9,13 +10,14 @@ from dotenv import load_dotenv
 import openai
 import nvdlib
 
+# Carrega .env de múltiplos locais
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = Flask(__name__)
+
 secret_key = os.getenv('FLASK_SECRET_KEY')
 if not secret_key:
-    print("AVISO: .env não encontrado ou sem FLASK_SECRET_KEY. Usando chave de emergência.")
     secret_key = 'chave_de_emergencia_temporaria_12345'
 
 app.config['SECRET_KEY'] = secret_key
@@ -43,15 +45,26 @@ class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(100), unique=True, nullable=False)
     ip_address = db.Column(db.String(50))
+    public_ip = db.Column(db.String(50))
+    mac_address = db.Column(db.String(50)) 
+    geolocation = db.Column(db.String(100), default="Desconhecido") # Nova
     os_version = db.Column(db.String(100))
     status = db.Column(db.String(20), default='offline')
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Hardware/Software
     cpu_usage = db.Column(db.Float, default=0.0)
     ram_usage = db.Column(db.Float, default=0.0)
     software_list = db.Column(db.Text, default="")
-    pending_command = db.Column(db.String(200), default=None)
+    startup_programs = db.Column(db.Text, default="") # Nova
+    external_drives = db.Column(db.Text, default="")  # Nova
+    
+    # Controle
+    pending_command = db.Column(db.String(500), default=None) # Aumentado para suportar comandos longos
     last_screenshot = db.Column(db.Text, default=None)
     ai_summary = db.Column(db.Text, default="Nenhuma análise gerada ainda.")
+    
+    # Relacionamentos
     logs = db.relationship('AgentLog', backref='agent', lazy=True)
     messages = db.relationship('ChatMessage', backref='agent', lazy=True)
     cves = db.relationship('AgentCVE', backref='agent', lazy=True)
@@ -79,17 +92,28 @@ class AgentCVE(db.Model):
     severity = db.Column(db.String(20))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- FUNÇÕES AUXILIARES ---
 def log_event(agent_id, type, msg):
     try:
         log = AgentLog(agent_id=agent_id, log_type=type, message=msg)
         db.session.add(log)
     except: pass
 
+def get_geo_info(ip):
+    try:
+        if not ip or ip == '127.0.0.1': return "Localhost"
+        r = requests.get(f"http://ip-api.com/json/{ip}", timeout=3)
+        data = r.json()
+        if data['status'] == 'success':
+            return f"{data.get('city')}, {data.get('country')}"
+    except: pass
+    return "Desconhecido"
+
+# --- ROTAS ---
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROTAS ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -127,18 +151,31 @@ def heartbeat():
         db.session.commit()
         log_event(agent.id, "SYSTEM", "Novo dispositivo registrado")
 
+    # Atualiza dados básicos
     agent.ip_address = data.get('ip')
+    agent.public_ip = data.get('public_ip')
+    agent.mac_address = data.get('mac')
     agent.os_version = data.get('os_version')
     agent.cpu_usage = data.get('cpu')
     agent.ram_usage = data.get('ram')
     agent.status = 'online'
     agent.last_seen = datetime.utcnow()
     
-    if data.get('software'):
-        agent.software_list = data.get('software')
+    # Dados de Hardware/Software
+    if data.get('software'): agent.software_list = data.get('software')
+    if data.get('startup'): agent.startup_programs = data.get('startup')
+    if data.get('drives'): agent.external_drives = data.get('drives')
+
+    # Geolocalização (se mudou o IP ou está vazio)
+    if agent.public_ip and (agent.geolocation == "Desconhecido" or "Localhost" in agent.geolocation):
+        agent.geolocation = get_geo_info(agent.public_ip)
 
     if data.get('threats'):
         log_event(agent.id, "SECURITY", f"Ameaça detectada: {data.get('threats')}")
+
+    # Processa retorno de comandos (Shell Output)
+    if data.get('cmd_output'):
+        log_event(agent.id, "SHELL_OUTPUT", data.get('cmd_output'))
 
     command = agent.pending_command
     agent.pending_command = None 
@@ -183,6 +220,12 @@ def control_command():
         content = request.form.get('message')
         msg = ChatMessage(agent_id=agent.id, sender='admin', content=content)
         db.session.add(msg)
+    elif cmd_type == 'shell':
+        # Comando personalizado de terminal
+        shell_cmd = request.form.get('shell_cmd')
+        if shell_cmd:
+            agent.pending_command = f"shell:{shell_cmd}"
+            log_event(agent.id, "COMMAND", f"Shell enviado: {shell_cmd}")
     elif cmd_type == 'analyze_full':
         generate_analysis(agent)
     else:
@@ -209,8 +252,13 @@ def get_agent_details(agent_id):
     return jsonify({
         'hostname': agent.hostname,
         'ip': agent.ip_address,
+        'public_ip': agent.public_ip,
+        'mac': agent.mac_address,
+        'geo': agent.geolocation,
         'os': agent.os_version,
         'software': agent.software_list,
+        'startup': agent.startup_programs,
+        'drives': agent.external_drives,
         'screenshot': agent.last_screenshot,
         'ai_report': agent.ai_summary,
         'logs': log_data,
@@ -223,29 +271,32 @@ def generate_analysis(agent):
         log_event(agent.id, "SCAN", "Consultando banco de dados NIST (CVEs)...")
         keyword = "Windows 11" if "11" in agent.os_version else "Windows 10"
         
-        cve_results = nvdlib.searchCVE(keywordSearch=keyword, limit=3, sortPubDate=True)
+        cve_results = nvdlib.searchCVE(keywordSearch=keyword, limit=3)
         AgentCVE.query.filter_by(agent_id=agent.id).delete()
         
         cve_text_list = []
         for cve in cve_results:
             sev = "Alta"
             if hasattr(cve, 'v31score'): sev = f"Score {cve.v31score}"
-            
             new_cve = AgentCVE(agent_id=agent.id, cve_id=cve.id, description=cve.descriptions[0].value, severity=sev)
             db.session.add(new_cve)
-            cve_text_list.append(f"- {cve.id} (Severidade: {sev}): {cve.descriptions[0].value[:100]}...")
+            cve_text_list.append(f"- {cve.id} ({sev})")
 
-        log_event(agent.id, "AI", "Gerando relatório amigável com OpenAI...")
+        log_event(agent.id, "AI", "Gerando relatório OpenAI...")
         
         prompt = f"""
-        Analise este PC: {agent.hostname} ({agent.os_version}).
-        Softwares: {agent.software_list[:200]}...
-        CVEs: {chr(10).join(cve_text_list)}
-        Dê um parecer curto e direto.
+        Relatório de Segurança para: {agent.hostname}
+        SO: {agent.os_version}
+        Local: {agent.geolocation}
+        Apps Startup: {agent.startup_programs[:300]}...
+        Discos: {agent.external_drives}
+        CVEs Críticos: {chr(10).join(cve_text_list)}
+        
+        Analise o risco dessa máquina e sugira ações.
         """
         response = openai.ChatCompletion.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "Seja um analista de segurança."},
+            messages=[{"role": "system", "content": "Seja um perito forense digital."},
                       {"role": "user", "content": prompt}]
         )
         agent.ai_summary = response.choices[0].message['content']
@@ -254,18 +305,10 @@ def generate_analysis(agent):
         log_event(agent.id, "ERROR", f"Falha na análise: {str(e)}")
         agent.ai_summary = f"Erro: {str(e)}"
 
-# --- INICIALIZAÇÃO SEGURA ---
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     
-    # Define a porta com fallback seguro
     target_port = int(os.getenv('SERVER_PORT', 7070))
-    
-    print("="*40)
-    print(f"AEGIS EDR SERVER INICIANDO...")
-    print(f"STATUS .ENV: {'Carregado' if os.getenv('FLASK_SECRET_KEY') else 'NÃO ENCONTRADO - Usando padrões'}")
-    print(f"PORTA ALVO: {target_port}")
-    print("="*40)
-    
+    print(f"AEGIS EDR v4.0 RODANDO NA PORTA {target_port}...")
     app.run(host='0.0.0.0', port=target_port)

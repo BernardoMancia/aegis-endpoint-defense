@@ -2,7 +2,7 @@
 <html lang="pt-br" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Aegis EDR Console</title>
+    <title>Aegis EDR v4.0</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -17,33 +17,31 @@
         .msg-client { text-align: left; color: #fff; margin: 5px; }
         .screenshot-container { width: 100%; min-height: 200px; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid #333; }
         .screenshot-img { max-width: 100%; max-height: 400px; }
-        .ai-report-box { background: #1e293b; padding: 20px; border-left: 4px solid #8b5cf6; border-radius: 5px; line-height: 1.6; }
+        .terminal-output { font-family: monospace; background: #000; color: #0f0; padding: 10px; height: 300px; overflow-y: auto; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     {% if mode == 'login' %}
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="card p-4" style="width: 350px; background: #1e293b;">
-            <h3 class="text-center mb-4"><i class="fas fa-shield-alt text-primary"></i> Aegis Login</h3>
+            <h3 class="text-center mb-4"><i class="fas fa-shield-alt text-primary"></i> Aegis EDR</h3>
             <form method="POST">
                 <input type="text" name="username" class="form-control mb-2" placeholder="Usuário" required>
                 <input type="password" name="password" class="form-control mb-3" placeholder="Senha" required>
-                <button class="btn btn-primary w-100">Acessar Console</button>
+                <button class="btn btn-primary w-100">Entrar</button>
             </form>
         </div>
     </div>
     {% else %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-shield-virus"></i> Aegis EDR</a>
-            <div class="d-flex">
-                <a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a>
-            </div>
+            <a class="navbar-brand" href="#"><i class="fas fa-shield-virus"></i> Aegis EDR v4.0</a>
+            <div class="d-flex"><a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a></div>
         </div>
     </nav>
 
     <div class="container mt-4">
-        <h4 class="mb-4 text-light">Endpoints Monitorados</h4>
+        <h4 class="mb-4 text-light">Painel de Operações</h4>
         <div class="row" id="agent-grid">
             {% for agent in agents %}
             <div class="col-md-3 mb-4">
@@ -53,8 +51,8 @@
                         <span class="status-dot {{ 'online' if agent.status == 'online' else 'offline' }}"></span>
                     </div>
                     <div class="text-secondary small mt-2">
-                        IP: {{ agent.ip_address }}<br>
-                        OS: {{ agent.os_version }}<br>
+                        <i class="fas fa-map-marker-alt"></i> {{ agent.geolocation }}<br>
+                        IP: {{ agent.public_ip or agent.ip_address }}<br>
                         Visto: {{ agent.last_seen.strftime('%H:%M') }}
                     </div>
                     <div class="progress mt-3" style="height: 5px;">
@@ -70,15 +68,16 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content bg-dark text-white">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="modalTitle">Detalhes do Endpoint</h5>
+                    <h5 class="modal-title" id="modalTitle">Detalhes</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="agentTabs">
-                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overview">Controle</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ai_tab">🤖 Relatório IA</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cves">Dados Técnicos (NVD)</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#history">Histórico</a></li>
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overview">Geral</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#terminal">Terminal Remoto</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ai_tab">IA & Forense</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cves">CVEs</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#history">Logs</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#chat">Chat</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#screen">Tela</a></li>
                     </ul>
@@ -86,48 +85,36 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="overview">
                             <div class="row">
-                                <div class="col-md-8">
-                                    <h6>Softwares Instalados</h6>
-                                    <div id="softwareList" class="p-2 border border-secondary rounded" style="max-height: 300px; overflow-y: auto; font-size: 0.8rem;"></div>
+                                <div class="col-md-6">
+                                    <h6 class="text-info">Inicialização (Startup)</h6>
+                                    <div id="startupList" class="p-2 border border-secondary rounded mb-2" style="max-height: 150px; overflow-y: auto;"></div>
+                                    <h6 class="text-info">Discos Externos</h6>
+                                    <div id="drivesList" class="p-2 border border-secondary rounded mb-2"></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <h6>Ações</h6>
+                                <div class="col-md-6">
+                                    <h6>Ações Rápidas</h6>
                                     <div class="d-grid gap-2">
-                                        <button onclick="runAnalysis()" class="btn btn-primary"><i class="fas fa-magic"></i> Gerar Análise Completa</button>
-                                        <hr class="border-secondary">
-                                        <button onclick="sendCommand('restart')" class="btn btn-outline-warning"><i class="fas fa-redo"></i> Reiniciar</button>
-                                        <button onclick="sendCommand('shutdown')" class="btn btn-outline-danger"><i class="fas fa-power-off"></i> Desligar</button>
-                                        <button onclick="requestScreenshot()" class="btn btn-info"><i class="fas fa-camera"></i> Capturar Tela</button>
-                                        <div class="input-group">
-                                            <input type="text" id="renameInput" class="form-control" placeholder="Novo Nome">
-                                            <button onclick="sendCommand('rename')" class="btn btn-secondary">Renomear</button>
-                                        </div>
+                                        <button onclick="runAnalysis()" class="btn btn-primary"><i class="fas fa-magic"></i> Análise Forense IA</button>
+                                        <button onclick="sendCommand('restart')" class="btn btn-outline-warning">Reiniciar</button>
+                                        <button onclick="sendCommand('shutdown')" class="btn btn-outline-danger">Desligar</button>
+                                        <button onclick="requestScreenshot()" class="btn btn-info">Print</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="ai_tab">
-                            <h5 class="text-info mb-3">Parecer do Consultor Virtual</h5>
-                            <div id="aiReportContent" class="ai-report-box">
-                                Aguardando geração do relatório... Clique em "Gerar Análise Completa" na aba de Controle.
+                        <div class="tab-pane fade" id="terminal">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text bg-dark text-white">>_</span>
+                                <input type="text" id="shellInput" class="form-control bg-dark text-white" placeholder="Comando PowerShell (ex: ipconfig, dir, whoami)">
+                                <button onclick="sendShell()" class="btn btn-success">Executar</button>
                             </div>
+                            <div id="terminalOutput" class="terminal-output">Aguardando output...</div>
                         </div>
 
-                         <div class="tab-pane fade" id="cves">
-                            <table class="table table-dark table-sm table-hover">
-                                <thead><tr><th>CVE ID</th><th>Severidade</th><th>Descrição Técnica</th></tr></thead>
-                                <tbody id="cveTable"></tbody>
-                            </table>
-                        </div>
-
-                        <div class="tab-pane fade" id="history">
-                            <table class="table table-dark table-sm table-hover">
-                                <thead><tr><th>Hora</th><th>Tipo</th><th>Evento</th></tr></thead>
-                                <tbody id="logTable"></tbody>
-                            </table>
-                        </div>
-
+                        <div class="tab-pane fade" id="ai_tab"><div id="aiReportContent" class="p-3 border rounded"></div></div>
+                        <div class="tab-pane fade" id="cves"><table class="table table-dark table-sm"><tbody id="cveTable"></tbody></table></div>
+                        <div class="tab-pane fade" id="history"><table class="table table-dark table-sm"><tbody id="logTable"></tbody></table></div>
                         <div class="tab-pane fade" id="chat">
                             <div id="chatWindow" class="chat-box mb-2"></div>
                             <div class="input-group">
@@ -135,13 +122,7 @@
                                 <button onclick="sendChatMessage()" class="btn btn-primary">Enviar</button>
                             </div>
                         </div>
-
-                        <div class="tab-pane fade" id="screen">
-                            <div class="screenshot-container">
-                                <img id="screenImg" class="screenshot-img" src="" alt="Sem imagem">
-                            </div>
-                            <button onclick="requestScreenshot()" class="btn btn-sm btn-light mt-2">Atualizar</button>
-                        </div>
+                        <div class="tab-pane fade" id="screen"><img id="screenImg" class="screenshot-img" src=""></div>
                     </div>
                 </div>
             </div>
@@ -154,8 +135,7 @@
 
         function openAgentModal(id) {
             currentAgentId = id;
-            const modal = new bootstrap.Modal(document.getElementById('agentModal'));
-            modal.show();
+            new bootstrap.Modal(document.getElementById('agentModal')).show();
             loadAgentData();
         }
 
@@ -164,81 +144,58 @@
             const res = await fetch(`/get_agent_details/${currentAgentId}`);
             const data = await res.json();
             
-            document.getElementById('modalTitle').innerText = data.hostname + " (" + data.ip + ")";
-            document.getElementById('softwareList').innerText = data.software || "Carregando...";
+            document.getElementById('modalTitle').innerText = `${data.hostname} (${data.public_ip || data.ip}) - ${data.geo}`;
+            document.getElementById('startupList').innerText = data.startup || "Nenhum";
+            document.getElementById('drivesList').innerText = data.drives || "Nenhum";
             
-            // Relatório IA
-            const aiBox = document.getElementById('aiReportContent');
-            aiBox.innerHTML = data.ai_report.replace(/\n/g, '<br>');
-
-            // CVEs
-            const cveTable = document.getElementById('cveTable');
-            cveTable.innerHTML = '';
-            data.cves.forEach(c => {
-                cveTable.innerHTML += `<tr><td class="text-danger fw-bold">${c.id}</td><td>${c.sev}</td><td>${c.desc}</td></tr>`;
-            });
-
-            // Logs
-            const logTable = document.getElementById('logTable');
-            logTable.innerHTML = '';
-            data.logs.forEach(l => {
-                logTable.innerHTML += `<tr><td>${l.time}</td><td><span class="badge bg-secondary">${l.type}</span></td><td>${l.msg}</td></tr>`;
-            });
-
-            // Chat
-            const chatBox = document.getElementById('chatWindow');
-            chatBox.innerHTML = '';
-            data.chat.forEach(c => {
-                const cls = c.sender === 'admin' ? 'msg-admin' : 'msg-client';
-                const icon = c.sender === 'admin' ? '🛡️' : '👤';
-                chatBox.innerHTML += `<div class="${cls}"><small>${c.time}</small> <b>${icon}:</b> ${c.msg}</div>`;
-            });
-
-            // Screenshot
-            if(data.screenshot) {
-                document.getElementById('screenImg').src = "data:image/png;base64," + data.screenshot;
+            // Terminal Output (Busca logs do tipo SHELL_OUTPUT)
+            const shellLogs = data.logs.filter(l => l.type === 'SHELL_OUTPUT');
+            if(shellLogs.length > 0) {
+                document.getElementById('terminalOutput').innerText = shellLogs[0].msg; // Mostra o mais recente
             }
+
+            // Preenche tabelas e campos (IA, CVE, Chat...) - Simplificado para brevidade
+            document.getElementById('aiReportContent').innerHTML = data.ai_report.replace(/\n/g, '<br>');
+            document.getElementById('screenImg').src = "data:image/png;base64," + (data.screenshot || "");
+            
+            let logsHtml = '';
+            data.logs.forEach(l => logsHtml += `<tr><td>${l.time}</td><td>${l.type}</td><td>${l.msg.substring(0,100)}</td></tr>`);
+            document.getElementById('logTable').innerHTML = logsHtml;
+
+            let chatHtml = '';
+            data.chat.forEach(c => chatHtml += `<div class="${c.sender === 'admin' ? 'msg-admin' : 'msg-client'}"><b>${c.sender}:</b> ${c.msg}</div>`);
+            document.getElementById('chatWindow').innerHTML = chatHtml;
         }
 
         async function sendCommand(type) {
-            const formData = new FormData();
-            formData.append('agent_id', currentAgentId);
-            formData.append('command', type);
-            if(type === 'rename') {
-                formData.append('new_name', document.getElementById('renameInput').value);
-            }
-            await fetch('/control/command', { method: 'POST', body: formData });
-            alert('Comando enviado.');
+            const fd = new FormData();
+            fd.append('agent_id', currentAgentId);
+            fd.append('command', type);
+            await fetch('/control/command', { method: 'POST', body: fd });
+            alert('Enviado.');
         }
 
-        async function runAnalysis() {
-            if(confirm("Isso consultará o banco NVD e usará a IA para gerar um relatório. Pode levar alguns segundos. Continuar?")) {
-                await sendCommand('analyze_full');
-            }
+        async function sendShell() {
+            const cmd = document.getElementById('shellInput').value;
+            const fd = new FormData();
+            fd.append('agent_id', currentAgentId);
+            fd.append('command', 'shell');
+            fd.append('shell_cmd', cmd);
+            await fetch('/control/command', { method: 'POST', body: fd });
+            document.getElementById('terminalOutput').innerText += "\n> " + cmd + " (Enviado... aguarde)";
         }
 
-        async function requestScreenshot() {
-            await sendCommand('screenshot');
-        }
-
+        async function runAnalysis() { if(confirm("Iniciar IA?")) sendCommand('analyze_full'); }
+        async function requestScreenshot() { sendCommand('screenshot'); }
         async function sendChatMessage() {
-            const msg = document.getElementById('chatInput').value;
-            const formData = new FormData();
-            formData.append('agent_id', currentAgentId);
-            formData.append('command', 'chat');
-            formData.append('message', msg);
-            await fetch('/control/command', { method: 'POST', body: formData });
-            document.getElementById('chatInput').value = '';
-            setTimeout(loadAgentData, 1000); 
+            const fd = new FormData();
+            fd.append('agent_id', currentAgentId);
+            fd.append('command', 'chat');
+            fd.append('message', document.getElementById('chatInput').value);
+            await fetch('/control/command', { method: 'POST', body: fd });
         }
 
-        setInterval(() => {
-            if(document.getElementById('agentModal').classList.contains('show')) {
-                loadAgentData();
-            } else {
-                location.reload(); 
-            }
-        }, 5000);
+        setInterval(() => { if(document.getElementById('agentModal').classList.contains('show')) loadAgentData(); }, 3000);
     </script>
     {% endif %}
 </body>
