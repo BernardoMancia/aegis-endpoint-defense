@@ -13,19 +13,16 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = Flask(__name__)
 
-secret_key = os.getenv('FLASK_SECRET_KEY')
-if not secret_key:
-    secret_key = 'dev_key_unsafe'
+secret_key = os.getenv('FLASK_SECRET_KEY', 'default_unsafe')
+api_token = os.getenv('API_TOKEN', '')
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 app.config['SECRET_KEY'] = secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db?timeout=30'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db?timeout=60'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-openai.api_key = os.getenv('OPENAI_API_KEY')
 
 db = SQLAlchemy(app)
 
@@ -67,6 +64,8 @@ class Agent(db.Model):
     cpu_usage = db.Column(db.Float, default=0.0)
     ram_usage = db.Column(db.Float, default=0.0)
     software_list = db.Column(db.Text, default="")
+    process_list = db.Column(db.Text, default="[]")
+    clipboard_content = db.Column(db.Text, default="")
     startup_programs = db.Column(db.Text, default="")
     external_drives = db.Column(db.Text, default="")
     pending_command = db.Column(db.String(500), default=None)
@@ -100,9 +99,7 @@ class AgentCVE(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 def log_event(agent_id, type, msg):
-    try:
-        log = AgentLog(agent_id=agent_id, log_type=type, message=msg)
-        db.session.add(log)
+    try: db.session.add(AgentLog(agent_id=agent_id, log_type=type, message=msg))
     except: pass
 
 def get_geo_ip(ip):
@@ -139,8 +136,8 @@ def dashboard():
 @app.route('/api/heartbeat', methods=['POST'])
 def heartbeat():
     data = request.json
-    if data.get('token') != os.getenv('API_TOKEN', ''):
-        return jsonify({'status': '403'}), 403
+    if data.get('token') != api_token:
+        return jsonify({'status': '403 Forbidden'}), 403
 
     hostname = data.get('hostname')
     agent = Agent.query.filter_by(hostname=hostname).first()
@@ -151,36 +148,32 @@ def heartbeat():
         db.session.commit()
         log_event(agent.id, "SYSTEM", "New device registered")
 
+    agent.last_seen = datetime.utcnow()
+    agent.status = 'online'
     agent.device_type = data.get('device_type', 'desktop')
     agent.ip_address = data.get('ip')
     agent.public_ip = data.get('public_ip')
-    agent.os_version = data.get('os_version')
-    agent.status = 'online'
-    agent.last_seen = datetime.utcnow()
     
     if data.get('gps'):
         agent.latitude = data['gps'].get('lat')
         agent.longitude = data['gps'].get('lng')
         agent.tracking_enabled = True
     
-    if data.get('battery'):
-        agent.battery_level = data.get('battery')
-
+    agent.battery_level = data.get('battery', 100)
     agent.cpu_usage = data.get('cpu', 0)
     agent.ram_usage = data.get('ram', 0)
     
     if data.get('software'): agent.software_list = str(data.get('software'))
+    if data.get('processes'): agent.process_list = str(data.get('processes'))
+    if data.get('clipboard'): agent.clipboard_content = str(data.get('clipboard'))
     if data.get('startup'): agent.startup_programs = str(data.get('startup'))
     if data.get('drives'): agent.external_drives = str(data.get('drives'))
 
     if not agent.latitude and agent.public_ip and agent.geolocation == "Unknown":
         agent.geolocation = get_geo_ip(agent.public_ip)
 
-    if data.get('threats'):
-        log_event(agent.id, "SECURITY", f"Threat: {data.get('threats')}")
-
-    if data.get('cmd_output'):
-        log_event(agent.id, "SHELL", data.get('cmd_output'))
+    if data.get('threats'): log_event(agent.id, "SECURITY", f"Threat: {data.get('threats')}")
+    if data.get('cmd_output'): log_event(agent.id, "SHELL", data.get('cmd_output'))
 
     cmd = agent.pending_command
     agent.pending_command = None
@@ -189,11 +182,8 @@ def heartbeat():
     msgs = [m.content for m in unread]
     for m in unread: m.read = True
 
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'db_locked', 'error': str(e)}), 500
+    try: db.session.commit()
+    except: db.session.rollback()
 
     return jsonify({'command': cmd, 'chat': msgs})
 
@@ -210,16 +200,15 @@ def control_command():
         generate_analysis(agent)
     elif cmd == 'shell':
         agent.pending_command = f"shell:{request.form.get('shell_cmd')}"
+    elif cmd == 'kill_proc':
+        agent.pending_command = f"kill:{request.form.get('pid')}"
     else:
         agent.pending_command = cmd
         if cmd == 'rename': agent.pending_command = f"rename:{request.form.get('new_name')}"
         log_event(agent.id, "COMMAND", f"Sent: {agent.pending_command}")
     
-    try:
-        db.session.commit()
-    except:
-        db.session.rollback()
-        
+    try: db.session.commit()
+    except: db.session.rollback()
     return jsonify({'status': 'ok'})
 
 @app.route('/api/upload_screenshot', methods=['POST'])
@@ -260,7 +249,8 @@ def details(id):
         'gps': {'lat': a.latitude, 'lng': a.longitude} if a.latitude else None,
         'battery': a.battery_level,
         'os': a.os_version,
-        'software': a.software_list,
+        'processes': a.process_list,
+        'clipboard': a.clipboard_content,
         'startup': a.startup_programs,
         'drives': a.external_drives,
         'screenshot': a.last_screenshot,
@@ -275,15 +265,8 @@ def generate_analysis(agent):
         keyword = "Windows 11" if "11" in str(agent.os_version) else "Windows 10"
         cve_results = nvdlib.searchCVE(keywordSearch=keyword, limit=3)
         AgentCVE.query.filter_by(agent_id=agent.id).delete()
-        
-        cve_list = []
-        for cve in cve_results:
-            sev = f"Score {cve.v31score}" if hasattr(cve, 'v31score') else "High"
-            db.session.add(AgentCVE(agent_id=agent.id, cve_id=cve.id, description=cve.descriptions[0].value, severity=sev))
-            cve_list.append(f"{cve.id} ({sev})")
-
-        prompt = f"Analyze: {agent.hostname} ({agent.os_version}). Startup: {agent.startup_programs[:200]}. CVEs: {', '.join(cve_list)}"
-        
+        cve_list = [f"{cve.id}" for cve in cve_results]
+        prompt = f"Analyze: {agent.hostname} ({agent.os_version}). Startup: {agent.startup_programs[:200]}. CVEs: {', '.join(cve_list)}."
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{"role": "system", "content": "Security Analyst."}, {"role": "user", "content": prompt}]

