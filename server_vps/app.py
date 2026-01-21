@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import openai
 import nvdlib
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -20,12 +22,20 @@ if not secret_key:
     secret_key = 'dev_key_unsafe'
 
 app.config['SECRET_KEY'] = secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db?timeout=30'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 db = SQLAlchemy(app)
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -104,7 +114,7 @@ def get_geo_ip(ip):
     return "Unknown"
 
 @login_manager.user_loader
-def load_user(uid): return User.query.get(int(uid))
+def load_user(uid): return db.session.get(User, int(uid))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -163,7 +173,7 @@ def heartbeat():
     if data.get('startup'): agent.startup_programs = str(data.get('startup'))
     if data.get('drives'): agent.external_drives = str(data.get('drives'))
 
-    if not agent.latitude and agent.public_ip:
+    if not agent.latitude and agent.public_ip and agent.geolocation == "Unknown":
         agent.geolocation = get_geo_ip(agent.public_ip)
 
     if data.get('threats'):
@@ -179,7 +189,12 @@ def heartbeat():
     msgs = [m.content for m in unread]
     for m in unread: m.read = True
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'db_locked', 'error': str(e)}), 500
+
     return jsonify({'command': cmd, 'chat': msgs})
 
 @app.route('/control/command', methods=['POST'])
@@ -187,7 +202,7 @@ def heartbeat():
 def control_command():
     agent_id = request.form.get('agent_id')
     cmd = request.form.get('command')
-    agent = Agent.query.get(agent_id)
+    agent = db.session.get(Agent, agent_id)
     
     if cmd == 'chat':
         db.session.add(ChatMessage(agent_id=agent.id, sender='admin', content=request.form.get('message')))
@@ -200,7 +215,11 @@ def control_command():
         if cmd == 'rename': agent.pending_command = f"rename:{request.form.get('new_name')}"
         log_event(agent.id, "COMMAND", f"Sent: {agent.pending_command}")
     
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        
     return jsonify({'status': 'ok'})
 
 @app.route('/api/upload_screenshot', methods=['POST'])
@@ -210,7 +229,8 @@ def upload_screenshot():
     if agent:
         agent.last_screenshot = data.get('image_data')
         log_event(agent.id, "INFO", "Screenshot received")
-        db.session.commit()
+        try: db.session.commit()
+        except: db.session.rollback()
     return jsonify({'status': 'ok'})
 
 @app.route('/api/send_chat', methods=['POST'])
@@ -219,13 +239,14 @@ def api_send_chat_client():
     agent = Agent.query.filter_by(hostname=data.get('hostname')).first()
     if agent:
         db.session.add(ChatMessage(agent_id=agent.id, sender='client', content=data.get('message')))
-        db.session.commit()
+        try: db.session.commit()
+        except: db.session.rollback()
     return jsonify({'status': 'ok'})
 
 @app.route('/get_agent_details/<int:id>')
 @login_required
 def details(id):
-    a = Agent.query.get(id)
+    a = db.session.get(Agent, id)
     logs = AgentLog.query.filter_by(agent_id=a.id).order_by(AgentLog.timestamp.desc()).limit(50).all()
     chat = ChatMessage.query.filter_by(agent_id=a.id).order_by(ChatMessage.timestamp.asc()).all()
     cves = AgentCVE.query.filter_by(agent_id=a.id).all()
