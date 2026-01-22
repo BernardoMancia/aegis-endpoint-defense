@@ -1,6 +1,6 @@
 import os
 import json
-import requests
+import time
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -8,7 +8,6 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import openai
-import nvdlib
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
@@ -16,12 +15,13 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 app = Flask(__name__)
 
-secret_key = os.getenv('FLASK_SECRET_KEY', 'default_unsafe')
-api_token = os.getenv('API_TOKEN', '')
+server_port = int(os.getenv('SERVER_PORT', 7070))
+secret_key = os.getenv('FLASK_SECRET_KEY', 'default_key')
+api_token = os.getenv('API_TOKEN', 'default_token')
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 app.config['SECRET_KEY'] = secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db?timeout=60'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aegis_core.db?timeout=30'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -37,43 +37,39 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# --- MODELOS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    is_priority = db.Column(db.Boolean, default=False)
+    def set_password(self, password): self.password_hash = generate_password_hash(password)
+    def check_password(self, password): return check_password_hash(self.password_hash, password)
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hostname = db.Column(db.String(100), nullable=False)
+    original_hostname = db.Column(db.String(100)) # ID Real (Fixo)
+    hostname = db.Column(db.String(100), nullable=False) # Apelido (Editável)
     device_type = db.Column(db.String(20), default="desktop")
     ip_address = db.Column(db.String(50))
     public_ip = db.Column(db.String(50))
-    mac_address = db.Column(db.String(50))
     geolocation = db.Column(db.String(100), default="Unknown")
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
-    tracking_enabled = db.Column(db.Boolean, default=False)
     os_version = db.Column(db.String(100))
     status = db.Column(db.String(20), default='offline')
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     battery_level = db.Column(db.Integer, default=100)
-    cpu_usage = db.Column(db.Float, default=0.0)
-    ram_usage = db.Column(db.Float, default=0.0)
-    software_list = db.Column(db.Text, default="")
-    process_list = db.Column(db.Text, default="[]")
+    
+    # Dados extras
+    software_list = db.Column(db.Text, default="[]")
     clipboard_content = db.Column(db.Text, default="")
-    startup_programs = db.Column(db.Text, default="")
-    external_drives = db.Column(db.Text, default="")
     pending_command = db.Column(db.String(500), default=None)
     last_screenshot = db.Column(db.Text, default=None)
-    ai_summary = db.Column(db.Text, default="No analysis.")
+    ai_summary = db.Column(db.Text, default="Aguardando...")
+    
     logs = db.relationship('AgentLog', backref='agent', lazy=True)
     messages = db.relationship('ChatMessage', backref='agent', lazy=True)
-    cves = db.relationship('AgentCVE', backref='agent', lazy=True)
 
 class AgentLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,30 +81,14 @@ class AgentLog(db.Model):
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
-    sender = db.Column(db.String(10), nullable=False)
+    sender = db.Column(db.String(10), nullable=False) # 'admin' ou 'client'
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
 
-class AgentCVE(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
-    cve_id = db.Column(db.String(20))
-    description = db.Column(db.Text)
-    severity = db.Column(db.String(20))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
 def log_event(agent_id, type, msg):
     try: db.session.add(AgentLog(agent_id=agent_id, log_type=type, message=msg))
     except: pass
-
-def get_geo_ip(ip):
-    try:
-        r = requests.get(f"http://ip-api.com/json/{ip}", timeout=2)
-        d = r.json()
-        if d['status'] == 'success': return f"{d['city']}, {d['country']}"
-    except: pass
-    return "Unknown"
 
 @login_manager.user_loader
 def load_user(uid): return db.session.get(User, int(uid))
@@ -130,62 +110,72 @@ def logout(): logout_user(); return redirect(url_for('login'))
 @login_required
 def dashboard():
     agents = Agent.query.all()
-    alerts = AgentLog.query.filter(AgentLog.log_type.in_(['SECURITY', 'ALERT'])).order_by(AgentLog.timestamp.desc()).limit(20).all()
-    return render_template('dashboard.html', mode='dashboard', agents=agents, alerts=alerts)
+    return render_template('dashboard.html', mode='dashboard', agents=agents)
 
 @app.route('/api/heartbeat', methods=['POST'])
 def heartbeat():
-    data = request.json
-    if data.get('token') != api_token:
-        return jsonify({'status': '403 Forbidden'}), 403
+    try:
+        data = request.json
+        if data.get('token') != api_token: return jsonify({'status': '403'}), 403
 
-    hostname = data.get('hostname')
-    agent = Agent.query.filter_by(hostname=hostname).first()
-    
-    if not agent:
-        agent = Agent(hostname=hostname)
-        db.session.add(agent)
-        db.session.commit()
-        log_event(agent.id, "SYSTEM", "New device registered")
+        orig_host = data.get('hostname')
+        agent = Agent.query.filter_by(original_hostname=orig_host).first()
+        
+        # Registro inicial
+        if not agent:
+            agent = Agent(original_hostname=orig_host, hostname=orig_host)
+            db.session.add(agent)
+            try:
+                db.session.commit()
+                log_event(agent.id, "SYSTEM", f"Novo: {orig_host}")
+            except:
+                db.session.rollback(); return jsonify({'status': 'retry'}), 200
 
-    agent.last_seen = datetime.utcnow()
-    agent.status = 'online'
-    agent.device_type = data.get('device_type', 'desktop')
-    agent.ip_address = data.get('ip')
-    agent.public_ip = data.get('public_ip')
-    
-    if data.get('gps'):
-        agent.latitude = data['gps'].get('lat')
-        agent.longitude = data['gps'].get('lng')
-        agent.tracking_enabled = True
-    
-    agent.battery_level = data.get('battery', 100)
-    agent.cpu_usage = data.get('cpu', 0)
-    agent.ram_usage = data.get('ram', 0)
-    
-    if data.get('software'): agent.software_list = str(data.get('software'))
-    if data.get('processes'): agent.process_list = str(data.get('processes'))
-    if data.get('clipboard'): agent.clipboard_content = str(data.get('clipboard'))
-    if data.get('startup'): agent.startup_programs = str(data.get('startup'))
-    if data.get('drives'): agent.external_drives = str(data.get('drives'))
+        # Atualiza status
+        agent.last_seen = datetime.utcnow()
+        agent.status = 'online'
+        agent.ip_address = data.get('ip')
+        agent.public_ip = request.remote_addr
+        agent.device_type = data.get('device_type', 'desktop')
+        agent.os_version = data.get('os_version')
+        agent.battery_level = data.get('battery', 100)
+        
+        if data.get('gps'):
+            agent.latitude = data['gps'].get('lat')
+            agent.longitude = data['gps'].get('lng')
+        
+        # Salva softwares se enviado
+        if data.get('software'): agent.software_list = json.dumps(data.get('software'))
+        
+        # Recebe Chat do Cliente
+        if data.get('client_message'):
+            db.session.add(ChatMessage(agent_id=agent.id, sender='client', content=data.get('client_message')))
 
-    if not agent.latitude and agent.public_ip and agent.geolocation == "Unknown":
-        agent.geolocation = get_geo_ip(agent.public_ip)
+        # Recebe Resultado do Shell
+        if data.get('cmd_output'):
+            # Limita tamanho do log para não explodir o banco
+            output_clean = data.get('cmd_output')[:2000]
+            log_event(agent.id, "SHELL_RESULT", output_clean)
 
-    if data.get('threats'): log_event(agent.id, "SECURITY", f"Threat: {data.get('threats')}")
-    if data.get('cmd_output'): log_event(agent.id, "SHELL", data.get('cmd_output'))
+        # Entrega comandos pendentes
+        cmd = agent.pending_command
+        agent.pending_command = None
 
-    cmd = agent.pending_command
-    agent.pending_command = None
+        # Entrega mensagens de chat pendentes (Admin -> Cliente)
+        unread = ChatMessage.query.filter_by(agent_id=agent.id, sender='admin', read=False).all()
+        chat_out = []
+        for m in unread:
+            chat_out.append(m.content)
+            m.read = True
 
-    unread = ChatMessage.query.filter_by(agent_id=agent.id, sender='admin', read=False).all()
-    msgs = [m.content for m in unread]
-    for m in unread: m.read = True
+        for _ in range(5):
+            try: db.session.commit(); break
+            except: db.session.rollback(); time.sleep(0.2)
 
-    try: db.session.commit()
-    except: db.session.rollback()
+        return jsonify({'command': cmd, 'chat_messages': chat_out, 'status': 'ok'})
 
-    return jsonify({'command': cmd, 'chat': msgs})
+    except Exception as e:
+        return jsonify({'status': 'error', 'msg': str(e)}), 500
 
 @app.route('/control/command', methods=['POST'])
 @login_required
@@ -194,18 +184,34 @@ def control_command():
     cmd = request.form.get('command')
     agent = db.session.get(Agent, agent_id)
     
-    if cmd == 'chat':
+    if not agent: return jsonify({'status': 'err'}), 404
+
+    if cmd == 'rename': # Renomear Apelido (DB)
+        agent.hostname = request.form.get('new_name')
+        log_event(agent.id, "SYSTEM", f"Apelido alterado: {agent.hostname}")
+        
+    elif cmd == 'rename_system': # Renomear Máquina Real
+        new_sys = request.form.get('new_host')
+        agent.pending_command = f"set_hostname:{new_sys}"
+        log_event(agent.id, "SYSTEM", f"Comando Rename PC: {new_sys}")
+        
+    elif cmd == 'chat_send':
         db.session.add(ChatMessage(agent_id=agent.id, sender='admin', content=request.form.get('message')))
+        
     elif cmd == 'analyze_full':
         generate_analysis(agent)
+        
+    elif cmd == 'ask_ai': # Pergunta Específica
+        ask_openai(agent, request.form.get('question'))
+        
     elif cmd == 'shell':
-        agent.pending_command = f"shell:{request.form.get('shell_cmd')}"
-    elif cmd == 'kill_proc':
-        agent.pending_command = f"kill:{request.form.get('pid')}"
+        shell_c = request.form.get('shell_cmd')
+        agent.pending_command = f"shell:{shell_c}"
+        log_event(agent.id, "SHELL_CMD", f"> {shell_c}")
+        
     else:
         agent.pending_command = cmd
-        if cmd == 'rename': agent.pending_command = f"rename:{request.form.get('new_name')}"
-        log_event(agent.id, "COMMAND", f"Sent: {agent.pending_command}")
+        log_event(agent.id, "COMMAND", cmd)
     
     try: db.session.commit()
     except: db.session.rollback()
@@ -214,20 +220,11 @@ def control_command():
 @app.route('/api/upload_screenshot', methods=['POST'])
 def upload_screenshot():
     data = request.json
-    agent = Agent.query.filter_by(hostname=data.get('hostname')).first()
+    agent = Agent.query.filter_by(original_hostname=data.get('hostname')).first()
     if agent:
+        # Recebe base64 pronto
         agent.last_screenshot = data.get('image_data')
-        log_event(agent.id, "INFO", "Screenshot received")
-        try: db.session.commit()
-        except: db.session.rollback()
-    return jsonify({'status': 'ok'})
-
-@app.route('/api/send_chat', methods=['POST'])
-def api_send_chat_client():
-    data = request.json
-    agent = Agent.query.filter_by(hostname=data.get('hostname')).first()
-    if agent:
-        db.session.add(ChatMessage(agent_id=agent.id, sender='client', content=data.get('message')))
+        log_event(agent.id, "INFO", "Print atualizado")
         try: db.session.commit()
         except: db.session.rollback()
     return jsonify({'status': 'ok'})
@@ -236,45 +233,63 @@ def api_send_chat_client():
 @login_required
 def details(id):
     a = db.session.get(Agent, id)
-    logs = AgentLog.query.filter_by(agent_id=a.id).order_by(AgentLog.timestamp.desc()).limit(50).all()
-    chat = ChatMessage.query.filter_by(agent_id=a.id).order_by(ChatMessage.timestamp.asc()).all()
-    cves = AgentCVE.query.filter_by(agent_id=a.id).all()
+    if not a: return jsonify({'error': 'Not found'}), 404
+
+    logs = AgentLog.query.filter_by(agent_id=a.id).order_by(AgentLog.timestamp.desc()).limit(30).all()
+    chats = ChatMessage.query.filter_by(agent_id=a.id).order_by(ChatMessage.timestamp.asc()).all()
     
+    soft = []
+    if a.software_list:
+        try: soft = json.loads(a.software_list)
+        except: soft = []
+
     return jsonify({
+        'id': a.id,
         'hostname': a.hostname,
+        'original_hostname': a.original_hostname,
         'type': a.device_type,
         'ip': a.ip_address,
-        'public_ip': a.public_ip,
-        'geo': a.geolocation,
-        'gps': {'lat': a.latitude, 'lng': a.longitude} if a.latitude else None,
-        'battery': a.battery_level,
         'os': a.os_version,
-        'processes': a.process_list,
-        'clipboard': a.clipboard_content,
-        'startup': a.startup_programs,
-        'drives': a.external_drives,
+        'battery': a.battery_level,
+        'gps': {'lat': a.latitude, 'lng': a.longitude} if a.latitude else None,
+        'software': soft,
         'screenshot': a.last_screenshot,
         'ai': a.ai_summary,
-        'logs': [{'time': l.timestamp.strftime('%H:%M'), 'type': l.log_type, 'msg': l.message} for l in logs],
-        'chat': [{'sender': c.sender, 'msg': c.content} for c in chat],
-        'cves': [{'id': c.cve_id, 'desc': c.description} for c in cves]
+        'logs': [{'time': l.timestamp.strftime('%H:%M:%S'), 'type': l.log_type, 'msg': l.message} for l in logs],
+        'chat': [{'sender': c.sender, 'msg': c.content} for c in chats]
     })
 
 def generate_analysis(agent):
+    # (Mesma lógica de IA anterior)
     try:
-        keyword = "Windows 11" if "11" in str(agent.os_version) else "Windows 10"
-        cve_results = nvdlib.searchCVE(keywordSearch=keyword, limit=3)
-        AgentCVE.query.filter_by(agent_id=agent.id).delete()
-        cve_list = [f"{cve.id}" for cve in cve_results]
-        prompt = f"Analyze: {agent.hostname} ({agent.os_version}). Startup: {agent.startup_programs[:200]}. CVEs: {', '.join(cve_list)}."
+        prompt = f"Analyze security: OS {agent.os_version}. Software count: {len(agent.software_list)}."
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": "Security Analyst."}, {"role": "user", "content": prompt}]
         )
         agent.ai_summary = response.choices[0].message['content']
-    except Exception as e:
-        agent.ai_summary = str(e)
+    except: agent.ai_summary = "Erro IA ou Sem API Key"
+
+def ask_openai(agent, question):
+    try:
+        context = f"OS: {agent.os_version}. Logs Recentes: {str([l.message for l in agent.logs[:5]])}"
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Security Analyst Assistant."},
+                {"role": "user", "content": f"Context: {context}\nQuestion: {question}"}
+            ]
+        )
+        agent.ai_summary = response.choices[0].message['content']
+        db.session.commit()
+    except: pass
 
 if __name__ == '__main__':
-    with app.app_context(): db.create_all()
-    app.run(host='0.0.0.0', port=int(os.getenv('SERVER_PORT', 7070)))
+    with app.app_context():
+        db.create_all()
+        if not User.query.filter_by(username='admin').first():
+            try:
+                u = User(username='admin'); u.set_password('admin123'); u.is_priority=True
+                db.session.add(u); db.session.commit()
+            except: pass
+    app.run(host='0.0.0.0', port=server_port, threaded=True)
