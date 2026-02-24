@@ -19,7 +19,7 @@ from functools import wraps
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, render_template, abort, g
+from flask import Flask, request, jsonify, render_template, abort, g, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import text, func
@@ -56,14 +56,14 @@ app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 
+db = SQLAlchemy(app)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+log = logging.getLogger("aegis")
+
 API_TOKEN = os.getenv("AEGIS_API_TOKEN", "aegis-default-token-mude-agora")
 if API_TOKEN == "":
     API_TOKEN = "aegis-default-token-mude-agora"
 log.debug(f"[AEGIS] Token carregado: {API_TOKEN[:4]}...{API_TOKEN[-4:]}")
-
-db = SQLAlchemy(app)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-log = logging.getLogger("aegis")
 
 
 def enable_wal(connection, _):
@@ -335,6 +335,64 @@ class AuditLog(db.Model):
         }
 
 
+
+
+
+class SocUser(db.Model):
+    __tablename__ = "soc_users"
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, nullable=False, index=True)
+    display_name = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(16), default="analyst")
+    status = db.Column(db.String(16), default="pending")
+    email = db.Column(db.String(256))
+    reason = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    approved_at = db.Column(db.DateTime)
+    approved_by = db.Column(db.String(64))
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        salt = os.getenv("AEGIS_SECRET_KEY", "aegis-salt")
+        return hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
+
+    def check_password(self, password: str) -> bool:
+        return self.password_hash == SocUser.hash_password(password)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "display_name": self.display_name or self.username,
+            "role": self.role,
+            "status": self.status,
+            "email": self.email,
+            "reason": self.reason,
+            "created_at": self.created_at.isoformat(),
+            "approved_at": self.approved_at.isoformat() if self.approved_at else None,
+            "approved_by": self.approved_by,
+        }
+
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("soc_user"):
+            return redirect(url_for("login_page"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+def require_admin(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("soc_user"):
+            return redirect(url_for("login_page"))
+        if session.get("soc_role") != "admin":
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
 
 
 def require_token(f):
@@ -1118,9 +1176,123 @@ def soar_action(agent_id):
 
 
 
+
+
+@app.route("/login", methods=["GET"])
+def login_page():
+    if session.get("soc_user"):
+        return redirect(url_for("dashboard"))
+    return render_template("login.html", error=None, success=None)
+
+
+@app.route("/login", methods=["POST"])
+def do_login():
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+    user = SocUser.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return render_template("login.html", error="Credenciais inválidas.", success=None)
+    if user.status == "pending":
+        return render_template("login.html", error="Cadastro aguardando aprovação do administrador.", success=None)
+    if user.status == "rejected":
+        return render_template("login.html", error="Seu cadastro foi recusado. Entre em contato com o administrador.", success=None)
+    session.permanent = True
+    session["soc_user"] = user.username
+    session["soc_display"] = user.display_name or user.username
+    session["soc_role"] = user.role
+    audit("USER_LOGIN", actor=user.username, target_type="auth", details=f"Login bem-sucedido")
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/logout")
+def do_logout():
+    actor = session.get("soc_user", "unknown")
+    session.clear()
+    audit("USER_LOGOUT", actor=actor, target_type="auth")
+    return redirect(url_for("login_page"))
+
+
+@app.route("/register", methods=["POST"])
+def do_register():
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+    display_name = request.form.get("display_name", "").strip()
+    email = request.form.get("email", "").strip()
+    reason = request.form.get("reason", "").strip()
+
+    if not username or not password:
+        return render_template("login.html", error="Username e senha são obrigatórios.", success=None, show_register=True)
+
+    if len(password) < 6:
+        return render_template("login.html", error="A senha deve ter ao menos 6 caracteres.", success=None, show_register=True)
+
+    if SocUser.query.filter_by(username=username).first():
+        return render_template("login.html", error="Este username já está em uso.", success=None, show_register=True)
+
+    new_user = SocUser(
+        username=username,
+        display_name=display_name or username,
+        password_hash=SocUser.hash_password(password),
+        email=email,
+        reason=reason,
+        status="pending",
+        role="analyst",
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    audit("USER_REGISTER_REQUEST", actor=username, target_type="auth", details=f"Solicitação de cadastro: {reason[:80]}")
+    return render_template("login.html", error=None, success="Solicitação enviada! Aguarde aprovação do administrador.")
+
+
+@app.route("/admin/users")
+@require_admin
+def admin_users():
+    pending = SocUser.query.filter_by(status="pending").order_by(SocUser.created_at.asc()).all()
+    approved = SocUser.query.filter_by(status="active").order_by(SocUser.created_at.desc()).all()
+    rejected = SocUser.query.filter_by(status="rejected").order_by(SocUser.created_at.desc()).all()
+    return render_template("admin_users.html",
+                           pending=pending, approved=approved, rejected=rejected,
+                           current_user=session.get("soc_user"),
+                           current_role=session.get("soc_role"))
+
+
+@app.route("/admin/users/<int:user_id>/approve", methods=["POST"])
+@require_admin
+def approve_user(user_id):
+    user = SocUser.query.get_or_404(user_id)
+    user.status = "active"
+    user.approved_at = datetime.utcnow()
+    user.approved_by = session.get("soc_user")
+    db.session.commit()
+    audit("USER_APPROVED", actor=session.get("soc_user"), target_type="user", target_id=user_id, details=f"Usuário {user.username} aprovado")
+    return redirect(url_for("admin_users"))
+
+
+@app.route("/admin/users/<int:user_id>/reject", methods=["POST"])
+@require_admin
+def reject_user(user_id):
+    user = SocUser.query.get_or_404(user_id)
+    user.status = "rejected"
+    user.approved_by = session.get("soc_user")
+    db.session.commit()
+    audit("USER_REJECTED", actor=session.get("soc_user"), target_type="user", target_id=user_id, details=f"Usuário {user.username} recusado")
+    return redirect(url_for("admin_users"))
+
+
+@app.route("/api/admin/users")
+@require_admin
+def api_list_users():
+    users = SocUser.query.order_by(SocUser.created_at.desc()).all()
+    return jsonify([u.to_dict() for u in users])
+
+
 @app.route("/")
+@require_auth
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template("dashboard.html",
+                           current_user=session.get("soc_user"),
+                           current_role=session.get("soc_role"),
+                           current_display=session.get("soc_display"))
 
 
 @app.route("/api/agents")
@@ -1592,6 +1764,23 @@ def init_db():
             db.session.add_all(sample_iocs)
             db.session.commit()
             log.info("[DB] IoCs de exemplo inseridos.")
+
+        adm_username = os.getenv("AEGIS_ADM_USER", "admin")
+        adm_pass = os.getenv("AEGIS_ADM_PASS", "Aegis@2026!")
+        if not SocUser.query.filter_by(username=adm_username).first():
+            adm = SocUser(
+                username=adm_username,
+                display_name="Administrador",
+                password_hash=SocUser.hash_password(adm_pass),
+                role="admin",
+                status="active",
+                email="admin@aegis.local",
+                approved_by="system",
+                approved_at=datetime.utcnow(),
+            )
+            db.session.add(adm)
+            db.session.commit()
+            log.info(f"[AUTH] Usuário ADM '{adm_username}' criado com sucesso.")
         log.info(f"[DB] Banco inicializado em {DB_PATH} (WAL mode)")
 
 
