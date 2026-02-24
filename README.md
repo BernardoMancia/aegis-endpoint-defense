@@ -33,7 +33,32 @@ O servidor estará disponível em `http://localhost:5000`.
 3. Rode o servidor: `python server_vps/app.py`
 
 ### 💻 Agente Windows
-O agente está localizado em `client_pc/agent_gui.py`. Ele requer Python 3.x e permissões administrativas para realizar as correções de segurança.
+O agente pode ser instalado de duas formas:
+1. **Instalador MSI (Recomendado)**: Execute o arquivo `.msi` gerado na pasta `dist/` para uma instalação limpa no Windows.
+2. **Manual**: Execute `python client_pc/agent_gui.py` (requer Python 3.x e permissões de Admin).
+
+### 🌐 Deploy em Produção (Sem Domínio / IP:Porta)
+
+#### Linux Server (Ubuntu/Debian)
+1. Certifique-se de que as portas `5000` (API/Dashboard) estão abertas no firewall:
+   ```bash
+   sudo ufw allow 5000/tcp
+   ```
+2. No arquivo `.env`, configure o `SERVER_IP` com o IP público do seu servidor.
+3. Suba o ambiente: `docker-compose up -d`.
+
+#### Windows Server
+1. Para rodar o servidor em produção no Windows sem Docker, recomenda-se o uso do `Waitress`:
+   ```bash
+   pip install waitress
+   waitress-serve --port=5000 server_vps.app:app
+   ```
+2. Para manter o servidor rodando como um serviço, utilize o [NSSM](https://nssm.cc/):
+   ```bash
+   nssm install AegisServer
+   ```
+   (Selecione o caminho do python.exe e o script app.py).
+3. Abra a porta `5000` no Windows Defender Firewall.
 
 ---
 
@@ -66,4 +91,29 @@ The server will be available at `http://localhost:5000`.
 3. Run the server: `python server_vps/app.py`
 
 ### 💻 Windows Agent
-The agent is located at `client_pc/agent_gui.py`. It requires Python 3.x and administrative privileges to perform security remediations.
+The agent can be installed in two ways:
+1. **MSI Installer (Recommended)**: Run the `.msi` file from the `dist/` folder for a clean installation.
+2. **Manual**: Run `python client_pc/agent_gui.py` (requires Python 3.x and Admin privileges).
+
+### 🌐 Production Deployment (No Domain / IP:Port)
+
+#### Linux Server (Ubuntu/Debian)
+1. Ensure port `5000` (API/Dashboard) is open in the firewall:
+   ```bash
+   sudo ufw allow 5000/tcp
+   ```
+2. In the `.env` file, set `SERVER_IP` to your server's public IP.
+3. Start the environment: `docker-compose up -d`.
+
+#### Windows Server
+1. To run the server in production on Windows without Docker, it's recommended to use `Waitress`:
+   ```bash
+   pip install waitress
+   waitress-serve --port=5000 server_vps.app:app
+   ```
+2. To keep the server running as a service, use [NSSM](https://nssm.cc/):
+   ```bash
+   nssm install AegisServer
+   ```
+   (Select the python.exe path and the app.py script).
+3. Open port `5000` in Windows Defender Firewall.

@@ -1,0 +1,5 @@
+README.md
+AegisAgent.egg-info/PKG-INFO
+AegisAgent.egg-info/SOURCES.txt
+AegisAgent.egg-info/dependency_links.txt
+AegisAgent.egg-info/top_level.txt
