@@ -59,7 +59,7 @@ app.config.update(
 API_TOKEN = os.getenv("AEGIS_API_TOKEN", "aegis-default-token-mude-agora")
 if API_TOKEN == "":
     API_TOKEN = "aegis-default-token-mude-agora"
-print(f"[AEGIS DBG] TOKEN EM USO: {API_TOKEN}")
+log.debug(f"[AEGIS] Token carregado: {API_TOKEN[:4]}...{API_TOKEN[-4:]}")
 
 db = SQLAlchemy(app)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -132,6 +132,7 @@ class Agent(db.Model):
             "command_result_time": self.command_result_time.isoformat() if self.command_result_time else None,
             "last_screenshot": bool(self.last_screenshot),
             "chat_requested": self.chat_requested,
+            "has_unread_chat": AgentChat.query.filter_by(agent_id=self.id, sender="agent", is_read=False).count() > 0,
         }
 
 
@@ -818,7 +819,7 @@ def ingest_android():
 def agent_request_chat():
     """Agente informa que o usuário Desktop solicitou Suporte do SOC."""
     data = request.get_json(silent=True) or {}
-    logger.info(f"Dados recebidos em request_chat: {data}")
+    log.info(f"Dados recebidos em request_chat: {data}")
     original_hostname = data.get("original_hostname")
     if not original_hostname:
         return jsonify({"error": "original_hostname ausente"}), 400
@@ -829,7 +830,7 @@ def agent_request_chat():
 
     agent.chat_requested = True
     db.session.commit()
-    logger.info(f"[C2] Solicitação de Suporte ativada pelo agente: {agent.hostname}")
+    log.info(f"[C2] Solicitação de Suporte ativada pelo agente: {agent.hostname}")
     return jsonify({"status": "ok"})
 
 
@@ -881,6 +882,7 @@ def register_agent():
 
 
 @app.route("/control/command", methods=["POST"])
+@require_token
 def send_command():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -899,6 +901,7 @@ def send_command():
 
 
 @app.route("/control/isolate", methods=["POST"])
+@require_token
 def isolate_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -917,6 +920,7 @@ def isolate_host():
 
 
 @app.route("/control/unisolate", methods=["POST"])
+@require_token
 def unisolate_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -935,6 +939,7 @@ def unisolate_host():
 
 
 @app.route("/control/wipe", methods=["POST"])
+@require_token
 def wipe_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -952,7 +957,9 @@ def wipe_host():
     return jsonify({"status": "ok", "message": f"Wipe enfileirado para {agent.hostname}"})
 
 
+
 @app.route("/control/screenshot", methods=["POST"])
+@require_token
 def request_screenshot():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -1037,6 +1044,7 @@ def agent_detail(agent_id):
 
 
 @app.route("/control/quick_command", methods=["POST"])
+@require_token
 def quick_command():
     """Envia um comando pré-definido ao agente (process list, netstat, sysinfo, etc.)."""
     data = request.get_json(silent=True) or {}
