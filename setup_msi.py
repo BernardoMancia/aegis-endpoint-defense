@@ -55,11 +55,10 @@ msi_data = {
 }
 
 bdist_msi_options = {
-    "upgrade_code": "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}",
+    "upgrade_code": "{B2C3D4E5-F678-90AB-CDEF-1234567890A1}",
     "add_to_path": False,
-    "initial_target_dir": r"[ProgramFilesFolder]\Aegis Security\Agent",
+    "initial_target_dir": r"[LocalAppDataFolder]\Aegis Security\Agent",
     "install_icon": os.path.join(agent_dir, "aegis_icon.ico"),
-    "all_users": True,
     "summary_data": {
         "author": "Aegis Security",
         "comments": "Aegis EDR Endpoint Agent - Protecao de endpoints em tempo real",

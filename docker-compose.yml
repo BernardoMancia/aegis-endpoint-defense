@@ -9,9 +9,7 @@ services:
       - "5000:5000"
     volumes:
       - ./data:/app/data
+    env_file:
+      - .env
     environment:
-      - AEGIS_API_TOKEN=${AEGIS_API_TOKEN}
-      - AEGIS_SECRET_KEY=${AEGIS_SECRET_KEY}
       - FLASK_ENV=production
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
