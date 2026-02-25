@@ -308,21 +308,36 @@
       <span class="font-bold text-white tracking-wide glow-text">AEGIS <span class="text-aegis-500">SOC</span></span>
       <span class="text-xs text-slate-500 hidden md:block">SIEM & EDR Platform v1.0</span>
     </div>
-    <div class="flex items-center gap-4">
-      <div id="header-stats" class="flex gap-4 text-xs">
-        <span class="text-slate-500">Agentes: <span id="stat-agents" class="text-white font-semibold">—</span></span>
-        <span class="text-slate-500">Online: <span id="stat-online" class="text-green-400 font-semibold">—</span></span>
-        <span class="text-slate-500">Incidentes: <span id="stat-incidents"
-            class="text-red-400 font-semibold">—</span></span>
-        <span class="text-slate-500">IoCs: <span id="stat-iocs" class="text-orange-400 font-semibold">—</span></span>
-      </div>
-      <div class="flex items-center gap-1.5">
+
+    <!-- Center Stats -->
+    <div id="header-stats" class="hidden lg:flex gap-4 text-xs items-center mx-auto">
+      <span class="text-slate-500">Agentes: <span id="stat-agents" class="text-white font-semibold">—</span></span>
+      <span class="text-slate-500">Online: <span id="stat-online" class="text-green-400 font-semibold">—</span></span>
+      <span class="text-slate-500">Incidentes: <span id="stat-incidents"
+          class="text-red-400 font-semibold">—</span></span>
+      <span class="text-slate-500">IoCs: <span id="stat-iocs" class="text-orange-400 font-semibold">—</span></span>
+      <div class="flex items-center gap-1.5 ml-2">
         <span id="ajax-indicator" class="status-dot status-online"></span>
         <span class="text-xs text-slate-500">Live</span>
       </div>
-      <a href="/admin/users" class="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-all font-medium flex items-center gap-1.5">⚙️ Admin</a>
+    </div>
+
+    <!-- Right Menu -->
+    <div class="flex items-center gap-3">
+      <a href="/admin/users"
+        class="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-all font-medium hidden sm:flex items-center gap-1.5">⚙️
+        Admin</a>
       <button id="btn-open-ioc" onclick="openIocModal()"
-        class="text-xs bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1.5 rounded-lg hover:bg-orange-500/20 transition-all">🎯 Threat Intel</button>
+        class="text-xs bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1.5 rounded-lg hover:bg-orange-500/20 transition-all hidden sm:block">🎯
+        Threat Intel</button>
+
+      <!-- User Dropdown (Profile & Logout) -->
+      <a href="/profile"
+        class="text-xs bg-sky-500/10 border border-sky-500/30 text-sky-400 px-3 py-1.5 rounded-lg hover:bg-sky-500/20 transition-all font-medium flex items-center gap-1.5">👤
+        Meu Perfil</a>
+      <a href="/logout"
+        class="text-xs bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all font-medium flex items-center gap-1.5"
+        title="Sair (Logout)">❌ Sair</a>
     </div>
   </header>
 
