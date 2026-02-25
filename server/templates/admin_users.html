@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aegis SOC — Gestão de Usuários</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080c14;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(14, 165, 233, 0.12);
+        }
+
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-active {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .badge-rejected {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .btn-approve {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-approve:hover {
+            background: rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-reject {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reject:hover {
+            background: rgba(248, 113, 113, 0.25);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+            padding: 12px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(14, 165, 233, 0.03);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="glass h-[52px] flex items-center justify-between px-6 border-b border-white/5 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center">
+                <svg style="width:14px;height:14px;" fill="none" stroke="white" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            <span class="font-bold text-white text-sm">AEGIS <span class="text-sky-400">SOC</span></span>
+            <span class="text-xs text-slate-600">/</span>
+            <span class="text-xs text-slate-400">Gestão de Usuários</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-xs text-slate-500">Admin: <span class="text-white font-medium">{{ current_user
+                    }}</span></span>
+            <a href="/" class="text-xs text-sky-400 hover:text-sky-300 transition-colors">← Voltar ao SOC</a>
+            <a href="/logout" class="text-xs text-slate-500 hover:text-red-400 transition-colors">Sair</a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-6">
+
+        {% if pending %}
+        <section class="glass rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <h2 class="section-title">Aguardando Aprovação <span class="badge badge-pending ml-2">{{ pending|length
+                        }}</span></h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Nome / E-mail</th>
+                        <th>Justificativa</th>
+                        <th>Solicitado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in pending %}
+                    <tr>
+                        <td>
+                            <div class="font-mono font-semibold text-white">{{ u.username }}</div>
+                            <div class="text-[10px] text-slate-600 mt-0.5">Analista</div>
+                        </td>
+                        <td>
+                            <div class="text-slate-300">{{ u.display_name or '—' }}</div>
+                            <div class="text-[11px] text-slate-600">{{ u.email or '—' }}</div>
+                        </td>
+                        <td class="max-w-xs">
+                            <div class="text-slate-400 text-xs leading-relaxed line-clamp-2">{{ u.reason or '—' }}</div>
+                        </td>
+                        <td class="text-slate-500 text-xs whitespace-nowrap">{{ u.created_at.strftime('%d/%m/%Y %H:%M')
+                            }}</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <form method="POST" action="/admin/users/{{ u.id }}/approve" style="display:inline">
+                                    <button type="submit" class="btn-approve">✓ Aprovar</button>
+                                </form>
+                                <form method="POST" action="/admin/users/{{ u.id }}/reject" style="display:inline">
+                                    <button type="submit" class="btn-reject">✕ Recusar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% else %}
+        <section class="glass rounded-xl p-5">
+            <h2 class="section-title mb-3">Aguardando Aprovação</h2>
+            <p class="text-sm text-slate-600 text-center py-6">Nenhuma solicitação pendente. 🎉</p>
+        </section>
+        {% endif %}
+
+        <section class="glass rounded-xl p-5">
+            <h2 class="section-title mb-4">Usuários Ativos <span class="badge badge-active ml-2">{{ approved|length
+                    }}</span></h2>
+            {% if approved %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Nome / E-mail</th>
+                        <th>Perfil</th>
+                        <th>Aprovado por</th>
+                        <th>Desde</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in approved %}
+                    <tr>
+                        <td class="font-mono font-semibold text-white">{{ u.username }}</td>
+                        <td>
+                            <div class="text-slate-300">{{ u.display_name or '—' }}</div>
+                            <div class="text-[11px] text-slate-600">{{ u.email or '—' }}</div>
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if u.role == 'admin' %}badge-pending{% else %}badge-active{% endif %}">
+                                {{ u.role.upper() }}
+                            </span>
+                        </td>
+                        <td class="text-slate-500 text-xs">{{ u.approved_by or 'Sistema' }}</td>
+                        <td class="text-slate-500 text-xs whitespace-nowrap">{{ u.approved_at.strftime('%d/%m/%Y') if
+                            u.approved_at else '—' }}</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openPasswordModal({{ u.id }}, '{{ u.username }}')"
+                                    class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-1 rounded hover:bg-blue-500/20">Trocar
+                                    Senha</button>
+                                {% if u.username != 'admin' %}
+                                <form method="POST" action="/admin/users/{{ u.id }}/delete" style="display:inline"
+                                    onsubmit="return confirm('Tem certeza que deseja DELETAR o usuário {{ u.username }}?');">
+                                    <button type="submit"
+                                        class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-1 rounded hover:bg-red-500/20">Excluir</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-sm text-slate-600 text-center py-4">Nenhum usuário ativo ainda.</p>
+            {% endif %}
+        </section>
+
+        <!-- Password Modal -->
+        <div id="password-modal" style="display:none;"
+            class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+            <div class="glass p-6 rounded-xl w-full max-w-sm">
+                <h3 class="text-lg font-bold text-white mb-2">Trocar Senha</h3>
+                <p class="text-xs text-slate-400 mb-4">Definir nova senha para <span id="pwd-username"
+                        class="font-mono text-sky-400"></span></p>
+                <form id="pwd-form" method="POST" action="">
+                    <input type="password" name="new_password" required placeholder="Nova Senha..."
+                        class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 mb-4" />
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="closePasswordModal()"
+                            class="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancelar</button>
+                        <button type="submit"
+                            class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 text-white rounded font-medium transition-colors">Salvar
+                            Nova Senha</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function openPasswordModal(id, username) {
+                document.getElementById('pwd-username').innerText = username;
+                document.getElementById('pwd-form').action = '/admin/users/' + id + '/password';
+                document.getElementById('password-modal').style.display = 'flex';
+            }
+            function closePasswordModal() {
+                document.getElementById('password-modal').style.display = 'none';
+            }
+        </script>
+
+        {% if rejected %}
+        <section class="glass rounded-xl p-5">
+            <h2 class="section-title mb-4">Recusados <span class="badge badge-rejected ml-2">{{ rejected|length
+                    }}</span></h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Nome / E-mail</th>
+                        <th>Recusado por</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in rejected %}
+                    <tr>
+                        <td class="font-mono text-slate-400">{{ u.username }}</td>
+                        <td class="text-slate-500">{{ u.display_name or '—' }}</td>
+                        <td class="text-slate-500 text-xs">{{ u.approved_by or '—' }}</td>
+                        <td class="text-slate-600 text-xs">{{ u.created_at.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+
+    </main>
+</body>
+
+</html>

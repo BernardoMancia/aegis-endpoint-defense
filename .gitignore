@@ -12,6 +12,17 @@ dist/
 *.db-shm
 *.db-wal
 .env
+.env.*
+*.env
 .idea/
 .vscode/
 *.log
+*.spec
+server/data/
+agent/dist/
+agent/build/
+*.key
+*.pem
+*.p12
+*.pfx
+screenshots/
