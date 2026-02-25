@@ -132,7 +132,13 @@ def do_register():
         role="viewer",
     )
     db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[AUTH] Erro ao registrar {username}: {e}")
+        db.session.rollback()
+        return render_template("login.html", error="Falha interna no servidor ao tentar registrar. Tente novamente.", success=None, show_register=True)
+
     audit("USER_REGISTER_REQUEST", actor=username, target_type="auth", details=f"Solicitação: {reason[:80]}")
     return render_template("login.html", error=None, success="Solicitação enviada! Aguarde aprovação.")
 
@@ -160,7 +166,13 @@ def mfa_do_verify():
     recovery_code = request.form.get("recovery_code", "").strip()
     if recovery_code:
         if user.use_recovery_code(recovery_code):
-            db.session.commit()
+            try:
+                db.session.commit()
+            except Exception as e:
+                log.error(f"[AUTH] Erro ao salvar login de recuperação de {user.username}: {e}")
+                db.session.rollback()
+                return render_template("mfa_verify.html", error="Erro interno ao processar recuperação.")
+
             session.pop("mfa_pending_user", None)
             _record_login(user, True)
             _set_session(user)
@@ -211,7 +223,14 @@ def mfa_confirm():
         return redirect(url_for("auth.mfa_setup_page"))
     user.mfa_enabled = True
     codes = user.generate_recovery_codes()
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[AUTH] Erro ao ativar MFA de {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna ao ativar o MFA. Tente novamente.", "danger")
+        return redirect(url_for("auth.mfa_setup_page"))
+
     audit("MFA_ENABLED", actor=user.username, target_type="auth")
     flash("MFA ativado com sucesso!", "success")
     return render_template("mfa_recovery.html", codes=codes)
@@ -236,7 +255,14 @@ def mfa_disable():
     user.mfa_enabled = False
     user.mfa_secret = None
     user.mfa_recovery_codes = None
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[AUTH] Erro ao desativar MFA de {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna ao desativar o MFA.", "danger")
+        return redirect(url_for("profile.profile_page"))
+
     audit("MFA_DISABLED", actor=user.username, target_type="auth")
     flash("MFA desativado.", "warning")
     return redirect(url_for("profile.profile_page"))

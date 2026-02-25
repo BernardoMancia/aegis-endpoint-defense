@@ -29,7 +29,15 @@ def update_profile():
     if display_name:
         user.display_name = display_name
         session["soc_display"] = display_name
-    db.session.commit()
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[PROFILE] Erro transacional ao atualizar display_name de {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna ao salvar. Tente novamente mais tarde.", "danger")
+        return redirect(url_for("profile.profile_page"))
+
     audit("PROFILE_UPDATE", actor=user.username, target_type="user", details="Display name atualizado")
     flash("Perfil atualizado com sucesso.", "success")
     return redirect(url_for("profile.profile_page"))
@@ -55,7 +63,14 @@ def change_own_password():
 
     user.password_hash = SocUser.hash_password(new_pw)
     user.password_changed_at = datetime.utcnow()
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[PROFILE] Erro transacional ao atualizar senha de {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna ao alterar senha. Tente novamente.", "danger")
+        return redirect(url_for("profile.profile_page"))
+
     audit("PASSWORD_CHANGE_SELF", actor=user.username, target_type="user")
     flash("Senha alterada com sucesso.", "success")
     return redirect(url_for("profile.profile_page"))
@@ -74,7 +89,13 @@ def request_email_change():
     user.pending_email = new_email
     user.email_token = token
     user.email_token_expires = datetime.utcnow() + timedelta(hours=24)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[PROFILE] Erro ao gerar token de email para {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna ao solicitar troca de e-mail.", "danger")
+        return redirect(url_for("profile.profile_page"))
 
     confirm_url = url_for("profile.confirm_email", token=token, _external=True)
     log.info(f"[EMAIL] Confirmação de troca de email para {user.username}: {confirm_url}")
@@ -97,7 +118,14 @@ def confirm_email(token):
     user.pending_email = None
     user.email_token = None
     user.email_token_expires = None
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[PROFILE] Erro ao confirmar troca de email de {user.username}: {e}")
+        db.session.rollback()
+        flash("Falha interna durante a validação. Tente mais tarde.", "danger")
+        return redirect(url_for("profile.profile_page"))
+
     audit("EMAIL_CHANGED", actor=user.username, target_type="user", details=f"{old_email} → {user.email}")
     flash("Email atualizado com sucesso!", "success")
     if session.get("soc_user"):

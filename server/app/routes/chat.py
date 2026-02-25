@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from extensions import db
+from extensions import db, log
 from models.chat import ChatMessage, AgentChat
 from models.agent import Agent
 from services.ai_service import get_ai_response
@@ -50,6 +50,10 @@ def clear_chat():
 
 @chat_bp.route("/api/chat/agent/<int:agent_id>/send", methods=["POST"])
 def admin_send_chat(agent_id):
+    from flask import session
+    if not session.get("soc_user") or session.get("soc_role") not in ["admin", "superadmin"]:
+        return jsonify({"error": "Não autorizado"}), 403
+
     data = request.get_json(silent=True) or {}
     message = data.get("message", "").strip()
     if not message:
@@ -57,7 +61,12 @@ def admin_send_chat(agent_id):
     agent = Agent.query.get_or_404(agent_id)
     chat_msg = AgentChat(agent_id=agent.id, sender="admin", message=message, is_read=False)
     db.session.add(chat_msg)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[CHAT] Erro ao salvar msg do admin para agente {agent_id}: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Falha no banco de dados"}), 500
     return jsonify({"status": "ok", "msg": chat_msg.to_dict()})
 
 
@@ -82,7 +91,11 @@ def agent_poll_chat():
     response_msgs = [m.to_dict() for m in unread]
     for m in unread:
         m.is_read = True
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        log.error(f"[CHAT] Erro ao sincronizar pool do agente {agent.id}: {e}")
+        db.session.rollback()
     return jsonify({"messages": response_msgs})
 
 

@@ -1,8 +1,24 @@
 from datetime import datetime
-from flask import Blueprint, request, jsonify
-from extensions import db
+from functools import wraps
+from flask import Blueprint, request, jsonify, abort, current_app
+from extensions import db, log
 from models.ioc import IOC
 from services.audit_service import audit
+
+threat_intel_bp = Blueprint("threat_intel", __name__)
+
+
+def require_token(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get("Authorization", "")
+        token = auth.replace("Bearer ", "").strip()
+        if token != current_app.config["API_TOKEN"]:
+            audit("UNAUTHORIZED_ACCESS", actor="unknown", target_type="api",
+                  details=f"Tentativa de check IoC sem token: {token[:8]}...")
+            abort(401)
+        return f(*args, **kwargs)
+    return decorated
 
 threat_intel_bp = Blueprint("threat_intel", __name__)
 
@@ -53,6 +69,7 @@ def delete_ioc(ioc_id):
 
 
 @threat_intel_bp.route("/api/ioc/check", methods=["POST"])
+@require_token
 def check_ioc_endpoint():
     data = request.get_json(silent=True) or {}
     value = data.get("value", "").strip().lower()
