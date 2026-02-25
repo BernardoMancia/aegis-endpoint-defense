@@ -1,20 +1,15 @@
 services:
-  aegis-c2:
-    build:
-      context: ./server_vps
-      dockerfile: Dockerfile
-    container_name: aegis-c2-server
-    restart: always
+  aegis-server:
+    build: .
+    container_name: aegis-soc-server
+    restart: unless-stopped
     ports:
       - "5000:5000"
-    environment:
-      - DATABASE_PATH=/app/data/aegis.db
-      - AEGIS_PORT=5000
-      - AEGIS_API_TOKEN=mude-este-token-secreto-agora
-      - AEGIS_SECRET_KEY=chave-secreta-flask-muito-longa-e-aleatoria
     volumes:
-      - aegis-data:/app/data
-
-volumes:
-  aegis-data:
-    driver: local
+      - ./data:/app/data
+    environment:
+      - AEGIS_API_TOKEN=${AEGIS_API_TOKEN}
+      - AEGIS_SECRET_KEY=${AEGIS_SECRET_KEY}
+      - FLASK_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}

