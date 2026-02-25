@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger("aegis-agent")
 
 DEFAULT_SERVER_URL = "http://82.112.245.99:5000"
-DEFAULT_TOKEN = "AEGIS-C913AD56BF3BCC24DB9D34A8510A847B"
+DEFAULT_TOKEN = "AEGIS-tNqtMrg3FcSZB5HGmdk0iW15TsBv5sixyghS9uK2DTn7zZ79"
 
 
 def main():
