@@ -139,3 +139,63 @@ def change_password(user_id):
 def api_list_users():
     users = SocUser.query.order_by(SocUser.created_at.desc()).all()
     return jsonify([u.to_dict() for u in users])
+
+
+@admin_bp.route("/users/<int:user_id>/profile", methods=["GET"])
+@require_superadmin
+def view_user_profile(user_id):
+    actor = _actor_obj()
+    target = SocUser.query.get_or_404(user_id)
+    if not actor.can_manage(target) and actor.id != target.id:
+        flash("Você não tem permissão para ver o perfil deste usuário.", "danger")
+        return redirect(url_for("admin.users"))
+    from models.user import LoginHistory, ROLES
+    history = LoginHistory.query.filter_by(user_id=target.id).order_by(LoginHistory.timestamp.desc()).limit(10).all()
+    return render_template("admin_user_profile.html",
+                           target=target, history=history,
+                           all_roles=ROLES,
+                           current_user=_actor(),
+                           current_role=session.get("soc_role"))
+
+
+@admin_bp.route("/users/<int:user_id>/profile/update", methods=["POST"])
+@require_superadmin
+def update_user_profile(user_id):
+    actor = _actor_obj()
+    target = SocUser.query.get_or_404(user_id)
+    if not actor.can_manage(target):
+        flash("Você não tem permissão para editar este perfil.", "danger")
+        return redirect(url_for("admin.users"))
+
+    display_name = request.form.get("display_name", "").strip()
+    email = request.form.get("email", "").strip()
+
+    if display_name:
+        target.display_name = display_name
+    if email and "@" in email:
+        target.email = email
+
+    db.session.commit()
+    audit("ADMIN_USER_PROFILE_UPDATE", actor=_actor(), target_type="user", target_id=user_id,
+          details=f"Perfil de {target.username} atualizado pelo superadmin")
+    flash(f"Perfil de {target.username} atualizado.", "success")
+    return redirect(url_for("admin.view_user_profile", user_id=user_id))
+
+
+@admin_bp.route("/users/<int:user_id>/profile/reset-mfa", methods=["POST"])
+@require_superadmin
+def reset_user_mfa(user_id):
+    actor = _actor_obj()
+    target = SocUser.query.get_or_404(user_id)
+    if not actor.can_manage(target):
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("admin.users"))
+    target.mfa_enabled = False
+    target.mfa_secret = None
+    target.mfa_recovery_codes = None
+    db.session.commit()
+    audit("ADMIN_MFA_RESET", actor=_actor(), target_type="user", target_id=user_id,
+          details=f"MFA de {target.username} resetado pelo superadmin")
+    flash(f"MFA de {target.username} foi desativado.", "warning")
+    return redirect(url_for("admin.view_user_profile", user_id=user_id))
+

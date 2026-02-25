@@ -227,19 +227,28 @@
                         </td>
                         <td>
                             <span
-                                class="badge {% if u.role == 'admin' %}badge-pending{% else %}badge-active{% endif %}">
-                                {{ u.role.upper() }}
+                                class="badge {% if u.role == 'superadmin' %}badge-rejected{% elif u.role == 'admin' %}badge-pending{% else %}badge-active{% endif %}">
+                                {{ all_roles[u.role].label if u.role in all_roles else u.role.upper() }}
                             </span>
+                            {% if u.mfa_enabled %}<span class="badge badge-active text-[9px] ml-1"
+                                title="MFA Ativo">🔐</span>{% endif %}
+                            {% if u.is_locked %}<span class="badge badge-rejected text-[9px] ml-1"
+                                title="Conta Bloqueada">🔒</span>{% endif %}
                         </td>
                         <td class="text-slate-500 text-xs">{{ u.approved_by or 'Sistema' }}</td>
                         <td class="text-slate-500 text-xs whitespace-nowrap">{{ u.approved_at.strftime('%d/%m/%Y') if
                             u.approved_at else '—' }}</td>
                         <td>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                {% if current_role == 'superadmin' %}
+                                <a href="/admin/users/{{ u.id }}/profile"
+                                    class="text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2 py-1 rounded hover:bg-sky-500/20">✏️
+                                    Editar Perfil</a>
+                                {% endif %}
                                 <button onclick="openPasswordModal({{ u.id }}, '{{ u.username }}')"
                                     class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-1 rounded hover:bg-blue-500/20">Trocar
                                     Senha</button>
-                                {% if u.username != 'admin' %}
+                                {% if current_role == 'superadmin' and u.role != 'superadmin' %}
                                 <form method="POST" action="/admin/users/{{ u.id }}/delete" style="display:inline"
                                     onsubmit="return confirm('Tem certeza que deseja DELETAR o usuário {{ u.username }}?');">
                                     <button type="submit"
