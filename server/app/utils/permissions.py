@@ -35,7 +35,7 @@ def require_role(*roles):
         @wraps(f)
         def wrapper(*args, **kwargs):
             if "soc_user" not in session:
-                return redirect(url_for("auth.login"))
+                return redirect(url_for("auth.login_page"))
             if current_role() not in roles:
                 flash("Acesso negado. Você não tem permissão para esta área.", "danger")
                 return abort(403)
@@ -48,7 +48,7 @@ def require_login(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if "soc_user" not in session:
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.login_page"))
         return f(*args, **kwargs)
     return wrapper
 
@@ -59,7 +59,7 @@ def require_min_role(min_role: str):
         @wraps(f)
         def wrapper(*args, **kwargs):
             if "soc_user" not in session:
-                return redirect(url_for("auth.login"))
+                return redirect(url_for("auth.login_page"))
             if current_user_level() < min_level:
                 flash("Acesso negado. Seu nível de acesso é insuficiente.", "danger")
                 return abort(403)
