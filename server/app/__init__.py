@@ -33,6 +33,7 @@ def create_app(config_class=Config):
         from routes.incidents import incidents_bp
         from routes.threat_intel import threat_intel_bp
         from routes.chat import chat_bp
+        from routes.profile import profile_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(dashboard_bp)
@@ -42,6 +43,7 @@ def create_app(config_class=Config):
         app.register_blueprint(incidents_bp)
         app.register_blueprint(threat_intel_bp)
         app.register_blueprint(chat_bp)
+        app.register_blueprint(profile_bp)
 
     return app
 
@@ -52,7 +54,7 @@ def init_db(app):
     from models.event import SecurityEvent
     from models.incident import Incident
     from models.chat import ChatMessage, AgentChat, AgentVulnerability
-    from models.user import SocUser
+    from models.user import SocUser, LoginHistory
     from config import DB_PATH
     from datetime import datetime
 
@@ -85,12 +87,13 @@ def init_db(app):
 
         adm_username = app.config["ADM_USER"]
         adm_pass = app.config["ADM_PASS"]
-        if not SocUser.query.filter_by(username=adm_username).first():
+        existing = SocUser.query.filter_by(username=adm_username).first()
+        if not existing:
             adm = SocUser(
                 username=adm_username,
-                display_name="Administrador",
+                display_name="Super Administrador",
                 password_hash=SocUser.hash_password(adm_pass),
-                role="admin",
+                role="superadmin",
                 status="active",
                 email="admin@aegis.local",
                 approved_by="system",
@@ -98,6 +101,10 @@ def init_db(app):
             )
             db.session.add(adm)
             db.session.commit()
-            log.info(f"[AUTH] Usuário ADM '{adm_username}' criado.")
+            log.info(f"[AUTH] Super Admin '{adm_username}' criado.")
+        elif existing.role == "admin":
+            existing.role = "superadmin"
+            db.session.commit()
+            log.info(f"[AUTH] '{adm_username}' promovido para superadmin.")
 
         log.info(f"[DB] Banco inicializado em {DB_PATH}")
