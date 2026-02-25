@@ -199,24 +199,36 @@
     <div class="max-w-3xl mx-auto">
 
         <!-- Header -->
-        <div class="flex items-center gap-4 mb-8">
-            <a href="/dashboard" class="text-slate-600 hover:text-slate-300 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-            </a>
-            <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-xl font-bold text-white">
-                {{ (user.display_name or user.username)[0].upper() }}
-            </div>
-            <div>
-                <h1 class="text-xl font-bold text-white">{{ user.display_name or user.username }}</h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <p class="text-sm text-slate-500">@{{ user.username }}</p>
-                    <span class="badge badge-{{ user.role_info.color }} role-badge-{{ user.role }}">{{
-                        user.role_info.label }}</span>
-                    {% if user.mfa_enabled %}<span class="badge badge-success">🔐 MFA Ativo</span>{% endif %}
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-slate-600 hover:text-slate-300 transition-colors" title="Voltar ao Dashboard">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <div
+                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-xl font-bold text-white">
+                    {{ (user.display_name or user.username)[0].upper() }}
                 </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">{{ user.display_name or user.username }}</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p class="text-sm text-slate-500">@{{ user.username }}</p>
+                        <span class="badge role-badge-{{ user.role }}">{{ user.role_info.label }}</span>
+                        {% if user.mfa_enabled %}<span class="badge badge-success">🔐 MFA Ativo</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Nav shortcuts -->
+            <div class="flex items-center gap-2 shrink-0">
+                {% if user.role in ['superadmin', 'admin'] %}
+                <a href="/admin/users"
+                    class="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-all">⚙️
+                    Admin</a>
+                {% endif %}
+                <a href="/logout"
+                    class="text-xs bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all">❌
+                    Sair</a>
             </div>
         </div>
 
