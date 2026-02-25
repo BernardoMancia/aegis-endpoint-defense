@@ -1,6 +1,8 @@
 services:
   aegis-server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: aegis-soc-server
     restart: unless-stopped
     ports:
