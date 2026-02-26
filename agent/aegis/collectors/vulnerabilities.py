@@ -14,7 +14,7 @@ def check_vulnerabilities() -> list:
     # 1. Antivírus desativado (simples)
     try:
         cmd = 'powershell -NoProfile -Command "Get-MpComputerStatus | Select-Object -ExpandProperty RealTimeProtectionEnabled"'
-        out = subprocess.check_output(cmd, encoding='utf-8', errors='ignore').strip()
+        out = subprocess.check_output(cmd, encoding='utf-8', errors='ignore', creationflags=subprocess.CREATE_NO_WINDOW).strip()
         if out == "False":
             vulns.append({
                 "title": "Windows Defender Desativado",
@@ -28,7 +28,7 @@ def check_vulnerabilities() -> list:
     # 2. Firewall desativado
     try:
         cmd = 'netsh advfirewall show currentprofile state'
-        out = subprocess.check_output(cmd, encoding='utf-8', errors='ignore')
+        out = subprocess.check_output(cmd, encoding='utf-8', errors='ignore', creationflags=subprocess.CREATE_NO_WINDOW)
         if "OFF" in out.upper() or "DESLIGADO" in out.upper():
             vulns.append({
                 "title": "Firewall do Windows Desativado",

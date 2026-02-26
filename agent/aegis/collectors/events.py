@@ -25,7 +25,8 @@ def read_windows_events(log_type="Security", last_n=20) -> list:
         $result | ConvertTo-Json -Compress
         """
         proc = subprocess.run(["powershell", "-NoProfile", "-Command", script],
-                              capture_output=True, text=True, timeout=15)
+                              capture_output=True, text=True, timeout=15,
+                              creationflags=subprocess.CREATE_NO_WINDOW)
         if proc.returncode == 0 and proc.stdout.strip():
             return json.loads(proc.stdout.strip())
         return []

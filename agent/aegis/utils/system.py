@@ -35,7 +35,14 @@ def get_network_info() -> dict:
     except Exception:
         pass
     try:
-        out = subprocess.check_output("ipconfig", encoding="cp850", errors="ignore")
+        if os.name == "nt":
+            out = subprocess.check_output(
+                "ipconfig", encoding="cp850", errors="ignore",
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+        else:
+            out = subprocess.check_output("ipconfig", encoding="cp850", errors="ignore")
+
         for line in out.splitlines():
             if "Gateway" in line and line.strip().split(":")[-1].strip():
                 info["gateway"] = line.strip().split(":")[-1].strip()

@@ -39,6 +39,13 @@ def main():
     agent = AegisAgentCore(server_url=server_url, token=token)
 
     if args.headless:
+        # Hide the console window unconditionally in headless mode
+        try:
+            import ctypes
+            ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
+        except Exception:
+            pass
+
         log.info("Iniciando em modo HEADLESS...")
         import time
         from aegis.core.commands import handle_command
