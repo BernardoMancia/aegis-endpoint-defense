@@ -25,6 +25,7 @@ class Agent(db.Model):
     command_result = db.Column(db.Text)
     command_result_time = db.Column(db.DateTime)
     chat_requested = db.Column(db.Boolean, default=False)
+    is_uninstalled = db.Column(db.Boolean, default=False)
 
     events = db.relationship("SecurityEvent", backref="agent", lazy="dynamic", cascade="all,delete-orphan")
     incidents = db.relationship("Incident", backref="agent", lazy="dynamic", cascade="all,delete-orphan")
@@ -33,8 +34,10 @@ class Agent(db.Model):
         from models.chat import AgentChat
         last_seen_dt = self.last_seen or datetime.utcnow()
         offline_threshold = datetime.utcnow() - timedelta(minutes=3)
-        computed_status = "isolated" if self.isolation_active else (
-            "online" if last_seen_dt > offline_threshold else "offline"
+        computed_status = "uninstalled" if getattr(self, "is_uninstalled", False) else (
+            "isolated" if self.isolation_active else (
+                "online" if last_seen_dt > offline_threshold else "offline"
+            )
         )
         return {
             "id": self.id,
@@ -46,6 +49,7 @@ class Agent(db.Model):
             "agent_version": self.agent_version,
             "platform": self.platform,
             "status": computed_status,
+            "is_uninstalled": getattr(self, "is_uninstalled", False),
             "isolation_active": self.isolation_active,
             "tags": json.loads(self.tags or "[]"),
             "last_seen": last_seen_dt.isoformat(),

@@ -60,6 +60,34 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
         except Exception:
             pass
 
+    elif cmd_type == "UNINSTALL":
+        agent.log_gui("⚠️ UNINSTALL RECEBIDO! Iniciando auto-destruição...")
+        try:
+            from aegis.utils import autostart
+            autostart.remove()
+        except Exception as e:
+            agent.log_gui(f"Erro ao remover autostart: {e}")
+            
+        agent.send_command_result("UNINSTALL", "[UNINSTALL_OK] Processo de auto-destruição iniciado nas chaves de registro e binários.", 0)
+        
+        import tempfile
+        import sys
+        
+        bat_path = os.path.join(tempfile.gettempdir(), "aegis_suicide.bat")
+        exe_path = sys.executable
+        
+        bat_content = f"""@echo off\ntimeout /t 3 /nobreak > NUL\ndel /f /q "{exe_path}"\ndel /f /q "%~f0"\n"""
+        try:
+            with open(bat_path, "w") as f:
+                f.write(bat_content)
+            
+            subprocess.Popen([bat_path], creationflags=_NO_WINDOW)
+            agent.log_gui("Script suicida engatilhado. Adeus.")
+        except Exception:
+            pass
+            
+        os._exit(0)
+
     elif cmd_type == "WIPE":
         agent.log_gui("💀 WIPE RECEBIDO! Iniciando formatação...")
         # Simulação para segurança:

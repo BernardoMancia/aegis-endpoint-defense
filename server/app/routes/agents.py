@@ -32,7 +32,7 @@ def health():
 
 @agents_bp.route("/api/agents")
 def list_agents():
-    agents = Agent.query.order_by(Agent.last_seen.desc()).all()
+    agents = Agent.query.filter_by(is_uninstalled=False).order_by(Agent.last_seen.desc()).all()
     return jsonify([a.to_dict() for a in agents])
 
 
@@ -208,10 +208,10 @@ def command_output():
 def stats():
     agent_id = request.args.get("agent_id", type=int)
     from sqlalchemy import func
-    total_agents = Agent.query.count()
+    total_agents = Agent.query.filter_by(is_uninstalled=False).count()
     online_thresh = datetime.utcnow() - timedelta(minutes=3)
-    online_agents = Agent.query.filter(Agent.last_seen > online_thresh, Agent.isolation_active == False).count()
-    isolated_agents = Agent.query.filter_by(isolation_active=True).count()
+    online_agents = Agent.query.filter(Agent.last_seen > online_thresh, Agent.isolation_active == False, Agent.is_uninstalled == False).count()
+    isolated_agents = Agent.query.filter_by(isolation_active=True, is_uninstalled=False).count()
     evt_q = SecurityEvent.query
     if agent_id:
         evt_q = evt_q.filter_by(agent_id=agent_id)

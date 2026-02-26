@@ -172,3 +172,26 @@ def soar_action(agent_id):
     db.session.commit()
     audit("SOAR_ACTION", target_type="agent", target_id=agent_id, details=action)
     return jsonify({"status": "ok"})
+
+
+@control_bp.route("/control/uninstall", methods=["POST"])
+@require_token
+def uninstall_agent():
+    data = request.get_json(silent=True) or {}
+    agent_id = data.get("agent_id")
+    if not agent_id:
+        return jsonify({"error": "agent_id obrigatório"}), 400
+        
+    agent = Agent.query.get_or_404(agent_id)
+    # Envia o comando de auto-destruição
+    agent.pending_command = json.dumps({"command": "UNINSTALL"})
+    agent.pending_command_time = datetime.utcnow()
+    # Ativa o soft delete do painel
+    agent.is_uninstalled = True
+    db.session.commit()
+    
+    audit("AGENT_UNINSTALL_REQUESTED", target_type="agent", target_id=agent_id,
+          details=f"Desinstalação forçada enviada para {agent.hostname}")
+          
+    return jsonify({"status": "ok", "message": f"Ordem de desinstalação enviada para {agent.hostname}. O agente removerá a si mesmo do Windows."})
+

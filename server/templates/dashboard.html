@@ -426,9 +426,14 @@
                 class="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] py-2 px-3 rounded-lg hover:bg-slate-700 transition-all font-bold flex items-center justify-center gap-2">🔓
                 RETIRAR ISOLAMENTO</button>
             </div>
-            <button onclick="soarAction('wipe')"
-              class="bg-red-600/20 border border-red-600/50 text-red-500 text-[10px] py-2.5 px-3 rounded-lg hover:bg-red-600/40 transition-all font-black flex items-center justify-center gap-2">💣
-              WIPE COMPLETO DO ENDPOINT</button>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="soarAction('uninstall')"
+                class="bg-orange-500/20 border border-orange-500/40 text-orange-400 text-[10px] py-2.5 px-3 rounded-lg hover:bg-orange-500/30 transition-all font-black flex items-center justify-center gap-2">🗑️
+                DESINSTALAR AGENTE</button>
+              <button onclick="soarAction('wipe')"
+                class="bg-red-600/20 border border-red-600/50 text-red-500 text-[10px] py-2.5 px-3 rounded-lg hover:bg-red-600/40 transition-all font-black flex items-center justify-center gap-2">💣
+                WIPE COMPLETO DO ENDPOINT</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1065,6 +1070,13 @@
         if (code !== "CONFIRMAR") { addTerminalLine('[ERRO] Código incorreto. Wipe abortado.', '#f87171'); return; }
         await fetch('/control/wipe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id, confirm: true }) });
         addTerminalLine(`[SOAR] Wipe enfileirado para ${name}!`, '#f87171');
+        return;
+      }
+      if (action === 'uninstall') {
+        if (!confirm(`⚠️ ATENÇÃO: O agente C2 será permanentemente desinstalado de ${name} e removido do painel. Continuar?`)) return;
+        await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
+        addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
+        setTimeout(() => location.reload(), 3500);
         return;
       }
       if (action === 'isolate') {
