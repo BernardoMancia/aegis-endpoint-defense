@@ -70,6 +70,13 @@ def init_db(app):
         sa_event.listen(db.engine, "connect", enable_wal)
         db.create_all()
 
+        try:
+            db.session.execute("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0")
+            db.session.commit()
+            log.info("[DB] Schema SQLite atualizado com sucesso: adicionado is_uninstalled.")
+        except Exception:
+            db.session.rollback()
+
         if IOC.query.count() == 0:
             sample_iocs = [
                 IOC(ioc_type="hash", value="44d88612fea8a8f36de82e1278abb02f",
