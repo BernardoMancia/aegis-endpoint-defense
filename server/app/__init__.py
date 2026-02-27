@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from flask import Flask
 from dotenv import load_dotenv
 from sqlalchemy import event as sa_event
+from sqlalchemy.sql import text
 
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
@@ -71,11 +72,13 @@ def init_db(app):
         db.create_all()
 
         try:
-            db.session.execute("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0")
+            db.session.execute(text("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0"))
             db.session.commit()
             log.info("[DB] Schema SQLite atualizado com sucesso: adicionado is_uninstalled.")
-        except Exception:
+        except Exception as e:
             db.session.rollback()
+            if "duplicate column name" not in str(e).lower():
+                log.error(f"[DB] Erro ao tentar migrar tabela: {e}")
 
         if IOC.query.count() == 0:
             sample_iocs = [
