@@ -86,7 +86,8 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
 ping 127.0.0.1 -n 2 > nul
 del /f /q "{exe_path}" > nul 2>&1
 if exist "{exe_path}" goto LOOP
-rmdir /s /q "{exe_dir}" > nul 2>&1
+echo "{exe_dir}" | findstr /i "AegisAgent exe.win-amd" > nul
+if %errorlevel% equ 0 rmdir /s /q "{exe_dir}" > nul 2>&1
 (goto) 2>nul & del "%~f0"
 """
         try:

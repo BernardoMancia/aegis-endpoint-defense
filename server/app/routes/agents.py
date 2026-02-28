@@ -59,7 +59,7 @@ def heartbeat():
     if not original_hostname:
         return jsonify({"error": "original_hostname obrigatório"}), 400
 
-    agent = Agent.query.filter_by(original_hostname=original_hostname).first()
+    agent = Agent.query.filter_by(original_hostname=original_hostname).order_by(Agent.id.desc()).first()
     if not agent:
         agent = Agent(original_hostname=original_hostname, hostname=data.get("hostname", original_hostname))
         db.session.add(agent)
@@ -94,7 +94,7 @@ def ingest_logs():
     events_list = data.get("events", [])
     if not original_hostname:
         return jsonify({"error": "original_hostname obrigatório"}), 400
-    agent = Agent.query.filter_by(original_hostname=original_hostname).first()
+    agent = Agent.query.filter_by(original_hostname=original_hostname).order_by(Agent.id.desc()).first()
     if not agent:
         return jsonify({"error": "Agente não encontrado"}), 404
     events_list = events_list[:500]
