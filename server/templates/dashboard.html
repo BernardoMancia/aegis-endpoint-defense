@@ -324,134 +324,134 @@ body {
                 let currentAgents = [];
                 let selectedAgentId = null;
 
-                function closeAgentPanel() {{ document.getElementById('agent-panel').classList.add('translate-x-full'); selectedAgentId = null; }}
-                async function openAgentPanel(agentId) {{
+                function closeAgentPanel() { document.getElementById('agent-panel').classList.add('translate-x-full'); selectedAgentId = null; }
+                async function openAgentPanel(agentId) {
                     selectedAgentId = agentId;
                     const agent = currentAgents.find(a => a.id === agentId);
                     if(!agent) return;
                     document.getElementById('panel-hostname').innerText = agent.hostname;
-                    document.getElementById('panel-agent-id').innerText = `ID: ${{agent.id}}`;
+                    document.getElementById('panel-agent-id').innerText = `ID: ${agent.id}`;
                     document.getElementById('panel-platform').innerText = agent.platform;
                     document.getElementById('panel-path').innerText = agent.agent_path || '---';
                     document.getElementById('agent-panel').classList.remove('translate-x-full');
                     document.getElementById('terminal-output').innerHTML = '<span class="text-emerald-500">Conexão estabelecida com shell remoto...</span>';
-                }}
+                }
 
-                function toggleAIChat() {{
+                function toggleAIChat() {
                     const win = document.getElementById('ai-chat-window');
                     win.classList.toggle('opacity-0'); win.classList.toggle('pointer-events-none'); win.classList.toggle('translate-y-10');
-                }}
+                }
 
-                async function fetchData() {{
-                    try {{
+                async function fetchData() {
+                    try {
                         const statsRes = await fetch('/api/stats');
-                        if(statsRes.ok) {{
+                        if(statsRes.ok) {
                             const s = await statsRes.json();
                             document.getElementById('stat-total-agents').innerText = s.agents?.total ?? 0;
                             document.getElementById('stat-online-agents').innerText = s.agents?.online ?? 0;
                             document.getElementById('stat-incidents').innerText = s.incidents?.open ?? 0;
-                        }}
+                        }
                         const agentsRes = await fetch('/api/agents');
-                        if(agentsRes.ok) {{ currentAgents = await agentsRes.json(); renderAgents(); }}
+                        if(agentsRes.ok) { currentAgents = await agentsRes.json(); renderAgents(); }
                         const incRes = await fetch('/api/incidents');
-                        if(incRes.ok) {{ const id = await incRes.json(); renderIncidents(id.incidents || []); }}
-                    }} catch(e) {{ console.error(e); }}
-                }}
+                        if(incRes.ok) { const id = await incRes.json(); renderIncidents(id.incidents || []); }
+                    } catch(e) { console.error(e); }
+                }
 
-                function renderAgents() {{
+                function renderAgents() {
                     const grid = document.getElementById('agents-grid');
                     grid.innerHTML = currentAgents.map(ag => `
-                        <div onclick="openAgentPanel('${{ag.id}}')" class="hyper-glass p-5 cursor-pointer border-l-4 ${{ag.status === 'online' ? 'border-l-emerald-500' : 'border-l-slate-700'}} group hover:scale-[1.02] transition-all">
+                        <div onclick="openAgentPanel('${ag.id}')" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all">
                             <div class="flex justify-between items-start mb-2">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full ${{ag.status === 'online' ? 'bg-emerald-500' : 'bg-slate-500'}}"></span>
-                                    <span class="font-bold text-sm">${{ag.hostname}}</span>
+                                    <span class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+                                    <span class="font-bold text-sm">${ag.hostname}</span>
                                 </div>
-                                <i data-lucide="${{ag.platform.includes('win') ? 'server' : 'smartphone'}}" class="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-colors"></i>
+                                <i data-lucide="${ag.platform.includes('win') ? 'server' : 'smartphone'}" class="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-colors"></i>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">${{ag.last_ip || '0.0.0.0'}} • ${{ag.os_version || 'N/A'}}</p>
-                            ${{ag.is_isolated ? '<span class="mt-2 inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">ISOLADO</span>' : ''}}
+                            <p class="text-[10px] text-slate-500 font-mono">${ag.last_ip || '0.0.0.0'} • ${ag.os_version || 'N/A'}</p>
+                            ${ag.is_isolated ? '<span class="mt-2 inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">ISOLADO</span>' : ''}
                         </div>
                     `).join('');
                     lucide.createIcons();
-                }}
+                }
 
-                function renderIncidents(incidents) {{
+                function renderIncidents(incidents) {
                     const feed = document.getElementById('incidents-feed');
                     feed.innerHTML = incidents.map(inc => `
                         <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex gap-4 transition-all hover:bg-white/[0.08]">
-                            <div class="mt-1 ${{inc.severity === 'CRITICAL' ? 'text-rose-500' : 'text-amber-500'}}">
+                            <div class="mt-1 ${inc.severity === 'CRITICAL' ? 'text-rose-500' : 'text-amber-500'}">
                                 <i data-lucide="alert-triangle" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold">${{inc.title}}</h4>
-                                <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${{inc.description}}</p>
+                                <h4 class="text-sm font-bold">${inc.title}</h4>
+                                <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${inc.description}</p>
                                 <div class="flex gap-2 mt-2 items-center">
-                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${{inc.severity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}}">${{inc.severity}}</span>
-                                    <span class="text-[9px] text-slate-500">${{new Date(inc.created_at).toLocaleString()}}</span>
+                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${inc.severity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}">${inc.severity}</span>
+                                    <span class="text-[9px] text-slate-500">${new Date(inc.created_at).toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
                     `).join('');
                     lucide.createIcons();
-                }}
+                }
 
-                function showToast(msg, type='info') {{
+                function showToast(msg, type='info') {
                     const container = document.getElementById('toast-container');
                     const toast = document.createElement('div');
                     toast.className = 'toast shadow-xl';
                     let icon = 'info';
-                    if(type === 'error') {{ toast.classList.add('border-l-4', 'border-l-rose-500'); icon = 'alert-octagon'; }}
-                    if(type === 'success') {{ toast.classList.add('border-l-4', 'border-l-emerald-500'); icon = 'check-circle'; }}
-                    toast.innerHTML = `<i data-lucide="${{icon}}" class="w-5 h-5"></i><span>${{msg}}</span>`;
+                    if(type === 'error') { toast.classList.add('border-l-4', 'border-l-rose-500'); icon = 'alert-octagon'; }
+                    if(type === 'success') { toast.classList.add('border-l-4', 'border-l-emerald-500'); icon = 'check-circle'; }
+                    toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span>${msg}</span>`;
                     container.appendChild(toast);
                     lucide.createIcons();
                     setTimeout(() => toast.classList.add('show'), 10);
-                    setTimeout(() => {{ toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }}, 5000);
-                }}
+                    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 5000);
+                }
 
-                async function soarAction(action) {{
+                async function soarAction(action) {
                     if(!selectedAgentId) return;
-                    showToast(`Despachando ação: ${{action}}...`);
-                    try {{
-                        const res = await fetch(`/control/${{selectedAgentId}}/soar`, {{ method: 'POST', headers: {{'Content-Type': 'application/json'}}, body: JSON.stringify({{action}}) }});
+                    showToast(`Despachando ação: ${action}...`);
+                    try {
+                        const res = await fetch(`/control/${selectedAgentId}/soar`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action}) });
                         const data = await res.json();
                         if(data.status === 'ok') showToast("Comando enviado com sucesso!", "success");
                         else showToast(data.message || "Erro ao enviar.", "error");
-                    }} catch(e) {{ showToast("Erro de conexão.", "error"); }}
-                }}
+                    } catch(e) { showToast("Erro de conexão.", "error"); }
+                }
 
-                async function sendTerminalCommand() {{
+                async function sendTerminalCommand() {
                     const input = document.getElementById('terminal-input');
                     const cmd = input.value.trim();
                     if(!cmd || !selectedAgentId) return;
                     const out = document.getElementById('terminal-output');
-                    out.innerHTML += `<div class="text-sky-400 mt-2">❯ ${{cmd}}</div>`;
+                    out.innerHTML += `<div class="text-sky-400 mt-2">❯ ${cmd}</div>`;
                     input.value = '';
-                    try {{
-                        const res = await fetch(`/control/${{selectedAgentId}}/shell`, {{ method: 'POST', headers: {{'Content-Type': 'application/json'}}, body: JSON.stringify({{command: cmd}}) }});
+                    try {
+                        const res = await fetch(`/control/${selectedAgentId}/shell`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({command: cmd}) });
                         const data = await res.json();
                         if(data.status === 'queued') out.innerHTML += `<div class="text-slate-500">Comando enfileirado...</div>`;
-                        else out.innerHTML += `<div class="text-rose-400">Falha: ${{data.message}}</div>`;
-                    }} catch(e) {{ out.innerHTML += '<div class="text-rose-500">Erro de rede.</div>'; }}
+                        else out.innerHTML += `<div class="text-rose-400">Falha: ${data.message}</div>`;
+                    } catch(e) { out.innerHTML += '<div class="text-rose-500">Erro de rede.</div>'; }
                     out.scrollTop = out.scrollHeight;
-                }}
+                }
 
-                async function sendAIChat() {{
+                async function sendAIChat() {
                     const input = document.getElementById('ai-chat-input');
                     const msg = input.value.trim();
                     if(!msg) return;
                     const messages = document.getElementById('ai-chat-messages');
-                    messages.innerHTML += `<div class="bg-indigo-500/10 p-3 rounded-xl ml-4 text-sm text-slate-200 border border-indigo-500/20">${{msg}}</div>`;
+                    messages.innerHTML += `<div class="bg-indigo-500/10 p-3 rounded-xl ml-4 text-sm text-slate-200 border border-indigo-500/20">${msg}</div>`;
                     input.value = '';
                     messages.scrollTop = messages.scrollHeight;
-                    try {{
-                        const r = await fetch('/api/copilot/ask', {{ method: 'POST', headers: {{'Content-Type': 'application/json'}}, body: JSON.stringify({{message: msg}}) }});
+                    try {
+                        const r = await fetch('/api/copilot/ask', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: msg})});
                         const d = await r.json();
-                        messages.innerHTML += `<div class="bg-white/5 p-3 rounded-xl mr-4 text-sm text-sky-200 border border-white/5"><strong>Aegis AI:</strong> ${{d.reply || 'Processando análise...'}}</div>`;
+                        messages.innerHTML += `<div class="bg-white/5 p-3 rounded-xl mr-4 text-sm text-sky-200 border border-white/5"><strong>Aegis AI:</strong> ${d.reply || 'Processando análise...'}</div>`;
                         messages.scrollTop = messages.scrollHeight;
-                    }} catch(e) {{ messages.innerHTML += '<div class="text-rose-400 text-[10px]">Copilot offline.</div>'; }}
-                }}
+                    } catch(e) { messages.innerHTML += '<div class="text-rose-400 text-[10px]">Copilot offline.</div>'; }
+                }
 
                 setInterval(fetchData, 8000);
                 fetchData();
