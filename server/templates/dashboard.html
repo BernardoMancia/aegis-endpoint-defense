@@ -79,9 +79,9 @@
     .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
     .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
     
-    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4) !important; transform: translateY(-1px) !important; filter: brightness(1.1); }
+    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; transform: translateY(-2px) scale(1.02) !important; filter: brightness(1.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
     
     .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
@@ -123,10 +123,20 @@
     #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 100; backdrop-filter: blur(4px); }
     .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -46%); z-index: 101; background: rgba(20,20,20,0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 32px 64px rgba(0,0,0,0.6); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
     .modal.show { opacity: 1; transform: translate(-50%, -50%); pointer-events: auto; }
-            </style>
+            
+    /* Toast System */
+    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+    .toast { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
+    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
+    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.1), rgba(30,30,30,0.95) 20%); }
+    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.1), rgba(30,30,30,0.95) 20%); }
+    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.1), rgba(30,30,30,0.95) 20%); }
+
+</style>
 </head>
 
 <body>
+  <div id="toast-container"></div>
   <div class="bg-mesh"></div>
   <div class="glow-orb-1"></div>
   <div class="glow-orb-2"></div>
@@ -281,16 +291,19 @@
               </div>
               
               
-              <div id="tab-content-soar" class="hidden h-full flex flex-col gap-4">
-                <div class="grid grid-cols-4 gap-3">
-                  <button onclick="soarAction('screenshot')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fluent-primary hover:border-fluent-primary"><span class="text-lg">🖥️</span>Screenshot</button>
-                  <button onclick="soarAction('force_scan_vulns')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-purple-400 hover:border-purple-400"><span class="text-lg">🛡️</span>Scan Vulns</button>
-                  <button onclick="soarAction('force_scan_fim')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-400"><span class="text-lg">🔍</span>Integridade (FIM)</button>
-                  <button onclick="soarAction('force_scan_network')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fuchsia-400 hover:border-fuchsia-400"><span class="text-lg">📡</span>Scan Rede</button>
+                            <div id="tab-content-soar" class="hidden h-full flex flex-col gap-4">
+                <div class="grid grid-cols-5 gap-3">
+                  <button onclick="soarAction('screenshot')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-sky-400 hover:border-sky-400/50 hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🖥️</span>Screenshot</button>
+                  <button onclick="soarAction('force_scan_vulns')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-purple-400 hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🛡️</span>Scan Vulns</button>
+                  <button onclick="soarAction('force_scan_fim')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-teal-400 hover:border-teal-400/50 hover:shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🔍</span>Integridade</button>
+                  <button onclick="soarAction('force_scan_network')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-fuchsia-400 hover:border-fuchsia-400/50 hover:shadow-[0_0_20px_rgba(232,121,249,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">📡</span>Scan Rede</button>
+                  <button onclick="soarAction('force_logs')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-yellow-400 hover:border-yellow-400/50 hover:shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">📋</span>Coletar Logs</button>
                 </div>
-                <div class="grid grid-cols-2 gap-3 mt-2 border-t border-fluent-border pt-4">
-                  <button onclick="soarAction('isolate')" class="bg-red-500/10 border border-red-500/30 text-red-400 py-3 rounded text-xs font-bold hover:bg-red-500/20">🔒 ISOLAR DISPOSITIVO</button>
-                  <button onclick="soarAction('uninstall')" class="bg-orange-500/10 border border-orange-500/30 text-orange-400 py-3 rounded text-xs font-bold hover:bg-orange-500/20">🗑️ DESINSTALAR AGENTE</button>
+                <div class="grid grid-cols-2 gap-3 mt-1 pt-2">
+                  <button onclick="soarAction('isolate')" class="flex items-center gap-3 justify-center bg-dark-800 border border-red-500/20 text-red-500 py-3 rounded-2xl text-xs font-bold hover:bg-red-500/10 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(248,113,113,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🔒</span> ISOLAR DISPOSITIVO</button>
+                  <button onclick="soarAction('unisolate')" class="flex items-center gap-3 justify-center bg-dark-800 border border-green-500/20 text-green-500 py-3 rounded-2xl text-xs font-bold hover:bg-green-500/10 hover:border-green-500/50 hover:shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🔓</span> REMOVER ISOLAMENTO</button>
+                  <button onclick="soarAction('uninstall')" class="flex items-center gap-3 justify-center bg-dark-800 border border-orange-500/20 text-orange-400 py-3 rounded-2xl text-xs font-bold hover:bg-orange-500/10 hover:border-orange-500/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🗑️</span> DESINSTALAR AGENTE</button>
+                  <button onclick="soarAction('wipe')" class="flex items-center gap-3 justify-center bg-dark-800 border border-rose-500/20 text-rose-500 py-3 rounded-2xl text-xs font-bold hover:bg-rose-500/10 hover:border-rose-500/50 hover:shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">💣</span> WIPE (DESTRUIÇÃO)</button>
                 </div>
                 <div class="flex-1 min-h-0 mt-4 border border-fluent-border rounded bg-dark-850 flex flex-col">
                   <div class="px-3 py-2 border-b border-fluent-border text-xs font-medium bg-dark-800 flex justify-between">
@@ -879,7 +892,7 @@
 
 
     async function sendCommand() {
-      if (!selectedAgent) { addTerminalLine('[ERRO] Selecione um agente primeiro.', '#f87171'); return; }
+      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
       const inp = document.getElementById('cmd-input');
       const cmd = inp.value.trim();
       if (!cmd) return;
@@ -906,7 +919,7 @@
 
 
     async function soarAction(action) {
-      if (!selectedAgent) { addTerminalLine('[ERRO] Selecione um agente primeiro.', '#f87171'); return; }
+      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
       const id = selectedAgent.id;
       const name = selectedAgent.hostname;
 
@@ -1124,8 +1137,36 @@
     }
 
 
+    
     function showToast(message, type = 'info') {
-      console.log(`Toast (${type}): ${message}`);
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      
+      // Auto mapping "ERRO" to error toast if not specified
+      if (message.includes('[ERRO]') && type === 'info') type = 'error';
+      message = message.replace('[ERRO]', '').trim();
+      
+      const toast = document.createElement('div');
+      let typeClass = '';
+      let icon = 'ℹ️';
+      if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
+      if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
+      if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
+      
+      toast.className = `toast ${typeClass}`;
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      
+      // Animate entry
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 600);
+      }, 5000);
+    }
+): ${message}`);
 
 
 
