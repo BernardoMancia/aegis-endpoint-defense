@@ -1,7 +1,10 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis SOC — Verificação MFA</title>
+    <title>Aegis SOC — Autenticação MFA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -125,30 +128,33 @@ body {
 }
 .toast.show { transform: translateX(0); }
 </style>
-    </head><body>
+    
+</head>
+<body>
     <div class="bg-mesh"></div>
+    
     <div class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <div class="hyper-glass p-10 text-center space-y-8">
-                <div class="mx-auto w-16 h-16 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-white/10">
+            <div class="hyper-glass p-10 text-center space-y-8 border-b-4 border-b-sky-500 shadow-2xl">
+                <div class="mx-auto w-16 h-16 rounded-3xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">
                     <i data-lucide="shield-check" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-white">Verificação MFA</h1>
-                    <p class="text-sm text-slate-400 mt-2">Sua conta possui proteção extra. Insira o código do seu aplicativo autenticador.</p>
+                    <h1 class="text-2xl font-black text-white">AUTENTICAÇÃO MFA</h1>
+                    <p class="text-[11px] text-slate-400 mt-2 uppercase tracking-widest">Segunda camada de segurança exigida.</p>
                 </div>
-                
                 <form action="/mfa/verify" method="POST" class="space-y-6">
-                    <input type="text" name="token" class="aegis-input text-center text-2xl tracking-[0.5em] font-bold" placeholder="000000" maxlength="6" required autofocus>
-                    <button type="submit" class="w-full aegis-btn-primary justify-center">Verificar Identidade</button>
+                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
+                    <button type="submit" class="w-full aegis-btn-primary justify-center py-4 font-black">VALIDAR TOKEN</button>
                     <div class="pt-4 border-t border-white/5">
-                        <a href="/mfa/recovery" class="text-xs text-slate-500 hover:text-white transition-colors">Perdeu acesso? Usar código de recuperação</a>
+                        <a href="/mfa/recovery" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors font-bold">PROBLEMAS COM O APP? USAR RECOV CODE</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script>lucide.createIcons();</script>
     
     <div id="toast-container"></div>
-</body></html>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

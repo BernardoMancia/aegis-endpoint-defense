@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis SOC — Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
+import os
+import re
+
+TEMPLATES_DIR = "server/templates"
+
+GLOBAL_CSS = """
 /* Aegis Hyper-Glass Design System */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -127,21 +123,22 @@ body {
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 .toast.show { transform: translateX(0); }
-</style>
-    
-</head>
-<body>
-    <div class="bg-mesh"></div>
-    
-        <div class="flex h-screen overflow-hidden">
-            
+"""
+
+def write_file(name, txt):
+    p = os.path.join(TEMPLATES_DIR, name)
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(txt)
+
+def get_sidebar(active_item):
+    return f"""
     <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
         <a href="/" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
             <i data-lucide="shield" class="text-white w-6 h-6"></i>
         </a>
         
         <nav class="flex-1 flex flex-col gap-4">
-            <a href="/" class="p-3 hyper-glass text-sky-400 cursor-pointer hover:text-white transition-colors" title="Dashboard">
+            <a href="/" class="p-3 {'hyper-glass text-sky-400' if active_item == 'dashboard' else 'text-slate-500'} cursor-pointer hover:text-white transition-colors" title="Dashboard">
                 <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
             </a>
             <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Incidentes (Em breve)">
@@ -153,20 +150,57 @@ body {
         </nav>
         
         <div class="flex flex-col gap-4">
-            <a href="/admin/users" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
+            <a href="/admin/users" class="p-3 {'hyper-glass text-sky-400' if active_item == 'admin' else 'text-slate-500'} cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
                 <i data-lucide="settings" class="w-6 h-6"></i>
             </a>
-            <a href="/profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
-                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
+            <a href="/profile" class="w-10 h-10 rounded-full border-2 {'border-sky-500 shadow-[0_0_10px_var(--neon-blue-glow)]' if active_item == 'profile' else 'border-slate-700'} overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{{{ session.get('soc_user', 'Aegis') }}}}" alt="Avatar">
             </a>
             <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all" title="Sair">
                 <i data-lucide="log-out" class="w-6 h-6"></i>
             </a>
         </div>
     </aside>
+    """
+
+def apply_layout(content, title, active_item=None):
+    head = f"""
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>{GLOBAL_CSS}</style>
+    """
     
+    if active_item:
+        sidebar = get_sidebar(active_item)
+        body_content = f"""
+        <div class="flex h-screen overflow-hidden">
+            {sidebar}
             <main class="flex-1 p-8 overflow-y-auto">
-                
+                {content}
+            </main>
+        </div>
+        """
+    else:
+        body_content = content
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    {head}
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    {body_content}
+    <div id="toast-container"></div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>"""
+
+def rebuild_dashboard():
+    dashboard_html = """
             <header class="flex justify-between items-center mb-10">
                 <div>
                     <h1 class="text-3xl font-bold tracking-tight">Status do Ambiente</h1>
@@ -456,11 +490,361 @@ body {
                 setInterval(fetchData, 8000);
                 fetchData();
             </script>
-    
-            </main>
+    """
+    write_file("dashboard.html", apply_layout(dashboard_html, "Aegis SOC — Dashboard", active_item="dashboard"))
+
+def rebuild_profile():
+    profile_content = """
+        <div class="max-w-4xl mx-auto py-10 px-6">
+            <div class="flex items-center gap-6 mb-12">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl">
+                    {{ (user.display_name or user.username or 'A')[0].upper() }}
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
+                    <p class="text-slate-400">Gerencie sua identidade e segurança na plataforma.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-6">
+                <!-- Info -->
+                <div class="hyper-glass p-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
+                    <form action="/profile/update" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Exibição</label>
+                            <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Usuário</label>
+                            <input type="text" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.username }}" disabled>
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-sm text-slate-400">Endereço de E-mail</label>
+                            <input type="email" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.email or 'N/A' }}" disabled>
+                        </div>
+                        <div class="md:col-span-2 flex justify-end">
+                            <button type="submit" class="aegis-btn-primary">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password -->
+                <div class="hyper-glass p-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-amber-500"></i> Segurança e Senha</h2>
+                    <form action="/profile/change-password" method="POST" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Senha Atual</label>
+                            <input type="password" name="current_password" class="aegis-input" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Nova Senha</label>
+                                <input type="password" name="new_password" class="aegis-input" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Confirmar Nova Senha</label>
+                                <input type="password" name="confirm_password" class="aegis-input" required>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="aegis-btn-primary">Atualizar Senha</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- MFA -->
+                <div class="hyper-glass p-8 border-l-4 border-l-purple-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <h2 class="text-xl font-bold mb-2">Autenticação de Dois Fatores (MFA)</h2>
+                            <p class="text-sm text-slate-400 max-w-lg">Proteja sua conta com uma camada extra de segurança.</p>
+                        </div>
+                        <a href="/mfa/setup" class="aegis-btn-primary !bg-purple-600">
+                            {{ 'Gerenciar MFA' if user.mfa_enabled else 'Ativar MFA Agora' }}
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-    <div id="toast-container"></div>
-    <script>lucide.createIcons();</script>
-</body>
-</html>
+    """
+    write_file("profile.html", apply_layout(profile_content, "Aegis SOC — Perfil", active_item="profile"))
+
+def rebuild_admin_users():
+    content = """
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Gestão de Usuários</h1>
+                    <p class="text-slate-400">Administre analistas e permissões do Aegis SOC.</p>
+                </div>
+            </header>
+
+            <div class="space-y-8">
+                <!-- Ativos -->
+                <div class="hyper-glass overflow-hidden shadow-2xl">
+                    <div class="px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-sky-400">Analistas Registrados</h2>
+                        <span class="text-[10px] bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded">{{ approved|length }}</span>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead class="bg-white/[0.03] border-b border-white/10 text-[10px] uppercase text-slate-500 tracking-widest font-bold">
+                            <tr>
+                                <th class="px-6 py-4">Usuário / Identidade</th>
+                                <th class="px-6 py-4 text-center">Nível</th>
+                                <th class="px-6 py-4 text-center">Status MFA</th>
+                                <th class="px-6 py-4 text-right">Controle</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for u in approved %}
+                            <tr class="hover:bg-white/[0.02] transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm uppercase border border-indigo-500/20 group-hover:bg-indigo-500/20 transition-all">{{ u.username[0] }}</div>
+                                        <div>
+                                            <div class="text-sm font-bold text-white">{{ u.display_name or u.username }}</div>
+                                            <div class="text-[10px] text-slate-500 font-mono">{{ u.email or 'admin@aegis.local' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">
+                                        {{ u.role }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    {% if u.mfa_enabled %}
+                                        <span class="text-emerald-500 flex items-center justify-center gap-1 text-[10px] font-bold"><i data-lucide="shield-check" class="w-3 h-3"></i> ATIVO</span>
+                                    {% else %}
+                                        <span class="text-slate-600 text-[10px] font-bold">INATIVO</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="/admin/users/{{ u.id }}/profile" class="p-2 hover:bg-sky-500/20 text-sky-400 rounded-lg transition-colors" title="Editar Perfil"><i data-lucide="user-cog" class="w-4 h-4"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pendentes -->
+                {% if pending %}
+                <div class="hyper-glass overflow-hidden border-l-4 border-l-amber-500 shadow-2xl">
+                    <div class="px-6 py-4 border-b border-white/5 bg-white/5">
+                        <h2 class="text-sm font-bold text-amber-500 flex items-center gap-2 underline underline-offset-4">
+                            <i data-lucide="clock" class="w-4 h-4"></i> Aguardando Aprovação
+                        </h2>
+                    </div>
+                    <table class="w-full text-left">
+                        <tbody class="divide-y divide-white/5">
+                            {% for u in pending %}
+                            <tr class="hover:bg-amber-500/5 transition-colors group">
+                                <td class="px-6 py-4">
+                                     <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-sm uppercase">{{ u.username[0] }}</div>
+                                        <div>
+                                            <div class="text-sm font-bold text-white">{{ u.username }}</div>
+                                            <div class="text-[10px] text-amber-500/50">Solicitação pendente</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-3 pr-2">
+                                        <form action="/admin/users/{{ u.id }}/approve" method="POST">
+                                            <button type="submit" class="p-2 bg-emerald-500/10 hover:bg-emerald-500/30 text-emerald-500 rounded-xl transition-all border border-emerald-500/20">
+                                                <i data-lucide="user-check" class="w-5 h-5"></i>
+                                            </button>
+                                        </form>
+                                        <form action="/admin/users/{{ u.id }}/reject" method="POST">
+                                            <button type="submit" class="p-2 bg-rose-500/10 hover:bg-rose-500/30 text-rose-500 rounded-xl transition-all border border-rose-500/20">
+                                                <i data-lucide="user-x" class="w-5 h-5"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+    """
+    write_file("admin_users.html", apply_layout(content, "Aegis SOC — Admin", active_item="admin"))
+
+def rebuild_admin_user_profile():
+    content = """
+        <div class="max-w-4xl mx-auto py-10 px-6">
+            <div class="flex items-center gap-4 mb-10">
+                 <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <h1 class="text-3xl font-bold text-white">Editar Profile: <span class="text-sky-500 underline">{{ target.username }}</span></h1>
+            </div>
+
+            <div class="grid gap-6">
+                <div class="hyper-glass p-8">
+                    <form action="/admin/users/{{ target.id }}/profile/update" method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Display Name</label>
+                                <input type="text" name="display_name" class="aegis-input" value="{{ target.display_name or '' }}">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Email Contact</label>
+                                <input type="email" name="email" class="aegis-input" value="{{ target.email or '' }}">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Role Authorization</label>
+                                <select name="role" class="aegis-input">
+                                    <option value="user" {% if target.role == 'user' %}selected{% endif %}>User (Restricted)</option>
+                                    <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin (Full Control)</option>
+                                    <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                                </select>
+                            </div>
+                             <div class="space-y-2">
+                                <label class="text-sm text-slate-400">MFA Status</label>
+                                <div class="aegis-input opacity-60 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500' if target.mfa_enabled else 'bg-slate-600' }}"></span>
+                                    {{ 'Ativo' if target.mfa_enabled else 'Desativado' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="submit" class="aegis-btn-primary">Update Authorization</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="hyper-glass p-8 border-l-4 border-l-rose-500">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-rose-500"><i data-lucide="key" class="w-5 h-5"></i> Force Password Reset</h3>
+                    <form action="/admin/users/{{ target.id }}/password" method="POST" class="flex gap-4">
+                        <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Enter new strong password..." required>
+                        <button type="submit" class="aegis-btn-secondary border-rose-500/30 text-rose-500 hover:bg-rose-500/10">Reset Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    """
+    write_file("admin_user_profile.html", apply_layout(content, "Aegis SOC — Editar", active_item="admin"))
+
+def rebuild_login():
+    login_html = """
+    <div class="min-h-screen flex items-center justify-center p-6 bg-deep-bg">
+        <div class="w-full max-w-md">
+            <div class="flex flex-col items-center mb-10">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center shadow-2xl border border-white/20 mb-6 group cursor-default">
+                    <i data-lucide="shield" class="text-white w-10 h-10 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <h1 class="text-4xl font-black tracking-tighter text-white">AEGIS <span class="text-sky-500">SOC</span></h1>
+                <p class="text-slate-500 font-mono mt-2 uppercase tracking-[0.3em] text-[9px]">Cybersecurity Defense Unit</p>
+            </div>
+
+            <div class="hyper-glass p-10 space-y-8 relative overflow-hidden active-nav-item">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full -mr-16 -mt-16 animate-pulse"></div>
+                <h2 class="text-xl font-bold text-center tracking-tight">Identificação Requerida</h2>
+                <form action="/login" method="POST" class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-xs text-slate-500 flex items-center gap-2 font-bold"><i data-lucide="user" class="w-3 h-3 text-sky-400"></i> USUÁRIO</label>
+                        <input type="text" name="username" class="aegis-input" placeholder="analyst.name" required autofocus>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs text-slate-500 flex items-center gap-2 font-bold"><i data-lucide="key" class="w-3 h-3 text-sky-400"></i> SENHA</label>
+                        <input type="password" name="password" class="aegis-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full aegis-btn-primary justify-center text-lg mt-4 py-4 uppercase tracking-widest font-black">LOGIN</button>
+                </form>
+                <div class="text-center pt-4 border-t border-white/5">
+                    <p class="text-[9px] text-slate-500 italic">Ambiente Restrito. Todas as sessões são auditadas.</p>
+                </div>
+            </div>
+            <p class="text-center mt-8 text-slate-800 text-[10px] font-mono">B.MANCIA &bull; AEGIS SOC &bull; 2026</p>
+        </div>
+    </div>
+    """
+    write_file("login.html", apply_layout(login_html, "Aegis SOC — Login"))
+
+def rebuild_mfa_flow():
+    # Setup MFA
+    mfa_setup = """
+    <div class="max-w-2xl mx-auto py-20 px-6">
+        <div class="hyper-glass p-10 text-center space-y-8 border-t-4 border-t-indigo-600">
+            <h1 class="text-3xl font-black">PROTEÇÃO EXTRA</h1>
+            <p class="text-slate-400 text-sm">Escaneie o código abaixo com seu app autenticador nível SOC.</p>
+            <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl border-4 border-indigo-600/50">
+                <img src="{{ qrcode_url }}" alt="MFA QR" class="w-48 h-48">
+            </div>
+            <div class="space-y-4 max-w-sm mx-auto">
+                <p class="text-[10px] text-slate-500 font-mono italic">Manual Key: {{ secret }}</p>
+                <form action="/mfa/setup" method="POST" class="space-y-4">
+                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-800" placeholder="000 000" maxlength="6" required>
+                    <button type="submit" class="w-full aegis-btn-primary justify-center">VALIDAR E ATIVAR</button>
+                    <a href="/profile" class="block text-xs text-slate-600 hover:text-white transition-colors uppercase font-bold tracking-widest">CANCELAR</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    """
+    write_file("mfa_setup.html", apply_layout(mfa_setup, "Aegis SOC — Setup MFA"))
+
+    # Verify MFA
+    mfa_verify = """
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+            <div class="hyper-glass p-10 text-center space-y-8 border-b-4 border-b-sky-500 shadow-2xl">
+                <div class="mx-auto w-16 h-16 rounded-3xl bg-sky-500/10 flex items-center justify-center text-sky-500 border border-sky-500/20">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white">AUTENTICAÇÃO MFA</h1>
+                    <p class="text-[11px] text-slate-400 mt-2 uppercase tracking-widest">Segunda camada de segurança exigida.</p>
+                </div>
+                <form action="/mfa/verify" method="POST" class="space-y-6">
+                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
+                    <button type="submit" class="w-full aegis-btn-primary justify-center py-4 font-black">VALIDAR TOKEN</button>
+                    <div class="pt-4 border-t border-white/5">
+                        <a href="/mfa/recovery" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors font-bold">PROBLEMAS COM O APP? USAR RECOV CODE</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    """
+    write_file("mfa_verify.html", apply_layout(mfa_verify, "Aegis SOC — Autenticação MFA"))
+
+    # Recovery
+    mfa_recovery = """
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+            <div class="hyper-glass p-10 text-center space-y-8 border-l-4 border-rose-600 shadow-2xl">
+                <div class="mx-auto w-16 h-16 rounded-3xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+                    <i data-lucide="life-buoy" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white">RECOV PROTOCOL</h1>
+                    <p class="text-xs text-slate-400 mt-2">Insira um código de recuperação de emergência.</p>
+                </div>
+                <form action="/mfa/recovery" method="POST" class="space-y-6">
+                    <input type="text" name="recovery_code" class="aegis-input text-center font-mono text-xl tracking-widest uppercase" placeholder="XXXXXXXX" maxlength="8" required autofocus>
+                    <button type="submit" class="w-full aegis-btn-primary !bg-rose-600 justify-center py-4 font-black">BYPASS MFA</button>
+                    <div class="pt-4">
+                        <a href="/login" class="text-[10px] text-slate-500 hover:text-white transition-colors font-bold">VOLTAR AO LOGIN INTEGRADO</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    """
+    write_file("mfa_recovery.html", apply_layout(mfa_recovery, "Aegis SOC — Recuperação"))
+
+if __name__ == "__main__":
+    rebuild_dashboard()
+    rebuild_profile()
+    rebuild_login()
+    rebuild_admin_users()
+    rebuild_admin_user_profile()
+    rebuild_mfa_flow()
+    print("Hyper-Glass UI Unified & Refactored Successfully!")

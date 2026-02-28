@@ -1,4 +1,7 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aegis SOC — Recuperação</title>
@@ -125,30 +128,33 @@ body {
 }
 .toast.show { transform: translateX(0); }
 </style>
-    </head><body>
+    
+</head>
+<body>
     <div class="bg-mesh"></div>
+    
     <div class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-md">
-            <div class="hyper-glass p-10 text-center space-y-8">
-                <div class="mx-auto w-16 h-16 rounded-3xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/10">
+            <div class="hyper-glass p-10 text-center space-y-8 border-l-4 border-rose-600 shadow-2xl">
+                <div class="mx-auto w-16 h-16 rounded-3xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
                     <i data-lucide="life-buoy" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-white">Recuperação de Conta</h1>
-                    <p class="text-sm text-slate-400 mt-2">Insira um dos seus códigos de recuperação de 8 dígitos.</p>
+                    <h1 class="text-2xl font-black text-white">RECOV PROTOCOL</h1>
+                    <p class="text-xs text-slate-400 mt-2">Insira um código de recuperação de emergência.</p>
                 </div>
-                
                 <form action="/mfa/recovery" method="POST" class="space-y-6">
-                    <input type="text" name="recovery_code" class="aegis-input text-center font-mono tracking-widest" placeholder="XXXXXXXX" maxlength="8" required autofocus>
-                    <button type="submit" class="w-full aegis-btn-primary !bg-rose-600 !shadow-rose-500/20 justify-center">Recuperar Acesso</button>
+                    <input type="text" name="recovery_code" class="aegis-input text-center font-mono text-xl tracking-widest uppercase" placeholder="XXXXXXXX" maxlength="8" required autofocus>
+                    <button type="submit" class="w-full aegis-btn-primary !bg-rose-600 justify-center py-4 font-black">BYPASS MFA</button>
                     <div class="pt-4">
-                        <a href="/login" class="text-xs text-slate-500 hover:text-white transition-colors">Voltar ao Login</a>
+                        <a href="/login" class="text-[10px] text-slate-500 hover:text-white transition-colors font-bold">VOLTAR AO LOGIN INTEGRADO</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script>lucide.createIcons();</script>
     
     <div id="toast-container"></div>
-</body></html>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

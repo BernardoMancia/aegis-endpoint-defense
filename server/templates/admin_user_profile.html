@@ -1,7 +1,10 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis SOC — Editar Usuário</title>
+    <title>Aegis SOC — Editar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -125,58 +128,101 @@ body {
 }
 .toast.show { transform: translateX(0); }
 </style>
-    </head><body>
-    <div class="bg-mesh"></div>
-    <div class="max-w-4xl mx-auto py-10 px-6">
-        <div class="flex justify-between items-center mb-12">
-            <div class="flex items-center gap-4">
-                 <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
-                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
-                </a>
-                <h1 class="text-3xl font-bold text-white">Editar Usuário: <span class="text-sky-500">{{ target.username }}</span></h1>
-            </div>
-        </div>
-
-        <div class="grid gap-6">
-            <!-- Informações Básicas -->
-            <div class="hyper-glass p-8">
-                <form action="/admin/users/{{ target.id }}/profile/update" method="POST" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Nome de Exibição</label>
-                            <input type="text" name="display_name" class="aegis-input" value="{{ target.display_name or '' }}">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">E-mail</label>
-                            <input type="email" name="email" class="aegis-input" value="{{ target.email or '' }}">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Role do Sistema</label>
-                            <select name="role" class="aegis-input">
-                                <option value="user" {% if target.role == 'user' %}selected{% endif %}>User</option>
-                                <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin</option>
-                                <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="pt-4 flex justify-end gap-3">
-                        <button type="submit" class="aegis-btn-primary">Atualizar Usuário</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Reset Password Admin -->
-            <div class="hyper-glass p-8 border-l-4 border-l-amber-500">
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-amber-500"><i data-lucide="key" class="w-5 h-5"></i> Redefinir Senha (Admin)</h3>
-                <form action="/admin/users/{{ target.id }}/password" method="POST" class="flex gap-4">
-                    <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Nova senha administrativa..." required>
-                    <button type="submit" class="aegis-btn-secondary border-amber-500/30 hover:bg-amber-500/10 text-amber-500">Resetar Senha</button>
-                </form>
-                <p class="text-[10px] text-slate-500 mt-2">Atenção: Esta ação mudará a senha do usuário instantaneamente sem confirmação.</p>
-            </div>
-        </div>
-    </div>
-    <script>lucide.createIcons();</script>
     
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    
+        <div class="flex h-screen overflow-hidden">
+            
+    <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
+        <a href="/" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
+            <i data-lucide="shield" class="text-white w-6 h-6"></i>
+        </a>
+        
+        <nav class="flex-1 flex flex-col gap-4">
+            <a href="/" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Dashboard">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </a>
+            <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Incidentes (Em breve)">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i>
+            </div>
+            <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Threat Intel (Em breve)">
+                <i data-lucide="crosshairs" class="w-6 h-6"></i>
+            </div>
+        </nav>
+        
+        <div class="flex flex-col gap-4">
+            <a href="/admin/users" class="p-3 hyper-glass text-sky-400 cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+            </a>
+            <a href="/profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
+            </a>
+            <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all" title="Sair">
+                <i data-lucide="log-out" class="w-6 h-6"></i>
+            </a>
+        </div>
+    </aside>
+    
+            <main class="flex-1 p-8 overflow-y-auto">
+                
+        <div class="max-w-4xl mx-auto py-10 px-6">
+            <div class="flex items-center gap-4 mb-10">
+                 <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <h1 class="text-3xl font-bold text-white">Editar Profile: <span class="text-sky-500 underline">{{ target.username }}</span></h1>
+            </div>
+
+            <div class="grid gap-6">
+                <div class="hyper-glass p-8">
+                    <form action="/admin/users/{{ target.id }}/profile/update" method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Display Name</label>
+                                <input type="text" name="display_name" class="aegis-input" value="{{ target.display_name or '' }}">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Email Contact</label>
+                                <input type="email" name="email" class="aegis-input" value="{{ target.email or '' }}">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Role Authorization</label>
+                                <select name="role" class="aegis-input">
+                                    <option value="user" {% if target.role == 'user' %}selected{% endif %}>User (Restricted)</option>
+                                    <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin (Full Control)</option>
+                                    <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                                </select>
+                            </div>
+                             <div class="space-y-2">
+                                <label class="text-sm text-slate-400">MFA Status</label>
+                                <div class="aegis-input opacity-60 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500' if target.mfa_enabled else 'bg-slate-600' }}"></span>
+                                    {{ 'Ativo' if target.mfa_enabled else 'Desativado' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="submit" class="aegis-btn-primary">Update Authorization</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="hyper-glass p-8 border-l-4 border-l-rose-500">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-rose-500"><i data-lucide="key" class="w-5 h-5"></i> Force Password Reset</h3>
+                    <form action="/admin/users/{{ target.id }}/password" method="POST" class="flex gap-4">
+                        <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Enter new strong password..." required>
+                        <button type="submit" class="aegis-btn-secondary border-rose-500/30 text-rose-500 hover:bg-rose-500/10">Reset Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+            </main>
+        </div>
+        
     <div id="toast-container"></div>
-</body></html>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

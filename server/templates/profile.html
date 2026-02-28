@@ -1,4 +1,7 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aegis SOC — Perfil</title>
@@ -125,84 +128,122 @@ body {
 }
 .toast.show { transform: translateX(0); }
 </style>
-    </head><body>
+    
+</head>
+<body>
     <div class="bg-mesh"></div>
-    <div class="max-w-4xl mx-auto py-10 px-6">
-        <div class="flex items-center gap-6 mb-12">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl">
-                {{ (user.display_name or user.username)[0].upper() }}
+    
+        <div class="flex h-screen overflow-hidden">
+            
+    <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
+        <a href="/" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
+            <i data-lucide="shield" class="text-white w-6 h-6"></i>
+        </a>
+        
+        <nav class="flex-1 flex flex-col gap-4">
+            <a href="/" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Dashboard">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </a>
+            <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Incidentes (Em breve)">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i>
             </div>
-            <div>
-                <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
-                <p class="text-slate-400">Gerencie sua identidade e segurança na plataforma.</p>
+            <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Threat Intel (Em breve)">
+                <i data-lucide="crosshairs" class="w-6 h-6"></i>
             </div>
+        </nav>
+        
+        <div class="flex flex-col gap-4">
+            <a href="/admin/users" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+            </a>
+            <a href="/profile" class="w-10 h-10 rounded-full border-2 border-sky-500 shadow-[0_0_10px_var(--neon-blue-glow)] overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
+            </a>
+            <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all" title="Sair">
+                <i data-lucide="log-out" class="w-6 h-6"></i>
+            </a>
         </div>
-
-        <div class="grid gap-6">
-            <div class="hyper-glass p-8">
-                <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
-                <form action="/profile/update" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm text-slate-400">Nome de Exibição</label>
-                        <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm text-slate-400">Nome de Usuário</label>
-                        <input type="text" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.username }}" disabled>
-                    </div>
-                    <div class="md:col-span-2 space-y-2">
-                        <label class="text-sm text-slate-400">Endereço de E-mail</label>
-                        <input type="email" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.email or 'N/A' }}" disabled>
-                    </div>
-                    <div class="md:col-span-2 flex justify-end">
-                        <button type="submit" class="aegis-btn-primary">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="hyper-glass p-8">
-                <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-amber-500"></i> Segurança e Senha</h2>
-                <form action="/profile/change-password" method="POST" class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-sm text-slate-400">Senha Atual</label>
-                        <input type="password" name="current_password" class="aegis-input" required>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Nova Senha</label>
-                            <input type="password" name="new_password" class="aegis-input" required>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Confirmar Nova Senha</label>
-                            <input type="password" name="confirm_password" class="aegis-input" required>
-                        </div>
-                    </div>
-                    <div class="flex justify-end">
-                        <button type="submit" class="aegis-btn-primary">Atualizar Senha</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="hyper-glass p-8 border-l-4 border-l-purple-500">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h2 class="text-xl font-bold mb-2">Autenticação de Dois Fatores (MFA)</h2>
-                        <p class="text-sm text-slate-400 max-w-lg">Proteja sua conta adicionando uma camada extra de segurança. Exigirá um código do seu aplicativo autenticador a cada login.</p>
-                    </div>
-                    <a href="/mfa/setup" class="aegis-btn-primary !bg-purple-600 !shadow-purple-500/20">
-                        {{ 'Gerenciar MFA' if user.mfa_enabled else 'Ativar MFA Now' }}
-                    </a>
+    </aside>
+    
+            <main class="flex-1 p-8 overflow-y-auto">
+                
+        <div class="max-w-4xl mx-auto py-10 px-6">
+            <div class="flex items-center gap-6 mb-12">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl">
+                    {{ (user.display_name or user.username or 'A')[0].upper() }}
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
+                    <p class="text-slate-400">Gerencie sua identidade e segurança na plataforma.</p>
                 </div>
             </div>
-            
-            <div class="flex justify-center pt-6">
-                <a href="/" class="text-slate-500 hover:text-white flex items-center gap-2 transition-colors">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para Dashboard
-                </a>
+
+            <div class="grid gap-6">
+                <!-- Info -->
+                <div class="hyper-glass p-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
+                    <form action="/profile/update" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Exibição</label>
+                            <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Usuário</label>
+                            <input type="text" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.username }}" disabled>
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-sm text-slate-400">Endereço de E-mail</label>
+                            <input type="email" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.email or 'N/A' }}" disabled>
+                        </div>
+                        <div class="md:col-span-2 flex justify-end">
+                            <button type="submit" class="aegis-btn-primary">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password -->
+                <div class="hyper-glass p-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-amber-500"></i> Segurança e Senha</h2>
+                    <form action="/profile/change-password" method="POST" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Senha Atual</label>
+                            <input type="password" name="current_password" class="aegis-input" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Nova Senha</label>
+                                <input type="password" name="new_password" class="aegis-input" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Confirmar Nova Senha</label>
+                                <input type="password" name="confirm_password" class="aegis-input" required>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="aegis-btn-primary">Atualizar Senha</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- MFA -->
+                <div class="hyper-glass p-8 border-l-4 border-l-purple-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <h2 class="text-xl font-bold mb-2">Autenticação de Dois Fatores (MFA)</h2>
+                            <p class="text-sm text-slate-400 max-w-lg">Proteja sua conta com uma camada extra de segurança.</p>
+                        </div>
+                        <a href="/mfa/setup" class="aegis-btn-primary !bg-purple-600">
+                            {{ 'Gerenciar MFA' if user.mfa_enabled else 'Ativar MFA Agora' }}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <script>lucide.createIcons();</script>
     
+            </main>
+        </div>
+        
     <div id="toast-container"></div>
-</body></html>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
