@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, abort, current_app
 from extensions import db, log
 from models.agent import Agent
 from services.audit_service import audit
+from utils.permissions import require_operator
 
 control_bp = Blueprint("control", __name__)
 
@@ -37,7 +38,7 @@ QUICK_COMMANDS = {
 
 
 @control_bp.route("/control/command", methods=["POST"])
-@require_token
+@require_operator
 def send_command():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -53,7 +54,7 @@ def send_command():
 
 
 @control_bp.route("/control/quick_command", methods=["POST"])
-@require_token
+@require_operator
 def quick_command():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -70,7 +71,7 @@ def quick_command():
 
 
 @control_bp.route("/control/isolate", methods=["POST"])
-@require_token
+@require_operator
 def isolate_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -87,7 +88,7 @@ def isolate_host():
 
 
 @control_bp.route("/control/unisolate", methods=["POST"])
-@require_token
+@require_operator
 def unisolate_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -104,7 +105,7 @@ def unisolate_host():
 
 
 @control_bp.route("/control/wipe", methods=["POST"])
-@require_token
+@require_operator
 def wipe_host():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -121,7 +122,7 @@ def wipe_host():
 
 
 @control_bp.route("/control/screenshot", methods=["POST"])
-@require_token
+@require_operator
 def request_screenshot():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
@@ -146,13 +147,14 @@ def upload_screenshot(agent_id):
 
 
 @control_bp.route("/api/screenshot/<int:agent_id>", methods=["GET"])
+@require_operator
 def get_screenshot(agent_id):
     agent = Agent.query.get_or_404(agent_id)
     return jsonify({"screenshot_b64": agent.last_screenshot})
 
 
 @control_bp.route("/api/soar/<int:agent_id>", methods=["POST"])
-@require_token
+@require_operator
 def soar_action(agent_id):
     data = request.get_json(silent=True) or {}
     action = data.get("action")
@@ -175,7 +177,7 @@ def soar_action(agent_id):
 
 
 @control_bp.route("/control/uninstall", methods=["POST"])
-@require_token
+@require_operator
 def uninstall_agent():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
