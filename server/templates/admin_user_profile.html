@@ -133,29 +133,29 @@ body {
                  <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
                     <i data-lucide="chevron-left" class="w-6 h-6"></i>
                 </a>
-                <h1 class="text-3xl font-bold text-white">Editar Usuário: <span class="text-sky-500">{{ user.username }}</span></h1>
+                <h1 class="text-3xl font-bold text-white">Editar Usuário: <span class="text-sky-500">{{ target.username }}</span></h1>
             </div>
         </div>
 
         <div class="grid gap-6">
             <!-- Informações Básicas -->
             <div class="hyper-glass p-8">
-                <form action="/admin/users/{{ user.id }}/update" method="POST" class="space-y-6">
+                <form action="/admin/users/{{ target.id }}/profile/update" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm text-slate-400">Nome de Exibição</label>
-                            <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}">
+                            <input type="text" name="display_name" class="aegis-input" value="{{ target.display_name or '' }}">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm text-slate-400">E-mail</label>
-                            <input type="email" name="email" class="aegis-input" value="{{ user.email or '' }}">
+                            <input type="email" name="email" class="aegis-input" value="{{ target.email or '' }}">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm text-slate-400">Role do Sistema</label>
                             <select name="role" class="aegis-input">
-                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
-                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                                <option value="superadmin" {% if user.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                                <option value="user" {% if target.role == 'user' %}selected{% endif %}>User</option>
+                                <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
                             </select>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ body {
             <!-- Reset Password Admin -->
             <div class="hyper-glass p-8 border-l-4 border-l-amber-500">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-amber-500"><i data-lucide="key" class="w-5 h-5"></i> Redefinir Senha (Admin)</h3>
-                <form action="/admin/users/{{ user.id }}/reset-password" method="POST" class="flex gap-4">
+                <form action="/admin/users/{{ target.id }}/password" method="POST" class="flex gap-4">
                     <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Nova senha administrativa..." required>
                     <button type="submit" class="aegis-btn-secondary border-amber-500/30 hover:bg-amber-500/10 text-amber-500">Resetar Senha</button>
                 </form>

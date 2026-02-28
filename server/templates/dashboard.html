@@ -356,17 +356,26 @@ body {
 
         async function fetchData() {
             try {
-                const res = await fetch('/api/stats');
-                const data = await res.json();
+                // Fetch stats for the Bento cards
+                const statsRes = await fetch('/api/stats');
+                const statsData = await statsRes.json();
                 
-                document.getElementById('stat-total-agents').innerText = data.agents_total;
-                document.getElementById('stat-online-agents').innerText = data.agents_online;
-                document.getElementById('stat-incidents').innerText = data.active_incidents;
+                document.getElementById('stat-total-agents').innerText = statsData.agents?.total ?? 0;
+                document.getElementById('stat-online-agents').innerText = statsData.agents?.online ?? 0;
+                document.getElementById('stat-incidents').innerText = statsData.incidents?.open ?? 0;
                 
-                currentAgents = data.agents || [];
+                // Fetch full agent list for the grid
+                const agentsRes = await fetch('/api/agents');
+                currentAgents = await agentsRes.json();
                 renderAgents();
-                renderIncidents(data.incidents || []);
-            } catch(e) { console.error(e); }
+                
+                // Fetch incidents for the feed
+                const incidentsRes = await fetch('/api/incidents');
+                if (incidentsRes.ok) {
+                    const incData = await incidentsRes.json();
+                    renderIncidents(incData.incidents || []);
+                }
+            } catch(e) { console.error("Error fetching dashboard data:", e); }
         }
 
         function renderAgents() {
