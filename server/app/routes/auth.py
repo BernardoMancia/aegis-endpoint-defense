@@ -223,6 +223,35 @@ def mfa_qr_image():
     return Response(buf.getvalue(), mimetype='image/png')
 
 
+@auth_bp.route("/mfa/recovery", methods=["GET"])
+def mfa_recovery_page():
+    # Esta página é acessada se o usuário clicar em "Usar Recov Code" no verify
+    return render_template("mfa_recovery.html")
+
+
+@auth_bp.route("/mfa/recovery", methods=["POST"])
+def mfa_do_recovery():
+    # Chamado via POST do formulário de recuperação
+    uid = session.get("mfa_pending_user")
+    if not uid:
+        return redirect(url_for("auth.login_page"))
+        
+    user = SocUser.query.get(uid)
+    if not user:
+        return redirect(url_for("auth.login_page"))
+        
+    recovery_code = request.form.get("recovery_code", "").strip()
+    if user.use_recovery_code(recovery_code):
+        db.session.commit()
+        session.pop("mfa_pending_user", None)
+        _record_login(user, True)
+        _set_session(user)
+        audit("USER_LOGIN_RECOVERY", actor=user.username, target_type="auth", details="Login via código de recuperação (POST direto)")
+        return redirect(url_for("dashboard.index"))
+        
+    return render_template("mfa_recovery.html", error="Código de recuperação inválido ou já utilizado.")
+
+
 @auth_bp.route("/mfa/confirm", methods=["POST"])
 def mfa_confirm():
     if "soc_user" not in session:

@@ -959,35 +959,111 @@ def rebuild_login():
     login_html = """
     <div class="min-h-screen flex items-center justify-center p-6 bg-deep-bg">
         <div class="w-full max-w-md">
-            <div class="flex flex-col items-center mb-10">
-                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center shadow-2xl border border-white/20 mb-6 group cursor-default">
-                    <i data-lucide="shield" class="text-white w-10 h-10 group-hover:scale-110 transition-transform"></i>
+            <div class="flex flex-col items-center mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center shadow-2xl border border-white/20 mb-4 group cursor-default">
+                    <i data-lucide="shield" class="text-white w-8 h-8 group-hover:scale-110 transition-transform"></i>
                 </div>
-                <h1 class="text-4xl font-black tracking-tighter text-white">AEGIS <span class="text-sky-500">SOC</span></h1>
-                <p class="text-slate-500 font-mono mt-2 uppercase tracking-[0.3em] text-[9px]">Cybersecurity Defense Unit</p>
+                <h1 class="text-3xl font-black tracking-tighter text-white">AEGIS <span class="text-sky-500">SOC</span></h1>
+                <p class="text-slate-500 font-mono mt-1 uppercase tracking-[0.3em] text-[8px]">Cybersecurity Defense Unit</p>
             </div>
 
-            <div class="hyper-glass p-10 space-y-8 relative overflow-hidden active-nav-item">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full -mr-16 -mt-16 animate-pulse"></div>
-                <h2 class="text-xl font-bold text-center tracking-tight">Identificação Requerida</h2>
-                <form action="/login" method="POST" class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-xs text-slate-500 flex items-center gap-2 font-bold"><i data-lucide="user" class="w-3 h-3 text-sky-400"></i> USUÁRIO</label>
-                        <input type="text" name="username" class="aegis-input" placeholder="analyst.name" required autofocus>
+            <div class="space-y-6">
+                <!-- Login Card -->
+                <div id="login-card" class="hyper-glass p-8 space-y-6 relative overflow-hidden {{ 'hidden' if show_register else '' }}">
+                    <h2 class="text-lg font-bold text-center tracking-tight">IDENTIFICAÇÃO SOC</h2>
+                    
+                    {% if error %}
+                    <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-center gap-3 animate-headShake">
+                        <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                        {{ error }}
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs text-slate-500 flex items-center gap-2 font-bold"><i data-lucide="key" class="w-3 h-3 text-sky-400"></i> SENHA</label>
-                        <input type="password" name="password" class="aegis-input" placeholder="••••••••" required>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold flex items-center gap-3 animate-bounce">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        {{ success }}
                     </div>
-                    <button type="submit" class="w-full aegis-btn-primary justify-center text-lg mt-4 py-4 uppercase tracking-widest font-black">LOGIN</button>
-                </form>
-                <div class="text-center pt-4 border-t border-white/5">
-                    <p class="text-[9px] text-slate-500 italic">Ambiente Restrito. Todas as sessões são auditadas.</p>
+                    {% endif %}
+
+                    <form action="/login" method="POST" class="space-y-5">
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-slate-500 flex items-center gap-2 font-bold uppercase tracking-wider"><i data-lucide="user" class="w-3 h-3 text-sky-400"></i> Analista</label>
+                            <input type="text" name="username" class="aegis-input" placeholder="seu.id" required autofocus>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-slate-500 flex items-center gap-2 font-bold uppercase tracking-wider"><i data-lucide="key" class="w-3 h-3 text-sky-400"></i> Password</label>
+                            <input type="password" name="password" class="aegis-input" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="w-full aegis-btn-primary justify-center py-4 uppercase tracking-widest font-black text-sm">AUTENTICAR</button>
+                    </form>
+                    <div class="text-center pt-4 border-t border-white/5">
+                        <button onclick="toggleAuth('register')" class="text-[10px] text-slate-500 hover:text-sky-400 transition-colors font-bold uppercase tracking-widest">NÃO POSSUI ACESSO? SOLICITAR CADASTRO</button>
+                    </div>
+                </div>
+
+                <!-- Register Card -->
+                <div id="register-card" class="hyper-glass p-8 space-y-6 relative overflow-hidden {{ '' if show_register else 'hidden' }}">
+                    <div class="text-center">
+                        <h2 class="text-lg font-bold tracking-tight">SOLICITAR ACESSO</h2>
+                        <p class="text-[10px] text-slate-400 mt-1">O seu pedido passará por auditoria interna.</p>
+                    </div>
+
+                    {% if error %}
+                    <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-center gap-3 animate-headShake">
+                        <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form action="/register" method="POST" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase">ID de Usuário</label>
+                            <input type="text" name="username" class="aegis-input" placeholder="ex: j.silva" required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase">Nome Completo</label>
+                                <input type="text" name="display_name" class="aegis-input" placeholder="João Silva" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase">Email</label>
+                                <input type="email" name="email" class="aegis-input" placeholder="analista@empresa.com" required>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase">Senha</label>
+                            <input type="password" name="password" class="aegis-input" placeholder="Mínimo 8 caracteres" minlength="8" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase">Justificativa de Acesso</label>
+                            <textarea name="reason" class="aegis-input min-h-[80px]" placeholder="Setor, cargo e motivo do acesso..." required></textarea>
+                        </div>
+                        <button type="submit" class="w-full aegis-btn-primary !bg-emerald-600 justify-center py-4 uppercase tracking-widest font-black text-sm">ENVIAR SOLICITAÇÃO</button>
+                    </form>
+                    <div class="text-center pt-4 border-t border-white/5">
+                        <button onclick="toggleAuth('login')" class="text-[10px] text-slate-500 hover:text-white transition-colors font-bold uppercase tracking-widest">VOLTAR AO LOGIN</button>
+                    </div>
                 </div>
             </div>
-            <p class="text-center mt-8 text-slate-800 text-[10px] font-mono">B.MANCIA &bull; AEGIS SOC &bull; 2026</p>
+
+            <p class="text-center mt-8 text-slate-800 text-[10px] font-mono">AEGIS SOC EDR &bull; VERSION 2.0 &bull; 2026</p>
         </div>
     </div>
+
+    <script>
+        function toggleAuth(view) {
+            const login = document.getElementById('login-card');
+            const register = document.getElementById('register-card');
+            if(view === 'register') {
+                login.classList.add('hidden');
+                register.classList.remove('hidden');
+            } else {
+                login.classList.remove('hidden');
+                register.classList.add('hidden');
+            }
+        }
+    </script>
     """
     write_file("login.html", apply_layout(login_html, "Aegis SOC — Login"))
 
@@ -1026,6 +1102,14 @@ def rebuild_mfa_flow():
                     <h1 class="text-2xl font-black text-white">AUTENTICAÇÃO MFA</h1>
                     <p class="text-[11px] text-slate-400 mt-2 uppercase tracking-widest">Segunda camada de segurança exigida.</p>
                 </div>
+
+                {% if error %}
+                <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-center gap-3">
+                    <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
                 <form action="/mfa/verify" method="POST" class="space-y-6">
                     <input type="text" name="code" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
                     <button type="submit" class="w-full aegis-btn-primary justify-center py-4 font-black">VALIDAR TOKEN</button>
@@ -1051,6 +1135,14 @@ def rebuild_mfa_flow():
                     <h1 class="text-2xl font-black text-white">RECOV PROTOCOL</h1>
                     <p class="text-xs text-slate-400 mt-2">Insira um código de recuperação de emergência.</p>
                 </div>
+
+                {% if error %}
+                <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-center gap-3">
+                    <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
                 <form action="/mfa/recovery" method="POST" class="space-y-6">
                     <input type="text" name="recovery_code" class="aegis-input text-center font-mono text-xl tracking-widest uppercase" placeholder="XXXXXXXX" maxlength="8" required autofocus>
                     <button type="submit" class="w-full aegis-btn-primary !bg-rose-600 justify-center py-4 font-black">BYPASS MFA</button>

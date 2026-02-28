@@ -143,6 +143,14 @@ body {
                     <h1 class="text-2xl font-black text-white">RECOV PROTOCOL</h1>
                     <p class="text-xs text-slate-400 mt-2">Insira um código de recuperação de emergência.</p>
                 </div>
+
+                {% if error %}
+                <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold flex items-center gap-3">
+                    <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
                 <form action="/mfa/recovery" method="POST" class="space-y-6">
                     <input type="text" name="recovery_code" class="aegis-input text-center font-mono text-xl tracking-widest uppercase" placeholder="XXXXXXXX" maxlength="8" required autofocus>
                     <button type="submit" class="w-full aegis-btn-primary !bg-rose-600 justify-center py-4 font-black">BYPASS MFA</button>
