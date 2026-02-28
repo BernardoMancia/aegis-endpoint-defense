@@ -349,6 +349,17 @@ def rebuild_dashboard():
                         </div>
                     </div>
 
+                    <!-- Critical Data / Security Context -->
+                    <div id="critical-data-section" class="space-y-4">
+                        <h3 class="text-sm font-black flex items-center gap-2"><i data-lucide="shield-alert" class="w-4 h-4 text-rose-500"></i> Segurança e Contexto Crítico</h3>
+                        <div id="panel-incidents-list" class="space-y-2">
+                            <!-- Agent specific incidents -->
+                        </div>
+                        <div id="panel-events-list" class="space-y-2">
+                            <!-- Agent specific events -->
+                        </div>
+                    </div>
+
                     <!-- SOAR Actions -->
                     <div class="space-y-4 pb-10">
                         <h3 class="text-sm font-black flex items-center gap-2"><i data-lucide="play" class="w-4 h-4 text-emerald-500"></i> Ações de Orquestração</h3>
@@ -420,7 +431,7 @@ def rebuild_dashboard():
                 async function fetchAgentDetail() {
                     if(!selectedAgentId) return;
                     try {
-                        const res = await fetch(`/api/agents/${selectedAgentId}/detail`);
+                        const res = await fetch(`/api/agent/${selectedAgentId}/detail`);
                         if(res.ok) {
                             const data = await res.json();
                             const ag = data.agent;
@@ -472,11 +483,11 @@ def rebuild_dashboard():
                                 }
                             }
 
-                            // Defensive Zone Buttons
+                                // Defensive Zone Buttons
                             const riskZone = document.getElementById('risk-zone-actions');
                             if(riskZone) {
-                                let riskHtml = `<button onclick="confirmWipe(${ag.id})" class="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-rose-500 text-[11px] font-black hover:bg-rose-500/20 transition-all flex flex-col items-center gap-2 group">
-                                    <i data-lucide="trash-2" class="w-6 h-6 group-hover:scale-110 transition-transform"></i> FORMATAR HOST (WIPE)
+                                let riskHtml = `<button onclick="confirmUninstall(${ag.id})" class="p-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 text-[11px] font-black hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 transition-all flex flex-col items-center gap-2 group">
+                                    <i data-lucide="trash-2" class="w-6 h-6 group-hover:scale-110 transition-transform"></i> DESINSTALAR AGENTE
                                 </button>`;
                                 
                                 if(ag.isolation_active) {
@@ -490,6 +501,39 @@ def rebuild_dashboard():
                                 }
                                 riskZone.innerHTML = riskHtml;
                             }
+
+                            // Render specific Incidents/Events
+                            const incList = document.getElementById('panel-incidents-list');
+                            if(data.open_incidents && data.open_incidents.length > 0) {
+                                incList.innerHTML = data.open_incidents.map(i => `
+                                    <div class="px-3 py-2 rounded-xl bg-rose-500/5 border border-rose-500/10 flex items-center gap-3">
+                                        <i data-lucide="alert-circle" class="w-3 h-3 text-rose-500"></i>
+                                        <div class="flex-1">
+                                            <div class="text-[10px] font-bold text-rose-200">${i.title}</div>
+                                            <div class="text-[8px] text-rose-500/70 font-mono">${new Date(i.created_at).toLocaleTimeString()}</div>
+                                        </div>
+                                    </div>
+                                `).join('');
+                            } else {
+                                incList.innerHTML = '<div class="text-[10px] text-slate-600 italic px-2">Nenhum incidente ativo.</div>';
+                            }
+
+                            const evList = document.getElementById('panel-events-list');
+                            if(data.recent_events && data.recent_events.length > 0) {
+                                evList.innerHTML = data.recent_events.map(e => `
+                                    <div class="px-3 py-2 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
+                                        <i data-lucide="activity" class="w-3 h-3 text-sky-400"></i>
+                                        <div class="flex-1">
+                                            <div class="text-[10px] text-slate-300 font-mono">${e.event_type}</div>
+                                            <div class="text-[8px] text-slate-500">${new Date(e.timestamp).toLocaleTimeString()}</div>
+                                        </div>
+                                    </div>
+                                `).join('');
+                                if(data.recent_events.length > 5) evList.innerHTML += '<div class="text-[8px] text-center text-slate-600 pt-1">Ver todos no histórico...</div>';
+                            } else {
+                                evList.innerHTML = '<div class="text-[10px] text-slate-600 italic px-2">Aguardando telemetria...</div>';
+                            }
+
                             lucide.createIcons();
                         }
                     } catch(e) { console.error("Error fetching agent detail:", e); }
@@ -627,15 +671,23 @@ def rebuild_dashboard():
                     out.scrollTop = out.scrollHeight;
                 }
 
-                async function confirmWipe(id) {
-                    if(confirm("⚠️ AVISO CRÍTICO: Esta ação irá limpar o sistema de arquivos do host remoto. Deseja prosseguir com o WIPE?")) {
-                        const res = await fetch('/control/wipe', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({agent_id: id, confirm: true})
-                        });
-                        const data = await res.json();
-                        if(data.status === 'ok') showToast("Protocolo de Auto-Destruição iniciado!", "success");
+                async function confirmUninstall(id) {
+                    if(confirm("⚠️ AVISO: Esta ação enviará um comando de AUTO-DESTRUIÇÃO para o agente. Ele removerá todos os seus arquivos do host e encerrará a conexão. Deseja prosseguir?")) {
+                        try {
+                            const res = await fetch('/control/uninstall', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({agent_id: id})
+                            });
+                            const data = await res.json();
+                            if(data.status === 'ok') {
+                                showToast("Ordem de desinstalação enviada!", "success");
+                                closeAgentPanel();
+                                fetchData();
+                            } else {
+                                showToast(data.error || "Falha ao solicitar desinstalação.", "error");
+                            }
+                        } catch(e) { showToast("C2 Connection Error", "error"); }
                     }
                 }
 
@@ -947,12 +999,12 @@ def rebuild_mfa_flow():
             <h1 class="text-3xl font-black">PROTEÇÃO EXTRA</h1>
             <p class="text-slate-400 text-sm">Escaneie o código abaixo com seu app autenticador nível SOC.</p>
             <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl border-4 border-indigo-600/50">
-                <img src="{{ qrcode_url }}" alt="MFA QR" class="w-48 h-48">
+                <img src="data:image/png;base64,{{ qr_b64 }}" alt="MFA QR" class="w-48 h-48">
             </div>
             <div class="space-y-4 max-w-sm mx-auto">
                 <p class="text-[10px] text-slate-500 font-mono italic">Manual Key: {{ secret }}</p>
-                <form action="/mfa/setup" method="POST" class="space-y-4">
-                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-800" placeholder="000 000" maxlength="6" required>
+                <form action="/mfa/confirm" method="POST" class="space-y-4">
+                    <input type="text" name="code" class="aegis-input text-center text-3xl font-black placeholder-slate-800" placeholder="000 000" maxlength="6" required>
                     <button type="submit" class="w-full aegis-btn-primary justify-center">VALIDAR E ATIVAR</button>
                     <a href="/profile" class="block text-xs text-slate-600 hover:text-white transition-colors uppercase font-bold tracking-widest">CANCELAR</a>
                 </form>
@@ -975,7 +1027,7 @@ def rebuild_mfa_flow():
                     <p class="text-[11px] text-slate-400 mt-2 uppercase tracking-widest">Segunda camada de segurança exigida.</p>
                 </div>
                 <form action="/mfa/verify" method="POST" class="space-y-6">
-                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
+                    <input type="text" name="code" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
                     <button type="submit" class="w-full aegis-btn-primary justify-center py-4 font-black">VALIDAR TOKEN</button>
                     <div class="pt-4 border-t border-white/5">
                         <a href="/mfa/recovery" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors font-bold">PROBLEMAS COM O APP? USAR RECOV CODE</a>

@@ -144,7 +144,7 @@ body {
                     <p class="text-[11px] text-slate-400 mt-2 uppercase tracking-widest">Segunda camada de segurança exigida.</p>
                 </div>
                 <form action="/mfa/verify" method="POST" class="space-y-6">
-                    <input type="text" name="token" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
+                    <input type="text" name="code" class="aegis-input text-center text-3xl font-black placeholder-slate-900" placeholder="000000" maxlength="6" required autofocus>
                     <button type="submit" class="w-full aegis-btn-primary justify-center py-4 font-black">VALIDAR TOKEN</button>
                     <div class="pt-4 border-t border-white/5">
                         <a href="/mfa/recovery" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors font-bold">PROBLEMAS COM O APP? USAR RECOV CODE</a>
