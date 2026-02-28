@@ -21,7 +21,7 @@
     };
   </script>
   <script>
-        tailwind.config = {
+    tailwind.config = {
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
@@ -31,7 +31,7 @@
             dark: { 900: '#111', 850: '#1a1a1a', 800: '#242424', 750: '#2a2a2a', 700: '#333333', 600: '#444', 500: '#555' }
           },
           animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite', 'slide-in': 'slideIn 0.3s ease-out' },
-          keyframes: { slideIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+          keyfmes: { slideIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
         }
       }
     }
@@ -41,7 +41,7 @@
       box-sizing: border-box
     }
 
-    
+
     body {
       background: #111111;
       font-family: 'Inter', sans-serif;
@@ -49,307 +49,520 @@
       overflow: hidden;
       margin: 0;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #666; }
-    .glass { background: #242424; border: 1px solid #333333; }
-    .glass-hover:hover { border-color: #555555; background: #2a2a2a; }
-    .fluent-input { background: #111; border: 1px solid #333; color: #e0e0e0; outline: none; transition: border-color 0.2s; }
-    .fluent-input:focus { border-color: #4cc2ff; }
-    .fluent-btn { background: #333; color: #e0e0e0; border: 1px solid #444; transition: all 0.2s; }
-    .fluent-btn:hover { background: #444; border-color: #555; }
-    .fluent-btn-primary { background: #4cc2ff; color: #000; font-weight: 500; border: none; }
-    .fluent-btn-primary:hover { background: #3bb1eb; }
-    
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .status-online { background: #4ade80; box-shadow: 0 0 8px #4ade80; }
-    .status-offline { background: #6b7280; }
-    .status-isolated { background: #f87171; box-shadow: 0 0 8px #f87171; }
-    
-    .terminal-output { font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; color: #e0e0e0; }
-    
-    .tab-btn { padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; color: #9e9e9e; border: 1px solid transparent; border-bottom: 2px solid transparent; }
-    .tab-btn.active { color: #4cc2ff; border-bottom-color: #4cc2ff; background: rgba(76, 194, 255, 0.05); }
-    .tab-btn:not(.active):hover { color: #e0e0e0; background: rgba(255, 255, 255, 0.05); }
-    
-    .agent-card.selected { border-left: 3px solid #4cc2ff !important; background: #2a2a2a !important; }
-    .fade-in { animation: slideIn 0.3s ease-out; }
-    .mitre-cell { width: 68px; height: 50px; border-radius: 4px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid #333; background: #242424; }
-    .mitre-cell.active { border-color: #f87171; color: #f87171; }
-    
-    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 100; backdrop-filter: blur(2px); }
-    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; background: #242424; border: 1px solid #333; border-radius: 8px; box-shadow: 0 24px 48px rgba(0,0,0,0.5); }
 
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+
+    .glass {
+      background: #242424;
+      border: 1px solid #333333;
+    }
+
+    .glass-hover:hover {
+      border-color: #555555;
+      background: #2a2a2a;
+    }
+
+    .fluent-input {
+      background: #111;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .fluent-input:focus {
+      border-color: #4cc2ff;
+    }
+
+    .fluent-btn {
+      background: #333;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      transition: all 0.2s;
+    }
+
+    .fluent-btn:hover {
+      background: #444;
+      border-color: #555;
+    }
+
+    .fluent-btn-primary {
+      background: #4cc2ff;
+      color: #000;
+      font-weight: 500;
+      border: none;
+    }
+
+    .fluent-btn-primary:hover {
+      background: #3bb1eb;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-online {
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+    }
+
+    .status-offline {
+      background: #6b7280;
+    }
+
+    .status-isolated {
+      background: #f87171;
+      box-shadow: 0 0 8px #f87171;
+    }
+
+    .terminal-output {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #9e9e9e;
+      border: 1px solid transparent;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: #4cc2ff;
+      border-bottom-color: #4cc2ff;
+      background: rgba(76, 194, 255, 0.05);
+    }
+
+    .tab-btn:not(.active):hover {
+      color: #e0e0e0;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .agent-card.selected {
+      border-left: 3px solid #4cc2ff !important;
+      background: #2a2a2a !important;
+    }
+
+    .fade-in {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .mitre-cell {
+      width: 68px;
+      height: 50px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #333;
+      background: #242424;
+    }
+
+    .mitre-cell.active {
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 101;
+      background: #242424;
+      border: 1px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    }
   </style>
 </head>
 
 <body>
 
 
-  
-<div class="flex h-screen w-full">
-  
-  <aside class="w-[260px] bg-fluent-surface border-r border-fluent-border flex flex-col z-20 shrink-0">
-    <div class="h-14 flex items-center px-4 border-b border-fluent-border gap-3">
-       <div class="w-8 h-8 rounded bg-fluent-primary flex items-center justify-center">
-         <svg style="width:18px; height:18px;" class="text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-         </svg>
-       </div>
-       <span class="font-semibold text-white tracking-wide text-sm">Aegis Endpoint</span>
-    </div>
-    
-    <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-4">Gestão</div>
-      <button onclick="switchMainView('visao-geral')" id="nav-visao-geral" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors bg-white/10 font-semibold relative">
-        <span class="text-fluent-textMuted">📊</span> Visão Geral
-      </button>
-      <button onclick="switchMainView('dispositivos')" id="nav-dispositivos" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">💻</span> Dispositivos
-      </button>
-      
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Segurança</div>
-      <button onclick="switchMainView('incidentes')" id="nav-incidentes" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">🚨</span> Incidentes & Eventos
-      </button>
-      <button onclick="openIocModal()" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">🎯</span> Threat Intelligence
-      </button>
-      <button onclick="switchMainView('copilot')" id="nav-copilot" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">✨</span> Aegis Copilot (AI)
-      </button>
 
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Administração</div>
-      <a href="/admin/users" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors">
-        <span class="text-fluent-textMuted">⚙️</span> Configurações SOC
-      </a>
-    </nav>
-  </aside>
+  <div class="flex h-screen w-full">
 
-  
-  <div class="flex-1 flex flex-col h-screen overflow-hidden bg-fluent-bg">
-    
-    
-    <header class="h-14 bg-fluent-surface border-b border-fluent-border flex items-center justify-between px-6 shrink-0">
-      <div class="flex items-center gap-2 text-sm">
-        <span class="text-fluent-textMuted">Home</span>
-        <span class="text-fluent-textMuted">/</span>
-        <span class="font-medium text-white" id="header-title">Visão Geral</span>
-      </div>
-      
-      <div id="header-stats" class="hidden lg:flex gap-6 text-xs items-center">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-fluent-textMuted">Agentes: <span id="stat-agents" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-fluent-textMuted">Online: <span id="stat-online" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-fluent-textMuted">Incidentes: <span id="stat-incidents" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-fluent-textMuted">IoCs: <span id="stat-iocs" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-1.5 ml-2">
-          <span id="ajax-indicator" class="status-dot status-online"></span>
+    <aside class="w-[260px] bg-fluent-surface border-r border-fluent-border flex flex-col z-20 shrink-0">
+      <div class="h-14 flex items-center px-4 border-b border-fluent-border gap-3">
+        <div class="w-8 h-8 rounded bg-fluent-primary flex items-center justify-center">
+          <svg style="width:18px; height:18px;" class="text-black" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
         </div>
+        <span class="font-semibold text-white tracking-wide text-sm">Aegis Endpoint</span>
       </div>
-      
-      <div class="flex items-center gap-4">
-        <a href="/profile" class="text-sm text-fluent-text hover:text-white transition-colors flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center border border-fluent-border">👤</div>
+
+      <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+        <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-4">Gestão</div>
+        <button onclick="switchMainView('visao-geral')" id="nav-visao-geral"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors bg-white/10 font-semibold relative">
+          <span class="text-fluent-textMuted">📊</span> Visão Geral
+        </button>
+        <button onclick="switchMainView('dispositivos')" id="nav-dispositivos"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
+          <span class="text-fluent-textMuted">💻</span> Dispositivos
+        </button>
+
+        <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Segurança
+        </div>
+        <button onclick="switchMainView('incidentes')" id="nav-incidentes"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
+          <span class="text-fluent-textMuted">🚨</span> Incidentes & Eventos
+        </button>
+        <button onclick="openIocModal()"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
+          <span class="text-fluent-textMuted">🎯</span> Threat Intelligence
+        </button>
+        <button onclick="switchMainView('copilot')" id="nav-copilot"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
+          <span class="text-fluent-textMuted">✨</span> Aegis Copilot (AI)
+        </button>
+
+        <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Administração
+        </div>
+        <a href="/admin/users"
+          class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors">
+          <span class="text-fluent-textMuted">⚙️</span> Configurações SOC
         </a>
-        <a href="/logout" class="text-xs text-red-400 hover:text-red-300">Sair</a>
-      </div>
-    </header>
+      </nav>
+    </aside>
 
-    
-    <main class="flex-1 overflow-auto p-6 relative">
-      
-      
-      <div id="view-visao-geral" class="main-view space-y-6 max-w-[1400px] mx-auto">
-        <div>
-          <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">Status do Ambiente</h1>
-          <p class="text-sm text-fluent-textMuted">Resumo de saúde e segurança dos endpoints gerenciados.</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Eventos por Hora (24h)</h3>
-            <canvas id="chart-events" height="120"></canvas>
-          </div>
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Distribuição por Severidade</h3>
-            <div class="flex items-center gap-6">
-              <div style="width:140px;height:140px"><canvas id="chart-severity"></canvas></div>
-              <div id="severity-legend" class="flex-1 space-y-2 text-sm"></div>
-            </div>
-          </div>
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Top Técnicas MITRE Dectectadas</h3>
-            <div id="mitre-top-list" class="space-y-3"></div>
-          </div>
-        </div>
-        
-        <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-          <h3 class="text-sm text-fluent-textMuted font-medium mb-4 uppercase tracking-widest">Táticas MITRE ATT&CK</h3>
-          <div id="mitre-map" class="flex flex-wrap gap-2"></div>
-        </div>
-      </div>
 
-      
-      <div id="view-dispositivos" class="main-view hidden h-full flex flex-col">
-        <div>
-          <h1 class="text-2xl font-semibold text-white tracking-tight mb-4">Dispositivos Gerenciados</h1>
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-fluent-bg">
+
+
+      <header
+        class="h-14 bg-fluent-surface border-b border-fluent-border flex items-center justify-between px-6 shrink-0">
+        <div class="flex items-center gap-2 text-sm">
+          <span class="text-fluent-textMuted">Home</span>
+          <span class="text-fluent-textMuted">/</span>
+          <span class="font-medium text-white" id="header-title">Visão Geral</span>
         </div>
-        <div class="flex flex-1 gap-4 min-h-0">
-          
-          
-          <div class="w-[320px] bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden shrink-0">
-            <div class="p-3 border-b border-fluent-border bg-dark-800">
-              <div class="flex gap-1 bg-dark-900 p-1 rounded">
-                <button onclick="filterPlatform('')" id="filter-all" class="flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium">Todos</button>
-                <button onclick="filterPlatform('windows')" id="filter-windows" class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Windows</button>
-                <button onclick="filterPlatform('android')" id="filter-android" class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Android</button>
-              </div>
-            </div>
-            <div id="agents-list" class="flex-1 overflow-y-auto p-2 space-y-1 bg-dark-850"></div>
+
+        <div id="header-stats" class="hidden lg:flex gap-6 text-xs items-center">
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span
+              class="text-fluent-textMuted">Agentes: <span id="stat-agents"
+                class="text-white font-semibold">—</span></span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span
+              class="text-fluent-textMuted">Online: <span id="stat-online"
+                class="text-white font-semibold">—</span></span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span><span
+              class="text-fluent-textMuted">Incidentes: <span id="stat-incidents"
+                class="text-white font-semibold">—</span></span></div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span
+              class="text-fluent-textMuted">IoCs: <span id="stat-iocs" class="text-white font-semibold">—</span></span>
           </div>
-          
-          
-          <div class="flex-1 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-            <div class="border-b border-fluent-border px-2 flex gap-1 bg-dark-800 items-center justify-between">
-              <div class="flex">
-                <button onclick="switchTab('terminal')" id="tab-terminal" class="tab-btn active border-b-2 px-4 py-3">Terminal Remoto</button>
-                <button onclick="switchTab('soar')" id="tab-soar" class="tab-btn border-b-2 px-4 py-3">Ações SOAR</button>
-                <button onclick="switchTab('vulns')" id="tab-vulns" class="tab-btn border-b-2 px-4 py-3">Vulnerabilidades</button>
-                <button onclick="switchTab('socchat')" id="tab-socchat" class="tab-btn border-b-2 px-4 py-3">Chat Agente</button>
-              </div>
-              <span id="selected-agent-label" class="text-xs font-semibold text-fluent-primary px-4 bg-fluent-primary/10 py-1 rounded-full mr-2">Nenhum Selecionado</span>
+          <div class="flex items-center gap-1.5 ml-2">
+            <span id="ajax-indicator" class="status-dot status-online"></span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <a href="/profile"
+            class="text-sm text-fluent-text hover:text-white transition-colors flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center border border-fluent-border">
+              👤</div>
+          </a>
+          <a href="/logout" class="text-xs text-red-400 hover:text-red-300">Sair</a>
+        </div>
+      </header>
+
+
+      <main class="flex-1 overflow-auto p-6 relative">
+
+
+        <div id="view-visao-geral" class="main-view space-y-6 max-w-[1400px] mx-auto">
+          <div>
+            <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">Status do Ambiente</h1>
+            <p class="text-sm text-fluent-textMuted">Resumo de saúde e segurança dos endpoints gerenciados.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
+              <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Eventos por Hora (24h)</h3>
+              <canvas id="chart-events" height="120"></canvas>
             </div>
-            
-            <div class="flex-1 overflow-hidden p-4 bg-dark-900 relative">
-              
-              <div id="tab-content-terminal" class="h-full flex flex-col">
-                <div id="terminal-output" class="flex-1 bg-black border border-fluent-border rounded shadow-inner p-3 overflow-y-auto mb-3 text-xs font-mono leading-relaxed">
-                  <span class="text-slate-500">Selecione um dispositivo e aguarde output...</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="text-green-400 font-mono text-sm self-center">❯</span>
-                  <input id="cmd-input" type="text" placeholder="Digite comando shell (ex: dir, ipconfig)..." autocomplete="off" class="fluent-input flex-1 rounded px-3 py-2 text-sm font-mono placeholder-slate-600" />
-                  <button onclick="sendCommand()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow-sm hover:shadow-md">Executar</button>
+            <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
+              <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Distribuição por Severidade</h3>
+              <div class="flex items-center gap-6">
+                <div style="width:140px;height:140px"><canvas id="chart-severity"></canvas></div>
+                <div id="severity-legend" class="flex-1 space-y-2 text-sm"></div>
+              </div>
+            </div>
+            <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
+              <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Top Técnicas MITRE Dectectadas</h3>
+              <div id="mitre-top-list" class="space-y-3"></div>
+            </div>
+          </div>
+
+          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
+            <h3 class="text-sm text-fluent-textMuted font-medium mb-4 uppercase tracking-widest">Táticas MITRE ATT&CK
+            </h3>
+            <div id="mitre-map" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+
+        <div id="view-dispositivos" class="main-view hidden h-full flex flex-col">
+          <div>
+            <h1 class="text-2xl font-semibold text-white tracking-tight mb-4">Dispositivos Gerenciados</h1>
+          </div>
+          <div class="flex flex-1 gap-4 min-h-0">
+
+
+            <div
+              class="w-[320px] bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden shrink-0">
+              <div class="p-3 border-b border-fluent-border bg-dark-800">
+                <div class="flex gap-1 bg-dark-900 p-1 rounded">
+                  <button onclick="filterPlatform('')" id="filter-all"
+                    class="flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium">Todos</button>
+                  <button onclick="filterPlatform('windows')" id="filter-windows"
+                    class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Windows</button>
+                  <button onclick="filterPlatform('android')" id="filter-android"
+                    class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Android</button>
                 </div>
               </div>
-              
-              
-              <div id="tab-content-soar" class="hidden h-full flex flex-col gap-4">
-                <div class="grid grid-cols-4 gap-3">
-                  <button onclick="soarAction('screenshot')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fluent-primary hover:border-fluent-primary"><span class="text-lg">🖥️</span>Screenshot</button>
-                  <button onclick="soarAction('force_scan_vulns')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-purple-400 hover:border-purple-400"><span class="text-lg">🛡️</span>Scan Vulns</button>
-                  <button onclick="soarAction('force_scan_fim')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-400"><span class="text-lg">🔍</span>Integridade (FIM)</button>
-                  <button onclick="soarAction('force_scan_network')" class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fuchsia-400 hover:border-fuchsia-400"><span class="text-lg">📡</span>Scan Rede</button>
+              <div id="agents-list" class="flex-1 overflow-y-auto p-2 space-y-1 bg-dark-850"></div>
+            </div>
+
+
+            <div class="flex-1 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
+              <div class="border-b border-fluent-border px-2 flex gap-1 bg-dark-800 items-center justify-between">
+                <div class="flex">
+                  <button onclick="switchTab('terminal')" id="tab-terminal"
+                    class="tab-btn active border-b-2 px-4 py-3">Terminal Remoto</button>
+                  <button onclick="switchTab('soar')" id="tab-soar" class="tab-btn border-b-2 px-4 py-3">Ações
+                    SOAR</button>
+                  <button onclick="switchTab('vulns')" id="tab-vulns"
+                    class="tab-btn border-b-2 px-4 py-3">Vulnerabilidades</button>
+                  <button onclick="switchTab('socchat')" id="tab-socchat" class="tab-btn border-b-2 px-4 py-3">Chat
+                    Agente</button>
                 </div>
-                <div class="grid grid-cols-2 gap-3 mt-2 border-t border-fluent-border pt-4">
-                  <button onclick="soarAction('isolate')" class="bg-red-500/10 border border-red-500/30 text-red-400 py-3 rounded text-xs font-bold hover:bg-red-500/20">🔒 ISOLAR DISPOSITIVO</button>
-                  <button onclick="soarAction('uninstall')" class="bg-orange-500/10 border border-orange-500/30 text-orange-400 py-3 rounded text-xs font-bold hover:bg-orange-500/20">🗑️ DESINSTALAR AGENTE</button>
-                </div>
-                <div class="flex-1 min-h-0 mt-4 border border-fluent-border rounded bg-dark-850 flex flex-col">
-                  <div class="px-3 py-2 border-b border-fluent-border text-xs font-medium bg-dark-800 flex justify-between">
-                    Resultados SOAR <button onclick="document.getElementById('soar-activities-log').innerHTML=''" class="text-fluent-primary">Limpar</button>
+                <span id="selected-agent-label"
+                  class="text-xs font-semibold text-fluent-primary px-4 bg-fluent-primary/10 py-1 rounded-full mr-2">Nenhum
+                  Selecionado</span>
+              </div>
+
+              <div class="flex-1 overflow-hidden p-4 bg-dark-900 relative">
+
+                <div id="tab-content-terminal" class="h-full flex flex-col">
+                  <div id="terminal-output"
+                    class="flex-1 bg-black border border-fluent-border rounded shadow-inner p-3 overflow-y-auto mb-3 text-xs font-mono leading-relaxed">
+                    <span class="text-slate-500">Selecione um dispositivo e aguarde output...</span>
                   </div>
-                  <div id="soar-activities-log" class="flex-1 overflow-y-auto p-3 text-[11px]"></div>
+                  <div class="flex gap-2">
+                    <span class="text-green-400 font-mono text-sm self-center">❯</span>
+                    <input id="cmd-input" type="text" placeholder="Digite comando shell (ex: dir, ipconfig)..."
+                      autocomplete="off"
+                      class="fluent-input flex-1 rounded px-3 py-2 text-sm font-mono placeholder-slate-600" />
+                    <button onclick="sendCommand()"
+                      class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow-sm hover:shadow-md">Executar</button>
+                  </div>
                 </div>
-              </div>
 
-              
-              <div id="tab-content-vulns" class="hidden h-full overflow-y-auto pr-2">
-                <div id="vulns-list" class="space-y-3"></div>
-              </div>
 
-              
-              <div id="tab-content-socchat" class="hidden h-full flex flex-col">
-                <div id="socchat-messages" class="flex-1 overflow-y-auto space-y-3 mb-3 bg-dark-850 border border-fluent-border rounded p-4 text-sm"></div>
-                <div class="flex gap-2">
-                   <input id="socchat-input" type="text" placeholder="Mensagem para o usuário do endpoint..." class="fluent-input flex-1 rounded px-3 py-2 text-sm" onkeydown="if(event.key==='Enter')sendSocChat()" />
-                   <button onclick="sendSocChat()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow">Enviar</button>
-                   <button onclick="resolveSocChat()" class="fluent-btn bg-dark-700 text-white px-4 py-2 rounded text-sm hover:bg-dark-600 border border-fluent-border">Resolver</button>
+                <div id="tab-content-soar" class="hidden h-full flex flex-col gap-4">
+                  <div class="grid grid-cols-4 gap-3">
+                    <button onclick="soarAction('screenshot')"
+                      class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fluent-primary hover:border-fluent-primary"><span
+                        class="text-lg">🖥️</span>Screenshot</button>
+                    <button onclick="soarAction('force_scan_vulns')"
+                      class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-purple-400 hover:border-purple-400"><span
+                        class="text-lg">🛡️</span>Scan Vulns</button>
+                    <button onclick="soarAction('force_scan_fim')"
+                      class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-400"><span
+                        class="text-lg">🔍</span>Integridade (FIM)</button>
+                    <button onclick="soarAction('force_scan_network')"
+                      class="fluent-btn px-3 py-3 rounded text-xs font-medium flex-col gap-2 flex items-center justify-center hover:text-fuchsia-400 hover:border-fuchsia-400"><span
+                        class="text-lg">📡</span>Scan Rede</button>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3 mt-2 border-t border-fluent-border pt-4">
+                    <button onclick="soarAction('isolate')"
+                      class="bg-red-500/10 border border-red-500/30 text-red-400 py-3 rounded text-xs font-bold hover:bg-red-500/20">🔒
+                      ISOLAR DISPOSITIVO</button>
+                    <button onclick="soarAction('uninstall')"
+                      class="bg-orange-500/10 border border-orange-500/30 text-orange-400 py-3 rounded text-xs font-bold hover:bg-orange-500/20">🗑️
+                      DESINSTALAR AGENTE</button>
+                  </div>
+                  <div class="flex-1 min-h-0 mt-4 border border-fluent-border rounded bg-dark-850 flex flex-col">
+                    <div
+                      class="px-3 py-2 border-b border-fluent-border text-xs font-medium bg-dark-800 flex justify-between">
+                      Resultados SOAR <button onclick="document.getElementById('soar-activities-log').innerHTML=''"
+                        class="text-fluent-primary">Limpar</button>
+                    </div>
+                    <div id="soar-activities-log" class="flex-1 overflow-y-auto p-3 text-[11px]"></div>
+                  </div>
+                </div>
+
+
+                <div id="tab-content-vulns" class="hidden h-full overflow-y-auto pr-2">
+                  <div id="vulns-list" class="space-y-3"></div>
+                </div>
+
+
+                <div id="tab-content-socchat" class="hidden h-full flex flex-col">
+                  <div id="socchat-messages"
+                    class="flex-1 overflow-y-auto space-y-3 mb-3 bg-dark-850 border border-fluent-border rounded p-4 text-sm">
+                  </div>
+                  <div class="flex gap-2">
+                    <input id="socchat-input" type="text" placeholder="Mensagem para o usuário do endpoint..."
+                      class="fluent-input flex-1 rounded px-3 py-2 text-sm"
+                      onkeydown="if(event.key==='Enter')sendSocChat()" />
+                    <button onclick="sendSocChat()"
+                      class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow">Enviar</button>
+                    <button onclick="resolveSocChat()"
+                      class="fluent-btn bg-dark-700 text-white px-4 py-2 rounded text-sm hover:bg-dark-600 border border-fluent-border">Resolver</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      
-      <div id="view-incidentes" class="main-view hidden h-full flex gap-4">
-        
-        <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-          <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-white">Incidentes Ativos</h2>
-            <div class="flex gap-1">
-              <button onclick="filterIncidents('')" class="text-[10px] px-2 py-1 bg-dark-700 rounded hover:bg-dark-600 text-white">Todos</button>
-              <button onclick="filterIncidents('CRITICAL')" class="text-[10px] px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded">Críticos</button>
+
+        <div id="view-incidentes" class="main-view hidden h-full flex gap-4">
+
+          <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
+            <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
+              <h2 class="text-sm font-semibold text-white">Incidentes Ativos</h2>
+              <div class="flex gap-1">
+                <button onclick="filterIncidents('')"
+                  class="text-[10px] px-2 py-1 bg-dark-700 rounded hover:bg-dark-600 text-white">Todos</button>
+                <button onclick="filterIncidents('CRITICAL')"
+                  class="text-[10px] px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded">Críticos</button>
+              </div>
             </div>
+            <div id="incidents-list" class="flex-1 overflow-y-auto p-3 space-y-2 bg-dark-900"></div>
           </div>
-          <div id="incidents-list" class="flex-1 overflow-y-auto p-3 space-y-2 bg-dark-900"></div>
+
+          <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
+            <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
+              <h2 class="text-sm font-semibold text-white">Eventos Brutos</h2>
+              <div class="flex gap-2">
+                <select id="filter-severity" onchange="loadEvents()"
+                  class="fluent-input text-[11px] py-1 px-2 rounded w-24">
+                  <option value="">Severidade</option>
+                  <option value="CRITICAL">Critical</option>
+                  <option value="HIGH">High</option>
+                </select>
+                <select id="filter-category" onchange="loadEvents()"
+                  class="fluent-input text-[11px] py-1 px-2 rounded w-24">
+                  <option value="">Categoria</option>
+                  <option value="auth">Auth</option>
+                  <option value="process">Process</option>
+                  <option value="network">Network</option>
+                </select>
+              </div>
+            </div>
+            <div id="events-list" class="flex-1 overflow-y-auto p-3 space-y-1.5 bg-dark-900"></div>
+          </div>
         </div>
-        
-        <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-          <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-white">Eventos Brutos</h2>
+
+
+        <div id="view-copilot"
+          class="main-view hidden h-full flex flex-col bg-fluent-surface border border-fluent-border rounded-lg max-w-4xl mx-auto overflow-hidden">
+          <div class="p-4 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
+            <div class="flex items-center gap-2"><span class="text-lg">✨</span>
+              <h2 class="font-semibold text-white">Aegis Copilot</h2>
+            </div>
+            <button onclick="clearChat()" class="text-xs text-fluent-textMuted hover:text-white">Nova Conversa</button>
+          </div>
+          <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-dark-900 text-sm"></div>
+          <div class="p-4 border-t border-fluent-border bg-dark-800">
             <div class="flex gap-2">
-              <select id="filter-severity" onchange="loadEvents()" class="fluent-input text-[11px] py-1 px-2 rounded w-24">
-                <option value="">Severidade</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option>
-              </select>
-              <select id="filter-category" onchange="loadEvents()" class="fluent-input text-[11px] py-1 px-2 rounded w-24">
-                <option value="">Categoria</option><option value="auth">Auth</option><option value="process">Process</option><option value="network">Network</option>
-              </select>
+              <input id="chat-input" type="text" placeholder="Pergunte sobre ameaças, logs, ou peça análises..."
+                autocomplete="off" class="fluent-input flex-1 rounded px-4 py-3 text-sm"
+                onkeydown="if(event.key==='Enter')sendChat()" />
+              <button onclick="sendChat()"
+                class="fluent-btn fluent-btn-primary px-6 py-3 rounded text-sm font-semibold shadow">Enviar</button>
             </div>
           </div>
-          <div id="events-list" class="flex-1 overflow-y-auto p-3 space-y-1.5 bg-dark-900"></div>
         </div>
-      </div>
 
-      
-      <div id="view-copilot" class="main-view hidden h-full flex flex-col bg-fluent-surface border border-fluent-border rounded-lg max-w-4xl mx-auto overflow-hidden">
-        <div class="p-4 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-          <div class="flex items-center gap-2"><span class="text-lg">✨</span> <h2 class="font-semibold text-white">Aegis Copilot</h2></div>
-          <button onclick="clearChat()" class="text-xs text-fluent-textMuted hover:text-white">Nova Conversa</button>
-        </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-dark-900 text-sm"></div>
-        <div class="p-4 border-t border-fluent-border bg-dark-800">
-           <div class="flex gap-2">
-             <input id="chat-input" type="text" placeholder="Pergunte sobre ameaças, logs, ou peça análises..." autocomplete="off" class="fluent-input flex-1 rounded px-4 py-3 text-sm" onkeydown="if(event.key==='Enter')sendChat()" />
-             <button onclick="sendChat()" class="fluent-btn fluent-btn-primary px-6 py-3 rounded text-sm font-semibold shadow">Enviar</button>
-           </div>
-        </div>
-      </div>
-
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
 
-<div id="modal-overlay" onclick="closeAllModals()"></div>
+  <div id="modal-overlay" onclick="closeAllModals()"></div>
 
-<div id="ioc-modal" class="modal w-[600px] hidden p-6">
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="font-semibold text-white text-lg">Threat Intelligence (IoC)</h2>
-    <button onclick="closeAllModals()" class="text-fluent-textMuted hover:text-white text-xl leading-none">✕</button>
-  </div>
-  <div class="flex gap-2 mb-4">
-    <select id="ioc-type" class="fluent-input px-3 py-2 rounded text-sm w-28"><option value="hash">Hash</option><option value="ip">IP</option><option value="domain">Dom</option></select>
-    <input id="ioc-value" type="text" placeholder="Valor do indicador..." class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
-    <input id="ioc-name" type="text" placeholder="Nome/Ameaça..." class="fluent-input w-32 px-3 py-2 rounded text-sm" />
-    <button onclick="addIoc()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm">Adicionar</button>
-  </div>
-  <div class="flex gap-2 mb-4 border-t border-fluent-border pt-4">
-    <input id="ioc-check-val" type="text" placeholder="Busca rápida de IoC..." class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
-    <button onclick="checkIoc()" class="fluent-btn px-4 py-2 rounded text-sm">Verificar</button>
-  </div>
-  <div id="ioc-check-result" class="mb-4 text-sm hidden"></div>
-  <div class="bg-dark-900 border border-fluent-border rounded p-2 h-64 overflow-y-auto">
+  <div id="ioc-modal" class="modal w-[600px] hidden p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-semibold text-white text-lg">Threat Intelligence (IoC)</h2>
+      <button onclick="closeAllModals()" class="text-fluent-textMuted hover:text-white text-xl leading-none">✕</button>
+    </div>
+    <div class="flex gap-2 mb-4">
+      <select id="ioc-type" class="fluent-input px-3 py-2 rounded text-sm w-28">
+        <option value="hash">Hash</option>
+        <option value="ip">IP</option>
+        <option value="domain">Dom</option>
+      </select>
+      <input id="ioc-value" type="text" placeholder="Valor do indicador..."
+        class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
+      <input id="ioc-name" type="text" placeholder="Nome/Ameaça..."
+        class="fluent-input w-32 px-3 py-2 rounded text-sm" />
+      <button onclick="addIoc()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm">Adicionar</button>
+    </div>
+    <div class="flex gap-2 mb-4 border-t border-fluent-border pt-4">
+      <input id="ioc-check-val" type="text" placeholder="Busca rápida de IoC..."
+        class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
+      <button onclick="checkIoc()" class="fluent-btn px-4 py-2 rounded text-sm">Verificar</button>
+    </div>
+    <div id="ioc-check-result" class="mb-4 text-sm hidden"></div>
+    <div class="bg-dark-900 border border-fluent-border rounded p-2 h-64 overflow-y-auto">
       <div id="ioc-list" class="space-y-1"></div>
+    </div>
   </div>
-</div>
 
-<div id="screenshot-modal" class="modal max-w-4xl w-[90%] hidden p-4">
-  <div class="flex justify-between mb-3"><h2 class="text-white font-semibold">Screenshot Viewer</h2><button onclick="closeAllModals()" class="text-fluent-textMuted hover:text-white">✕</button></div>
-  <img id="screenshot-img" src="" class="w-full rounded border border-fluent-border" />
-</div>
+  <div id="screenshot-modal" class="modal max-w-4xl w-[90%] hidden p-4">
+    <div class="flex justify-between mb-3">
+      <h2 class="text-white font-semibold">Screenshot Viewer</h2><button onclick="closeAllModals()"
+        class="text-fluent-textMuted hover:text-white">✕</button>
+    </div>
+    <img id="screenshot-img" src="" class="w-full rounded border border-fluent-border" />
+  </div>
 
 
   <div id="modal-overlay" onclick="closeAllModals()"></div>
@@ -404,12 +617,12 @@
     let ajaxInterval = null;
     let chartEvents = null;
     let chartSeverity = null;
-    
+
     function switchMainView(view) {
       // Esconder todas as views
       document.querySelectorAll('.main-view').forEach(el => el.classList.add('hidden'));
       document.getElementById('view-' + view).classList.remove('hidden');
-      
+
       // Resetar botões do menu
       document.querySelectorAll('aside nav button').forEach(el => {
         el.classList.remove('bg-white/10', 'font-semibold', 'text-white');
@@ -420,7 +633,7 @@
       if (activeBtn) {
         activeBtn.classList.add('bg-white/10', 'font-semibold', 'text-white');
       }
-      
+
       // Mudar titulo do header
       const titles = {
         'visao-geral': 'Visão Geral',
@@ -429,11 +642,11 @@
         'copilot': 'Aegis Copilot'
       };
       document.getElementById('header-title').textContent = titles[view] || 'Painel';
-      
+
       // Triggers específicos
       if (view === 'incidentes') {
-          loadIncidents();
-          loadEvents();
+        loadIncidents();
+        loadEvents();
       }
     }
 
@@ -621,17 +834,17 @@
       });
     }
 
-    
+
     function filterPlatform(p) {
       platformFilter = p;
       ['all', 'windows', 'android'].forEach(id => {
         const el = document.getElementById(`filter-${id}`);
         if (el) {
-           if ((p === '' && id === 'all') || (p === id)) {
-              el.className = 'flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium';
-           } else {
-              el.className = 'flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50';
-           }
+          if ((p === '' && id === 'all') || (p === id)) {
+            el.className = 'flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium';
+          } else {
+            el.className = 'flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50';
+          }
         }
       });
       loadAgents();
@@ -872,15 +1085,14 @@
         if (action === 'force_scan_vulns') msg = '[SOAR] Scan de Vulnerabilidades acionado. Verifique a aba Vulnerabilidades em instantes.';
         if (action === 'force_scan_fim') msg = '[SOAR] Scan de Integridade (FIM) acionado.';
         if (action === 'force_logs') msg = '[SOAR] Coleta de Logs Forçada acionada.';
-        if (action === 'force_scan_network') msg = '[SOAR] Scan de Portas/IPs Ativos acionado. O resultado deve cair no terminal logo mais.';
+        if (action === 'force_scan_network') msg = '[SOAR] Scan de Portas/IPs locais acionado. O resultado aparecerá no terminal logo mais.';
 
-        addTerminalLine(msg, '#fbbf24');
+        addTerminalLine(msg, '#60a5fa');
         return;
       }
-
       if (action === 'wipe') {
         if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar TODOS os dados de ${name}. Continuar?`)) return;
-        if (!confirm(`💣 ÚLTIMO AVISO: Isso é IRREVERSÍVEL. Confirmar wipe completo do ${name}?`)) return;
+        if (!confirm(`💣 ÚLTIMO AVISO: Isso é IRREVERSÍVEL. Confirmar wipe do ${name}?`)) return;
         let code = prompt("Digite CONFIRMAR para autorizar o Wipe:");
         if (code !== "CONFIRMAR") { addTerminalLine('[ERRO] Código incorreto. Wipe abortado.', '#f87171'); return; }
         await fetch('/control/wipe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id, confirm: true }) });
@@ -894,19 +1106,19 @@
           const res = await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
           if (!res.ok) {
             const err = await res.text();
-            addTerminalLine(`[ERRO SOAR] Backend recusou a desinstalação. Code: ${res.status}. Detalhes: ${err.substring(0, 100)}`, '#f87171');
+            showToast(`Backend recusou a desinstalação. Code: ${res.status}. Detalhes: ${err.substring(0, 50)}`, 'error');
             return;
           }
           const data = await res.json();
           if (data.error) {
-            addTerminalLine(`[ERRO] ${data.error}`, '#f87171');
+            showToast(data.error, 'error');
             return;
           }
 
-          addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
-          setTimeout(() => location.reload(), 3500);
+          showToast(`Desinstalação remota enviada! ${name} irá se auto-destruir.`, 'warning');
+          setTimeout(() => location.reload(), 3000);
         } catch (e) {
-          addTerminalLine(`[ERRO CRÍTICO] Falha ao contatar a API C2: ${e}`, '#f87171');
+          showToast(`Falha ao contatar a API C2.`, 'error');
         }
         return;
       }
@@ -1050,10 +1262,10 @@
 
 
 
-    
+
     function switchTab(tab) {
       activeTab = tab;
-      
+
       ['terminal', 'soar', 'vulns', 'socchat'].forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         const content = document.getElementById(`tab-content-${t}`);
