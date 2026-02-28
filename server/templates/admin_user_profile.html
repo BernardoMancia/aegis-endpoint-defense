@@ -184,17 +184,17 @@
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div>
                         <label>Nome de Exibição</label>
-                        <input name="display_name" type="text" class="aegis-input"
+                        <input name="display_name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-slate-500"
                             value="{{ target.display_name or '' }}" placeholder="{{ target.username }}" />
                     </div>
                     <div>
                         <label>Email</label>
-                        <input name="email" type="email" class="aegis-input" value="{{ target.email or '' }}"
+                        <input name="email" type="email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-slate-500" value="{{ target.email or '' }}"
                             placeholder="email@empresa.com" />
                     </div>
                 </div>
                 <div class="flex justify-end">
-                    <button type="submit" class="btn-neon">Salvar Alterações</button>
+                    <button type="submit" class="bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium rounded-lg px-4 py-2 shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 hover:scale-105 hover:shadow-sky-500/50 transition-all cursor-pointer inline-flex items-center justify-center">Salvar Alterações</button>
                 </div>
             </form>
         </div>
@@ -206,13 +206,13 @@
             <p class="text-xs text-slate-500">Não é possível alterar o nível de outro Super Administrador.</p>
             {% else %}
             <form method="POST" action="/admin/users/{{ target.id }}/role" class="flex items-center gap-3">
-                <select name="role" class="aegis-input">
+                <select name="role" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-slate-500">
                     {% for role_key, role_data in all_roles.items() %}
                     <option value="{{ role_key }}" {% if target.role==role_key %}selected{% endif %}>{{ role_data.label
                         }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="btn-neon">Alterar Role</button>
+                <button type="submit" class="bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium rounded-lg px-4 py-2 shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 hover:scale-105 hover:shadow-sky-500/50 transition-all cursor-pointer inline-flex items-center justify-center">Alterar Role</button>
             </form>
             {% endif %}
         </div>
@@ -221,9 +221,9 @@
         <div class="bento-card p-8">
             <p class="section-title">Redefinir Senha</p>
             <form method="POST" action="/admin/users/{{ target.id }}/password" class="flex gap-3">
-                <input name="new_password" type="text" class="aegis-input"
+                <input name="new_password" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-slate-500"
                     placeholder="Nova senha (mín. 8 caracteres)" />
-                <button type="submit" class="btn-neon">Redefinir</button>
+                <button type="submit" class="bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium rounded-lg px-4 py-2 shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 hover:scale-105 hover:shadow-sky-500/50 transition-all cursor-pointer inline-flex items-center justify-center">Redefinir</button>
             </form>
         </div>
 
@@ -248,7 +248,7 @@
                 <p class="text-sm text-red-400">🔒 Conta bloqueada — {{ target.lock_remaining_minutes }} min restantes.
                 </p>
                 <form method="POST" action="/admin/users/{{ target.id }}/unlock">
-                    <button type="submit" class="btn-neon">Desbloquear Conta</button>
+                    <button type="submit" class="bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium rounded-lg px-4 py-2 shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 hover:scale-105 hover:shadow-sky-500/50 transition-all cursor-pointer inline-flex items-center justify-center">Desbloquear Conta</button>
                 </form>
             </div>
         </div>

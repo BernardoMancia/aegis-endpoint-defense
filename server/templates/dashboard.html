@@ -406,10 +406,126 @@
       max-width: 1000px;
       display: none;
     }
+
+    /* Enhancements & Animations */
+    @keyframes floatLight {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: translateY(-20px) rotate(2deg);
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.8;
+      }
+    }
+
+    @keyframes pulseSoft {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 0.7;
+      }
+    }
+
+    .bg-animated {
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+      animation: rotateBg 60s linear infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes rotateBg {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .icon-animated {
+      animation: floatLight 4s ease-in-out infinite;
+    }
+
+    .side-icon {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .side-icon:hover i {
+      animation: pulseSoft 1s infinite;
+      fill: rgba(14, 165, 233, 0.2);
+    }
+
+    /* Floating Chat Bubble CSS */
+    #floating-chat-bubble {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 100;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      color: white;
+    }
+
+    #floating-chat-bubble:hover {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+    }
+
+    #floating-chat-window {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      z-index: 99;
+      width: 350px;
+      height: 450px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(20px) scale(0.9);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #floating-chat-window.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 
 <body>
+  <div class="bg-animated"></div>
 
   <!-- Toast Container -->
   <div id="toast-container"></div>
@@ -648,100 +764,89 @@
     // System setup
     lucide.createIcons();
     let agentsList = [];
-    let selectedAgent = null;
-    let currentPlatformFilter = '';
+    let selecte       null;
+    let currentPla      ter = '';
 
     // Slide Panel logic
-    function openSlidePanel(agentId) {
-      selectedAgent = agentId;
-      const ag = agentsList.find(a => a.id === agentId);
-      if (!ag) return;
+    function op      an el(agentId) {
+l      nt = agentId;
+      const ag = agentsList.find(a => a.id === agentId)      if (!ag) return;
 
-      document.getElementById('panel-agent-name').innerText = ag.hostname;
-      document.getElementById('panel-agent-id').innerText = ag.id;
+      document.getElementById('panel-agent-n      = ag.hostname;
+      docume      ementById('panel-agent-id').innerText = ag.id;
 
-      // Populate vulns if exist
-      const pv = document.getElementById('panel-vulns');
-      const pvw = document.getElementById('panel-vulns-wrapper');
-      if (ag.vulnerabilities && ag.vulnerabilities.length > 0) {
+         pulate vulns if exist
+      const pv = document.getElementBy      l- vulns');
+      const pvw = document.getElementById('pane        per');
+      if (ag.vulnerabilit        lnerabilities.length > 0) {
         pvw.classList.remove('hidden');
-        pv.innerHTML = ag.vulnerabilities.map(v => `<div class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"><p class="text-sm text-red-400 font-bold">${v.cve_id} <span class="bg-red-500/20 text-[10px] px-2 py-0.5 rounded text-white ml-2">CVSS ${v.cvss_score}</span></p><p class="text-xs text-slate-400 mt-1">${v.title}</p></div>`).join('');
-      } else {
-        pvw.classList.add('hidden');
+        pv.innerHTML = ag.vulnerabilities.map(v => `<div class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"><p class="text-sm text-red-400 font-bold">${v.cve_id} <span class="bg-red-500/20 text-[10px] px-2 py-0.5 rounded text-white ml-2">CVSS ${v.cvss_score}</span>      lass="tex        ate-400 mt-1">${v.title}</p><      joi           } e            pvw.classList.add('hidden');
       }
 
       // Open
-      document.getElementById('slide-panel').classList.add('open');
-      document.getElementById('panel-overlay').classList.add('open');
-      addTerminalLine(`Conectado ao canal reverso de ${ag.hostname}...`, '#10b981');
-    }
+          nt.getElementById('slide-panel').classList.add('open');
+      do      etElementById('panel-overlay').classList.add('open');
+      addTerminalLine(`Conectado ao canal reverso de ${ ag.hostnam      '#10b981');
+      }
 
-    function closeSlidePanel() {
-      document.getElementById('slide-panel').classList.remove('open');
-      document.getElementById('panel-overlay').classList.remove('open');
-    }
+      function closeSlidePanel() {
+      documen      mentById('slide-panel').classList.remove('open');
+        document.getElementById('panel-overlay').classList.remove('open');
+      }
 
-    // Tools & Toasts
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      if (message.includes('[ERRO]') && type === 'info') type = 'error';
-      message = message.replace('[ERRO]', '').trim();
-      const toast = document.createElement('div');
-      let typeClass = ''; let icon = 'ℹ️';
-      if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
-      if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
-      if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
-      toast.className = `toast ${typeClass}`;
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 5000);
-    }
+      // Tools & Toasts
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        if (message.includes('[ERRO]') && type === 'info') type = 'error';
+        message = message.replace('[ERRO]', '').trim();
+        const toast = document.createElement('div');
+        let typeClass = ''; let icon = 'ℹ️';
+        if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
+        if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
+        if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
+        toast.className = `toast ${typeClass}`;
+        toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 5000);
+      }
 
-    function addTerminalLine(text, color = '#e2e8f0') {
-      const el = document.getElementById('terminal-output');
-      if (el.innerHTML.includes('Conecte a um agente')) el.innerHTML = '';
-      const div = document.createElement('div');
-      div.style.color = color; div.className = 'mb-1 leading-tight';
-      div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
-      el.appendChild(div);
-      el.scrollTop = el.scrollHeight;
-    }
-
-    // Core Fetches
-    async function loadData() {
-      try {
-        const resp = await fetch('/api/stats');
-        const data = await resp.json();
-
-        // Header Stats
-        document.getElementById('stat-agents').innerText = data.agents_total || 0;
-        document.getElementById('stat-online').innerText = data.agents_online || 0;
-        document.getElementById('stat-incidents').innerText = data.active_incidents || 0;
-        document.getElementById('stat-iocs').innerText = data.total_iocs || 0;
-
-        agentsList = data.agents || [];
-        renderAgents();
-        renderIncidents(data.incidents || []);
-      } catch (e) { console.error("Error fetching stats:", e); }
+      function addTerminalLine(text, color = '#e2e8f0') {
+        const el = document.getElementById('terminal-output');
+        if (el.innerHTML.includes('Conecte a um agente')) el.innerHTML = '';
+        const div = document.createElement('div');
+        div.style.color = color; div.className = 'mb-1 leading-tight';
+        div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+        el.appendChild(div);
+        el.scrollTop = el.scrollHeight;
+        // Cor          async function loadData() {
+        try         nst resp = await fetch('/api/sta         = await resp.jso          // Header Stats
+        document.getElementById('stat-agents').innerText         s_total || 0;
+        document.getElementById('stat-online').innerText = dat        ine || 0;
+        document.getElementById('stat-incidents').innerText = data.activ || 0;
+        document.getElementById('stat-iocs').innerText = data.tot; entsList = data.agents || [];
+        Agents();
+        dents(data.incidents || []);
+      } ca      { conso le.error("Error fetching stats:", e); }
     }
 
     function filterPlatform(p) { currentPlatformFilter = p; renderAgents(); }
 
     function renderAgents() {
-      const c = document.getElementById('agents-list');
-      c.innerHTML = '';
-      let list = agentsList;
-      if (currentPlatformFilter) list = agentsList.filter(a => a.platform.toLowerCase().includes(currentPlatformFilter));
+      const ument.getElementById('agents-list');
+      c.inner      ';
+      let list       List;
+      if (current      Filter) list = agentsList.filter(a => a.platform.toLowerCase().includes(currentPlatformFilter));
 
-      if (list.length === 0) { c.innerHTML = '<p class="text-slate-500 text-sm p-4">Nenhum endpoint encontrado.</p>'; return; }
+      if (list.len0      nerHTML = '<p class="text-slate-500 text-sm p-4">Nenhum endpoint encontrado.</p>'; return;
+    }
 
-      list.forEach(ag => {
-        const statusColor = ag.status === 'online' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-600';
-        const isolated = ag.is_isolated ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 ml-2">ISOLADO</span>` : '';
-        const html = `
-              <div class="p-4 rounded-xl mb-2 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-sky-500/30 transition-all cursor-pointer flex items-center justify-between group" onclick="openSlidePanel('${ag.id}')">
+    list.forEach(ag => {
+ o      usColor = ag.status =        ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-600';
+      const isolated = ag.is_isolated ? `        "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 ml-2">ISOLADO</span>` : '';
+      const html = `
+              <div class        d-xl mb-2 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-sky-500/30 transition-all cursor-pointer flex items-center justify-between group" onclick="openSlidePanel('${ag.id}')">
                 <div class="flex items-center gap-3">
                    <div class="w-10 h-10 rounded-lg bg-black/30 flex items-center justify-center text-slate-400 group-hover:text-sky-400 transition-colors">
                      ${ag.platform.toLowerCase().includes('win') ? '<i data-lucide="server"></i>' : '<i data-lucide="smartphone"></i>'}
@@ -760,21 +865,19 @@
                 </div>
               </div>
             `;
-        c.insertAdjacentHTML('beforeend', html);
-      });
+      c.insertAdjacentHTML('beforeend', html);
       lucide.createIcons();
     }
 
-    function renderIncidents(incidents) {
+    functi      rInc      ncidents) {
       const c = document.getElementById('incidents-list');
-      c.innerHTML = '';
-      if (incidents.length === 0) { c.innerHTML = '<p class="text-slate-500 text-sm p-4">Nenhum incidente ativo.</p>'; return; }
+      innerHTML = '';
+      if (incidents.length === 0) { c      ML = '<p class="te      -500 text-sm p-4">Nenhum incidente ativo.</p>'; return; }
 
       incidents.forEach(inc => {
-        const badgeClass = inc.severity === 'CRITICAL' ? 'badge-critical' : inc.severity === 'HIGH' ? 'badge-high' : 'badge-medium';
-        const icon = inc.severity === 'CRITICAL' ? 'alert-octagon' : 'alert-triangle';
-        c.insertAdjacentHTML('beforeend', `
-              <div class="p-3 rounded-lg bg-black/30 border border-white/5 flex gap-3 cursor-pointer hover:border-white/10 transition-colors">
+        const badgeClass = inc.TICAL' ? 'badge - critical' :        y === 'HIGH' ? 'badge - high' : 'badge - medium';
+        const icon = inc.severity === 'CRITICAL' ? 'alert-octagon' : 'alert-tri            c.insertAdjacentHTML('beforeend', `
+          < div class="p-3 rounded-l        0 border border-white/5 flex gap-3 cursor-pointer hover:border-white/10 transition-colors" >
                  <div class="mt-0.5 ${badgeClass} p-1.5 rounded-md self-start"><i data-lucide="${icon}" class="w-4 h-4"></i></div>
                  <div>
                     <h4 class="text-sm font-semibold text-slate-200">${inc.title}</h4>
@@ -784,84 +887,134 @@
                        <span class="text-[10px] text-slate-500">${new Date(inc.created_at).toLocaleString()}</span>
                     </div>
                  </div>
-              </div>
-            `);
+              </div >
+          `);
       });
       lucide.createIcons();
     }
 
     // Actions
-    async function sendCommand() {
-      const i = document.getElementById('cmd-input');
+    async function sendComm                i = document.getElementById('cmd-input');
       const cmd = i.value.trim();
-      if (!cmd || !selectedAgent) return;
-      addTerminalLine(`> ${cmd}`, '#38bdf8');
-      i.value = '';
+         cmd || !selectedAgent) return;
+      addTerminal      ${cmd}`, '#38bdf8');
+      i       ' ';
 
       try {
-        const res = await fetch(`/control/${selectedAgent}/shell`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: cmd })
-        });
-        const data = await res.json();
-        if (data.status === 'queued') {
-          addTerminalLine('Comando enfileirado.', '#64748b');
-        } else {
-          addTerminalLine(`Falha: ${data.message}`, '#f87171');
-        }
-      } catch (e) { addTerminalLine('Erro de rede ao enviar comando.', '#f87171'); }
-    }
+        const res       fetch(`/control/${selectedAgent}/shell`            method: h      {
+          'Con        'application / json' }, body: JSON.stringify({ command: cmd })
+          const data = await res.json();
+          if (data.status = == 'queued') {
+           addTerminalL ine        file        4748b');
+          } else {
+             in alLine(`Falh a:  ${data.messa          ;
+          }
+        } catch (e) { addTerminalLine('Err         enviar c          71'); }
+      }
 
-    document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendCommand(); });
+    document.getElementById('cmd-input'        st      ydown',  e => { if (e.key === 'Enter') sendCommand(); });
 
     async function soarAction(action) {
-      if (!selectedAgent) { showToast('Nenhum agente selecionado no painel!', 'warning'); return; }
-      if (['wipe', 'uninstall', 'isolate'].includes(action)) {
-        if (!confirm('AÇÃO DELETÉRIA OU DE ISOLAMENTO. Você tem absoluta certeza?')) return;
+          if (!selectedAgent) { showToast('Nenhum agente selecionado  no pai nel !', 'warning'); return; }
+          if (['wipe', 'uninstall', 'isolate'].      (a ction)) {
+            if (!confirm('AÇÃO DELETÉRIA OU DE ISOLAMENTO. Você tem absoluta certeza?      rn;
       }
 
-      showToast(`Despachando ordem SOAR: ${action.toUpperCase()}`, 'info');
+          showToast(`Despachando ordem SOAR: ${a        rC ase()}`, 'info');
       try {
-        const res = await fetch(`/control/${selectedAgent}/soar`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action })
-        });
-        const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch (ex) { data = { message: text }; }
+        const res = await fetch(`/ control / ${ selected      oa       ethod: 'POST', headers: { 'Content-Type': 'application/json' }, body: ingify        ction })
+    });
+    const text = await res.text();
+    ;
+    try { data = JSO N.parse(text); } catch (ex) { data = { message: text }; }
 
-        if (res.ok) {
-          showToast(`Sucesso: ${data.message}`, 'success');
-          addTerminalLine(`[SOAR] ${action} -> OK`, '#10b981');
-        } else {
-          showToast(`Erro na Ação: ${data.message}`, 'error');
-        }
+    if (re s.o           s        cesso: ${ data.message } `, 'succe            addTer        SOAR] ${action} -> OK`, '#10b981');
+         } else {
+           sho wToasç        es sage
+    } `, 'er          
       } catch (e) {
-        showToast('Falha na comunicação C2.', 'error');
+        showToast('Falha na c           'error');
       }
     }
 
-    async function sendChat() {
-      const i = document.getElementById('chat-input');
+    async function sendChat(        nst i = d          ntById('chat-input');
+      const m = i.value.trim();        m)      
+       const         t.getElementById('chat-messages');
+      cm.inne       `< div class="bg-indigo-500/10 border bor      go-500/20 p-2 rounded-lg ml-6 text-slate-200" > <st r:</ strong> ${m}</div>`;
+       al ue = '';
+          ollTop = cm.scrollHeight;
+
+      try {
+        const       t fetch('/api/copilot/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: m }) });
+        co      await r.json()        cm.innerHTML += `< div class="b3       borde        2 rounded-lg mr-6 text-sky-200" > <strong>AegisAI:</strong> ${ d.reply || 'Erro cognitivo.' }</div > `;
+         cm.scrollTop = cm.scrol lHeight;
+        }        
+        cm.innerHTML += `        text - rose - 400 text - xs">Erro ao contatar IA.</div>`;
+      }
+    }
+
+    function openIocModal() {
+      alert("Módulo Threat Intel Integrado. Por favor utilize a versão c        }
+
+    setInterval(loadData, 500      loadDat a();
+  </script>
+
+  <!-- FLOATING CHAT -->
+  <div id="floating-chat-bubble" onclick="toggleChat()">
+    <i data-lucide="message-circle" class="w-8 h-8"></i>
+  </div>
+
+  <div id="floating-chat-window">
+    <div
+      class="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-t-20">
+      <div class="flex items-center gap-2">
+        <i data-lucide="bot" class="w-5 h-5 text-purple-400"></i>
+        <h3 class="text-sm font-bold text-white">Aegis AI Copilot</h3>
+      </div>
+      <button onclick="toggleChat()" class="text-slate-400 hover:text-white"><i data-lucide="x"
+          class="w-4 h-4"></i></button>
+    </div>
+    <div id="floating-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm text-slate-300">
+      <p class="text-slate-500 text-xs italic text-center">A IA está pronta para analisar ameaças.</p>
+    </div>
+    <div class="p-3 border-t border-white/10 bg-black/20 rounded-b-20 flex gap-2">
+      <input type="text" id="floating-chat-input"
+        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+        placeholder="Pergunte à IA..." onkeydown="if(event.key==='Enter')sendFloatingChat()">
+      <button onclick="sendFloatingChat()"
+        class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white p-2 rounded-lg hover:scale-105 transition-transform"><i
+          data-lucide="send" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+
+  <script>
+      let chatOpen = false;
+      function toggleChat           chatOpen = !chatOpen;
+      const w = document.getElementById('floating-chat-window');
+      const b = document.querySelector('#floating-chat-bubble i');
+      if (n) { w.classList.add('open'); b.setAttribute('data-lucide', 'x'); }
+      else { w.classList.remove('open'); b.setAttribute('data-lucide', 'message-circle'); }
+      lucide.createIcons();
+    }
+
+    async function sendFloatingChat() {
+      const i = document.getElementById('floating-chat-input');
       const m = i.value.trim();
       if (!m) return;
-      const cm = document.getElementById('chat-messages');
-      cm.innerHTML += `<div class="bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-lg ml-6 text-slate-200"><strong>User:</strong> ${m}</div>`;
+      const cm = document.getElementById('floating-chat-messages');
+      cm.innerHTML += `<div class="bg-slate-800/80 p-3 rounded-lg ml-6 text-white border border-slate-700">${m}</div>`;
       i.value = '';
       cm.scrollTop = cm.scrollHeight;
 
       try {
         const r = await fetch('/api/copilot/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: m }) });
         const d = await r.json();
-        cm.innerHTML += `<div class="bg-black/30 border border-white/5 p-2 rounded-lg mr-6 text-sky-200"><strong>AegisAI:</strong> ${d.reply || 'Erro cognitivo.'}</div>`;
+        cm.innerHTML += `<div class="bg-purple-900/40 p-3 rounded-lg mr-6 text-sky-100 border border-purple-500/30"><strong>AI:</strong> ${d.reply || 'Erro cognitivo.'}</div>`;
         cm.scrollTop = cm.scrollHeight;
       } catch (e) {
-        cm.innerHTML += `<div class="text-rose-400 text-xs">Erro ao contatar IA.</div>`;
+        cm.innerHTML += `<div class="text-rose-400 text-xs text-center">Erro ao contatar IA.</div>`;
       }
     }
-
-    function openIocModal() { alert("Módulo Threat Intel Integrado. Por favor utilize a versão completa."); }
-
-    setInterval(loadData, 5000);
-    loadData();
   </script>
 </body>
 
