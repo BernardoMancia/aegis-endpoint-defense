@@ -65,6 +65,10 @@ def heartbeat():
         db.session.add(agent)
         audit("AGENT_REGISTERED", actor="agent", target_type="agent", target_id=original_hostname)
         log.info(f"[C2] Novo agente registrado: {original_hostname}")
+    elif agent.is_uninstalled and not agent.pending_command:
+        agent.is_uninstalled = False
+        audit("AGENT_REVIVED", actor="agent", target_type="agent", target_id=original_hostname)
+        log.info(f"[C2] Agente reativado apos desinstalacao ou reinstalacao identificada: {original_hostname}")
 
     agent.ip_address = data.get("ip_address", agent.ip_address)
     agent.mac_address = data.get("mac_address", agent.mac_address)
