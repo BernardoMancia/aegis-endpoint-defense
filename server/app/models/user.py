@@ -128,6 +128,7 @@ class SocUser(db.Model):
             "role_color": self.role_info["color"],
             "status": self.status,
             "email": self.email,
+            "avatar_url": self.avatar_url,
             "mfa_enabled": self.mfa_enabled,
             "is_locked": self.is_locked,
             "reason": self.reason,

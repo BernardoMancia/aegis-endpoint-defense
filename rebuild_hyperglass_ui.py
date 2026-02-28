@@ -178,7 +178,11 @@ def get_sidebar(active_item):
                 <i data-lucide="settings" class="w-6 h-6"></i>
             </a>
             <a href="/profile" class="w-10 h-10 rounded-full border-2 {'border-sky-500 shadow-[0_0_10px_var(--neon-blue-glow)]' if active_item == 'profile' else 'border-slate-700'} overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
+                {{% if user.avatar_url %}}
+                <img src="{{{{ user.avatar_url }}}}" alt="Avatar" class="w-full h-full object-cover">
+                {{% else %}}
                 <img src="https://api.dicebear.com/7.x/initials/svg?seed={{{{ session.get('soc_user', 'Aegis') }}}}" alt="Avatar">
+                {{% endif %}}
             </a>
             <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all" title="Sair">
                 <i data-lucide="log-out" class="w-6 h-6"></i>
@@ -703,6 +707,7 @@ def rebuild_dashboard():
                 }
 
                 function showStatDetails(type) {
+                    console.log("Stat clicked:", type);
                     const modal = document.getElementById('stat-detail-modal');
                     const title = document.getElementById('modal-title');
                     const iconBg = document.getElementById('modal-icon-bg');
@@ -841,8 +846,12 @@ def rebuild_profile():
     profile_content = """
         <div class="max-w-4xl mx-auto py-10 px-6">
             <div class="flex items-center gap-6 mb-12">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl">
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl overflow-hidden border-2 border-white/10">
+                    {% if user.avatar_url %}
+                    <img src="{{ user.avatar_url }}" class="w-full h-full object-cover" alt="Profile">
+                    {% else %}
                     {{ (user.display_name or user.username or 'A')[0].upper() }}
+                    {% endif %}
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
@@ -854,23 +863,36 @@ def rebuild_profile():
                 <!-- Info -->
                 <div class="hyper-glass p-8">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
-                    <form action="/profile/update" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Nome de Exibição</label>
-                            <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
+                    <form action="/profile/update" method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Nome de Exibição</label>
+                                <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm text-slate-400">Avatar URL (Foto de Perfil)</label>
+                                <input type="url" name="avatar_url" class="aegis-input" value="{{ user.avatar_url or '' }}" placeholder="https://exemplo.com/sua-foto.jpg">
+                            </div>
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-sm text-slate-400">Nome de Usuário</label>
-                            <input type="text" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.username }}" disabled>
-                        </div>
-                        <div class="md:col-span-2 space-y-2">
-                            <label class="text-sm text-slate-400">Endereço de E-mail</label>
-                            <input type="email" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.email or 'N/A' }}" disabled>
-                        </div>
-                        <div class="md:col-span-2 flex justify-end">
-                            <button type="submit" class="aegis-btn-primary">Salvar Alterações</button>
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" class="aegis-btn-primary">SALVAR ALTERAÇÕES</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- Account Data -->
+                <div class="hyper-glass p-8 opacity-80">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-slate-400"></i> Dados de Acesso</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Usuário</label>
+                            <input type="text" class="aegis-input cursor-not-allowed bg-white/5" value="{{ user.username }}" disabled>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">E-mail Cadastrado</label>
+                            <input type="text" class="aegis-input cursor-not-allowed bg-white/5" value="{{ user.email or 'N/A' }}" disabled>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Password -->

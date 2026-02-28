@@ -30,6 +30,9 @@ def update_profile():
         user.display_name = display_name
         session["soc_display"] = display_name
     
+    avatar_url = request.form.get("avatar_url", "").strip()
+    user.avatar_url = avatar_url or None
+    
     try:
         db.session.commit()
     except Exception as e:

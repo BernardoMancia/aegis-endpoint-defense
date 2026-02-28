@@ -181,7 +181,11 @@ body {
                 <i data-lucide="settings" class="w-6 h-6"></i>
             </a>
             <a href="/profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
+                {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
+                {% else %}
                 <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
+                {% endif %}
             </a>
             <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all" title="Sair">
                 <i data-lucide="log-out" class="w-6 h-6"></i>
