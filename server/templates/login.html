@@ -9,11 +9,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script>
-    tailwind.config = {
+        tailwind.config = {
       theme: {
         extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
           colors: {
-            fluent: { bg: '#111111', surface: '#242424', border: '#333333', primary: '#4cc2ff', text: '#e0e0e0', textMuted: '#9e9e9e' }
+            fluent: { 
+              bg: '#050505', 
+              surface: 'rgba(30, 30, 30, 0.45)', 
+              surfaceHover: 'rgba(45, 45, 45, 0.6)',
+              border: 'rgba(255, 255, 255, 0.08)', 
+              primary: '#0ea5e9', 
+              primaryHover: '#0284c7', 
+              text: '#e2e8f0', 
+              textMuted: '#94a3b8' 
+            },
+            dark: { 900: '#0a0a0a', 850: '#111111', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
+          }
+        }
+      }
+    }
           }
         }
       }
@@ -21,91 +36,75 @@
   </script>
   <style>
     * { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #111111;
-      color: #e0e0e0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin: 0;
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #050505; 
+      color: #e2e8f0; 
+      margin: 0; 
+      min-height: 100vh; 
+      overflow: hidden; 
     }
-    .card {
-      background: #242424;
-      border: 1px solid #333333;
-      border-radius: 8px;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.5);
-    }
-    .input-field {
-      background: #111111;
-      border: 1px solid #333333;
-      border-radius: 4px;
-      color: #e0e0e0;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      width: 100%;
-      outline: none;
-    }
-    .input-field:focus {
-      border-color: #4cc2ff;
-    }
-    .input-field::placeholder { color: #555555; }
-    .btn-primary {
-      background: #4cc2ff;
-      color: #000;
-      font-weight: 600;
-      padding: 12px 24px;
-      border-radius: 4px;
-      width: 100%;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .btn-primary:hover {
-      background: #3bb1eb;
-    }
-    .alert-error {
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      color: #fca5a5;
-      border-radius: 4px;
-      padding: 12px 14px;
-      font-size: 13px;
-    }
-    .alert-success {
-      background: rgba(34,197,94,0.1);
-      border: 1px solid rgba(34,197,94,0.3);
-      color: #86efac;
-      border-radius: 4px;
-      padding: 12px 14px;
-      font-size: 13px;
-    }
-    .tab-btn {
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #9e9e9e;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-      background: transparent;
-    }
-    .tab-btn.active {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-    }
-    label { font-size: 12px; font-weight: 500; color: #9e9e9e; margin-bottom: 6px; display: block; }
-  </style>
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Background Orbs & Mesh */
+    .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
+    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.05) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+
+    /* Fluent Glass Modifiers */
+    .bg-fluent-surface { background: rgba(20, 20, 20, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+    .fluent-card { background: rgba(30, 30, 30, 0.4) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
+    .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
+    
+    .fluent-input { background: rgba(10, 10, 10, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
+    .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
+    
+    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4) !important; transform: translateY(-1px) !important; filter: brightness(1.1); }
+    .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
+    
+    .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
+    .btn-action:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; }
+
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-pending { background: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.2) !important; }
+    .badge-active { background: rgba(74, 222, 128, 0.1) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.2) !important; }
+    .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
+
+    /* Login / Single Cards specific (Auth pages) */
+    .auth-card { background: rgba(20, 20, 20, 0.6) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+
+    /* Navigation Sidebar styling overrides */
+    aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
+    aside nav button:hover:not(.bg-white\/10), aside nav a:hover:not(.bg-white\/10) { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.02); }
+    aside nav .bg-white\/10 { background: linear-gradient(90deg, rgba(14,165,233,0.15) 0%, transparent 100%) !important; border-left: 3px solid #0ea5e9 !important; border-radius: 4px !important; color: white !important; }
+    aside nav .text-fluent-textMuted { color: #94a3b8 !important; }
+
+    label { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.2px; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    th { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; transition: background 0.2s; }
+    tr { transition: transform 0.2s; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    tr:last-child td { border-bottom: none; }
+</style>
 </head>
 <body>
+  <div class="bg-mesh"></div>
+  <div class="glow-orb-1"></div>
+  <div class="glow-orb-2"></div>
+
   
 
-  <div class="card w-full max-w-md mx-4 p-10">
+  <div class="auth-card w-full max-w-md mx-4 p-10">
 
     <div class="flex items-center gap-3 mb-8">
       <div class="w-10 h-10 rounded bg-[#4cc2ff] flex items-center justify-center flex-shrink-0">
@@ -114,7 +113,7 @@
         </svg>
       </div>
       <div>
-        <h1 class="font-bold text-white text-lg leading-none">AEGIS <span class="text-sky-400">SOC</span></h1>
+        <h1 class="font-bold text-white text-lg leading-none">AEGIS <span class="text-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]">SOC</span></h1>
         <p class="text-xs text-slate-500 mt-0.5">Security Operations Center</p>
       </div>
     </div>
