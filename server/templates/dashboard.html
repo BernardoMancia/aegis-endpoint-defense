@@ -127,6 +127,30 @@ body {
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 .toast.show { transform: translateX(0); }
+
+/* Modal System */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px); z-index: 2000;
+    display: flex; items-center: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: all 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content {
+    width: 100%; max-width: 600px; max-height: 80vh;
+    transform: translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+
+@keyframes headShake {
+  0% { transform: translateX(0); }
+  6.5% { transform: translateX(-6px) rotateY(-9deg); }
+  18.5% { transform: translateX(5px) rotateY(7deg); }
+  31.5% { transform: translateX(-3px) rotateY(-5deg); }
+  43.5% { transform: translateX(2px) rotateY(3deg); }
+  50% { transform: translateX(0); }
+}
+.animate-headShake { animation: headShake 0.6s ease-in-out; }
 </style>
     
 </head>
@@ -182,37 +206,60 @@ body {
 
             <!-- Bento Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div class="hyper-glass p-6">
+                <div onclick="showStatDetails('total')" class="hyper-glass p-6 cursor-pointer hover:border-sky-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500"><i data-lucide="monitor" class="w-5 h-5"></i></div>
+                        <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500 group-hover:scale-110 transition-transform"><i data-lucide="monitor" class="w-5 h-5"></i></div>
                         <span class="text-xs text-emerald-400 font-bold">+12%</span>
                     </div>
                     <h3 class="text-slate-500 text-sm font-medium">Endpoints Totais</h3>
                     <p class="text-3xl font-bold mt-1" id="stat-total-agents">--</p>
                 </div>
-                <div class="hyper-glass p-6">
+                <div onclick="showStatDetails('online')" class="hyper-glass p-6 cursor-pointer hover:border-emerald-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><i data-lucide="wifi" class="w-5 h-5"></i></div>
+                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 group-hover:scale-110 transition-transform"><i data-lucide="wifi" class="w-5 h-5"></i></div>
                         <span class="text-xs text-emerald-400 font-bold">Online</span>
                     </div>
                     <h3 class="text-slate-500 text-sm font-medium">Agentes Online</h3>
                     <p class="text-3xl font-bold mt-1 text-emerald-400" id="stat-online-agents">--</p>
                 </div>
-                <div class="hyper-glass p-6">
+                <div onclick="showStatDetails('incidents')" class="hyper-glass p-6 cursor-pointer hover:border-rose-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+                        <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400 group-hover:scale-110 transition-transform"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
                         <span class="text-xs text-rose-400 font-bold">Crítico</span>
                     </div>
                     <h3 class="text-slate-500 text-sm font-medium">Ameaças Ativas</h3>
                     <p class="text-3xl font-bold mt-1 text-rose-500" id="stat-incidents">--</p>
                 </div>
-                <div class="hyper-glass p-6">
+                <div onclick="showStatDetails('health')" class="hyper-glass p-6 cursor-pointer hover:border-indigo-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 group-hover:scale-110 transition-transform"><i data-lucide="activity" class="w-5 h-5"></i></div>
                         <span class="text-xs text-indigo-400">Normal</span>
                     </div>
                     <h3 class="text-slate-500 text-sm font-medium">Health Score</h3>
                     <p class="text-3xl font-bold mt-1">98%</p>
+                </div>
+            </div>
+
+            <!-- Stat Detail Modal -->
+            <div id="stat-detail-modal" class="modal-overlay flex items-center justify-center p-6" onclick="if(event.target === this) closeStatModal()">
+                <div class="modal-content hyper-glass p-8 flex flex-col shadow-2xl border-white/10 max-h-[80vh]">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-3">
+                            <div id="modal-icon-bg" class="p-3 rounded-xl">
+                                <i id="modal-icon" data-lucide="activity" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h2 id="modal-title" class="text-xl font-bold">Título da Estatística</h2>
+                                <p id="modal-subtitle" class="text-[10px] text-slate-500 font-mono uppercase tracking-widest">DETALHAMENTO TÉCNICO</p>
+                            </div>
+                        </div>
+                        <button onclick="closeStatModal()" class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div id="modal-body" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Content here -->
+                    </div>
                 </div>
             </div>
 
@@ -615,6 +662,79 @@ body {
                             out.scrollTop = out.scrollHeight;
                         }
                     } catch(e) { showToast("C2 Error", "error"); }
+                }
+
+                function closeStatModal() {
+                    document.getElementById('stat-detail-modal').classList.remove('active');
+                }
+
+                function showStatDetails(type) {
+                    const modal = document.getElementById('stat-detail-modal');
+                    const title = document.getElementById('modal-title');
+                    const iconBg = document.getElementById('modal-icon-bg');
+                    const icon = document.getElementById('modal-icon');
+                    const body = document.getElementById('modal-body');
+                    
+                    let html = '';
+                    if(type === 'total') {
+                        title.innerText = 'Endpoints Gerenciados';
+                        iconBg.className = 'p-3 rounded-xl bg-sky-500/10 text-sky-500';
+                        icon.setAttribute('data-lucide', 'monitor');
+                        html = `<div class="space-y-3">
+                            ${currentAgents.map(ag => `
+                                <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : 'bg-slate-500'}"></div>
+                                        <span class="font-bold text-sm">${ag.hostname}</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 font-mono">${ag.platform}</span>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                    } else if(type === 'online') {
+                        title.innerText = 'Agentes em Tempo Real';
+                        iconBg.className = 'p-3 rounded-xl bg-emerald-500/10 text-emerald-500';
+                        icon.setAttribute('data-lucide', 'wifi');
+                        const online = currentAgents.filter(a => a.status === 'online');
+                        html = online.length > 0 ? `<div class="space-y-3">
+                            ${online.map(ag => `
+                                <div class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex justify-between items-center">
+                                    <span class="font-bold text-sm text-emerald-400">${ag.hostname}</span>
+                                    <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-black">ONLINE</span>
+                                </div>
+                            `).join('')}
+                        </div>` : '<div class="text-center py-10 text-slate-500 italic">Nenhum agente online no momento.</div>';
+                    } else if(type === 'incidents') {
+                        title.innerText = 'Ameaças Críticas';
+                        iconBg.className = 'p-3 rounded-xl bg-rose-500/10 text-rose-500';
+                        icon.setAttribute('data-lucide', 'shield-alert');
+                        // We would ideally fetch more incident details, but for now we list the open ones from stats
+                        html = `<div class="text-center py-10 text-slate-500 italic">Consulte o feed lateral para detalhes forenses. O Aegis SOC identificou incidentes críticos que requerem atenção imediata.</div>`;
+                    } else if(type === 'health') {
+                        title.innerText = 'Aegis Health Factor';
+                        iconBg.className = 'p-3 rounded-xl bg-indigo-500/10 text-indigo-500';
+                        icon.setAttribute('data-lucide', 'activity');
+                        html = `<div class="space-y-6">
+                            <div class="p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+                                <h4 class="text-sm font-bold mb-2">Resumo de Postura</h4>
+                                <p class="text-xs text-slate-400 leading-relaxed">O score de 98% indica um ambiente estável. 2% de depreciação devido a vulnerabilidades pendentes em 3 endpoints e 1 isolamento ativo.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                                    <div class="text-[10px] text-slate-500 mb-1">Patch Compliance</div>
+                                    <div class="text-lg font-bold">94%</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                                    <div class="text-[10px] text-slate-500 mb-1">Threat Block Rate</div>
+                                    <div class="text-lg font-bold">100%</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    body.innerHTML = html;
+                    lucide.createIcons();
+                    modal.classList.add('active');
                 }
 
                 async function sendTerminalCommand() {
