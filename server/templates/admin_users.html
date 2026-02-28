@@ -14,7 +14,7 @@
           fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
           colors: {
             fluent: { 
-              bg: '#050505', 
+              bg: '#141414', 
               surface: 'rgba(30, 30, 30, 0.45)', 
               surfaceHover: 'rgba(45, 45, 45, 0.6)',
               border: 'rgba(255, 255, 255, 0.08)', 
@@ -23,7 +23,7 @@
               text: '#e2e8f0', 
               textMuted: '#94a3b8' 
             },
-            dark: { 900: '#0a0a0a', 850: '#111111', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
+            dark: { 900: '#0a0a0a', 850: '#181818', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
           }
         }
       }
@@ -36,8 +36,9 @@
     <style>
     * { box-sizing: border-box; }
     body { 
+      color-scheme: dark; 
       font-family: 'Inter', sans-serif; 
-      background: #050505; 
+      background: #141414; 
       color: #e2e8f0; 
       margin: 0; 
       min-height: 100vh; 
@@ -52,15 +53,15 @@
     
     /* Background Orbs & Mesh */
     .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
-    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.05) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
-    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.02) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.015) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
 
     /* Fluent Glass Modifiers */
-    .bg-fluent-surface { background: rgba(20, 20, 20, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .fluent-card { background: rgba(30, 30, 30, 0.4) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
+    .bg-fluent-surface { background: rgba(35, 35, 35, 0.6) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+    .fluent-card { background: rgba(40, 40, 40, 0.5) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
     .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
     
-    .fluent-input { background: rgba(10, 10, 10, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
+    .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
     .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
     
     .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -77,7 +78,7 @@
     .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
 
     /* Login / Single Cards specific (Auth pages) */
-    .auth-card { background: rgba(20, 20, 20, 0.6) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+    .auth-card { background: rgba(30, 30, 30, 0.7) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
 
     /* Navigation Sidebar styling overrides */
     aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
@@ -246,7 +247,7 @@
                             <div class="flex items-center gap-2 flex-wrap">
                                 {% if current_role == 'superadmin' %}
                                 <a href="/admin/users/{{ u.id }}/profile"
-                                    class="text-[10px] bg-sky-500/10 text-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)] border border-sky-500/30 px-2 py-1 rounded hover:bg-sky-500/20">✏️
+                                    class="text-[10px] bg-sky-500/10 text-sky-400 drop-shadow-[0_0_4px_rgba(56,189,248,0.2)] border border-sky-500/30 px-2 py-1 rounded hover:bg-sky-500/20">✏️
                                     Editar Perfil</a>
                                 {% endif %}
                                 <button onclick="openPasswordModal({{ u.id }}, '{{ u.username }}')"
@@ -276,7 +277,7 @@
             <div class="fluent-card p-6 w-full max-w-sm">
                 <h3 class="text-lg font-bold text-white mb-2">Trocar Senha</h3>
                 <p class="text-xs text-slate-400 mb-4">Definir nova senha para <span id="pwd-username"
-                        class="font-mono text-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]"></span></p>
+                        class="font-mono text-sky-400 drop-shadow-[0_0_4px_rgba(56,189,248,0.2)]"></span></p>
                 <form id="pwd-form" method="POST" action="">
                     <input type="password" name="new_password" required placeholder="Nova Senha..."
                         class="fluent-input w-full mt-2 mb-4 block" />
