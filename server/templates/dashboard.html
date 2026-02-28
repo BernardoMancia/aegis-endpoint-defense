@@ -4,274 +4,396 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Aegis SOC — Security Operations Center</title>
-  <meta name="description" content="Painel SOC da plataforma Aegis SIEM & EDR" />
-  <script src="https://cdn.tailwindcss.com?v=1.1"></script>
-  <script src="https://unpkg.com/lucide@latest?v=1.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js?v=1.1"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap&v=1.1"
-    rel="stylesheet" />
-  <script>
-    window.onerror = function (msg, url, line) {
-      console.error("AEGIS ERROR:", msg, "at", url, ":", line);
-      return false;
-    };
-  </script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-          colors: {
-            aegis: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e' },
-            dark: { 900: '#080c14', 850: '#0d1117', 800: '#161b24', 750: '#1a2230', 700: '#1e2a3a', 600: '#243447', 500: '#2d4060' }
-          },
-          animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite', 'slide-in': 'slideIn 0.3s ease-out' },
-          keyframes: { slideIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
-        }
-      }
-    }
-  </script>
+  <title>Aegis SOC — Next-Gen Endpoint Defense</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
+    /* Aegis Next-Gen Deep Space & Neon Theme */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --deep-space: #050812;
+      --card-bg: rgba(13, 18, 30, 0.7);
+      --neon-sky: #0ea5e9;
+      --neon-emerald: #10b981;
+      --neon-rose: #f43f5e;
+      --neon-purple: #a855f7;
+      --border-subtle: rgba(255, 255, 255, 0.05);
+    }
+
     * {
-      box-sizing: border-box
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
     }
 
     body {
-      background: #080c14;
-      font-family: 'Inter', sans-serif;
-      color: #e2e8f0;
-      overflow-x: hidden;
-      overflow-y: auto;
+      background-color: var(--deep-space);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+        conic-gradient(from 0deg at 50% 100%, rgba(0, 0, 0, 0) 0%, rgba(14, 165, 233, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
+      color: #E2E8F0;
       min-height: 100vh;
+      overflow: hidden;
+      /* Main window doesn't scroll natively anymore */
       margin: 0;
+      display: flex;
     }
 
-    .hidden {
-      display: none !important;
-    }
-
-    svg {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-
+    /* Scrollbars */
     ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px
+      width: 5px;
+      height: 5px;
     }
 
     ::-webkit-scrollbar-track {
-      background: #0d1117
+      background: transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #2d4060;
-      border-radius: 4px
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #0ea5e9
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    
-
-    
-
-    .severity-CRITICAL {
-      color: #f87171;
-      border-color: #f87171
+    /* Bento Cards */
+    .bento-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .severity-HIGH {
-      color: #fb923c;
-      border-color: #fb923c
+    .bento-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(14, 165, 233, 0.2);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(14, 165, 233, 0.1);
     }
 
-    .severity-MEDIUM {
-      color: #fbbf24;
-      border-color: #fbbf24
+    /* Buttons */
+    .btn-neon {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .severity-LOW {
-      color: #4ade80;
-      border-color: #4ade80
+    .btn-neon:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
     }
 
-    .bg-severity-CRITICAL {
-      background: rgba(248, 113, 113, 0.12)
+    .btn-neon:active:not(:disabled) {
+      transform: translateY(1px) scale(0.98);
     }
 
-    .bg-severity-HIGH {
-      background: rgba(251, 146, 60, 0.12)
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .bg-severity-MEDIUM {
-      background: rgba(251, 191, 36, 0.12)
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--neon-sky);
+      color: white;
+      transform: translateY(-2px);
     }
 
-    .bg-severity-LOW {
-      background: rgba(74, 222, 128, 0.12)
+    /* Slide-in Overlay Panel */
+    #slide-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 600px;
+      max-width: 100vw;
+      height: 100vh;
+      background: rgba(10, 15, 25, 0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+      z-index: 50;
+      transform: translateX(100%);
+      transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      display: flex;
+      flex-direction: column;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block
+    #slide-panel.open {
+      transform: translateX(0);
     }
 
-    .status-online {
-      background: #4ade80;
-      box-shadow: 0 0 8px #4ade80
+    #panel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
     }
 
-    .status-offline {
-      background: #6b7280
+    #panel-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
     }
 
-    .status-isolated {
-      background: #f87171;
-      box-shadow: 0 0 8px #f87171
+    /* Compact Sidebar */
+    .compact-sidebar {
+      width: 72px;
+      height: 100vh;
+      background: rgba(13, 18, 30, 0.4);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 24px;
+      padding-bottom: 24px;
+      z-index: 20;
     }
 
-    .terminal-output {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      color: #4ade80
-    }
-
-    .mitre-cell {
-      width: 68px;
-      height: 50px;
-      border-radius: 4px;
-      font-size: 9px;
-      font-weight: 600;
+    .side-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
+      color: #64748b;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(30, 42, 58, 0.6)
+      margin-bottom: 16px;
     }
 
-    .mitre-cell.active {
-      background: rgba(248, 113, 113, 0.25);
-      border-color: #f87171;
-      color: #f87171
+    .side-icon:hover {
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--neon-sky);
+      transform: scale(1.1);
     }
 
-    .mitre-cell:hover {
-      border-color: rgba(14, 165, 233, 0.5);
-      transform: scale(1.05)
+    .side-icon.active {
+      background: var(--neon-sky);
+      color: white;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
     }
 
-    .chat-bubble-user {
-      background: rgba(14, 165, 233, 0.15);
-      border: 1px solid rgba(14, 165, 233, 0.3);
-      border-radius: 12px 12px 0 12px
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .chat-bubble-ai {
-      background: rgba(30, 42, 58, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px 12px 12px 0
+    .top-header {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: linear-gradient(180deg, rgba(13, 18, 30, 0.5) 0%, transparent 100%);
     }
 
-    .tab-btn {
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-      color: #94a3b8
-    }
-
-    .tab-btn.active {
-      background: rgba(14, 165, 233, 0.2);
-      color: #0ea5e9;
-      border: 1px solid rgba(14, 165, 233, 0.4); box-shadow: 0 0 10px rgba(14,165,233,0.3);
-    }
-
-    .tab-btn:not(.active):hover {
-      color: #cbd5e1;
-      background: rgba(255, 255, 255, 0.05)
-    }
-
-    .agent-card {
-      transition: all 0.2s;
-      cursor: pointer
-    }
-
-    .agent-card.selected {
-      border-color: rgba(14, 165, 233, 0.6) !important;
-      background: rgba(14, 165, 233, 0.06) !important
-    }
-
-    .glow-text {
-      text-shadow: 0 0 20px rgba(14, 165, 233, 0.5)
-    }
-
-    .grid-layout {
-      display: grid;
-      grid-template-columns: 300px 1fr 320px;
-      gap: 12px;
-      height: calc(100vh - 60px);
-      overflow: hidden
-    }
-
-    .col-scroll {
+    .dashboard-scroll {
+      flex: 1;
       overflow-y: auto;
-      height: 100%;
-      padding-right: 2px
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
-    .fade-in {
-      animation: slideIn 0.3s ease-out
+    /* Severity badges */
+    .badge-critical {
+      background: rgba(244, 63, 94, 0.15);
+      color: #FDA4AF;
+      border: 1px solid rgba(244, 63, 94, 0.3);
     }
 
-    @keyframes shimmer {
-      0% {
-        background-position: -200% 0
-      }
-
-      100% {
-        background-position: 200% 0
-      }
+    .badge-high {
+      background: rgba(245, 158, 11, 0.15);
+      color: #FCD34D;
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
-    .skeleton {
-      background: linear-gradient(90deg, #1e2a3a 25%, #243447 50%, #1e2a3a 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px
+    .badge-medium {
+      background: rgba(14, 165, 233, 0.15);
+      color: #7DD3FC;
+      border: 1px solid rgba(14, 165, 233, 0.3);
     }
 
-    #modal-overlay {
-      display: none;
+    .badge-low {
+      background: rgba(16, 185, 129, 0.15);
+      color: #A7F3D0;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Terminal & Inputs */
+    .terminal-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: rgba(5, 8, 18, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--neon-emerald);
+      overflow-y: auto;
+    }
+
+    .aegis-input {
+      background: rgba(15, 23, 42, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #F8FAFC !important;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+      transition: all 0.3s ease;
+      color-scheme: dark;
+    }
+
+    .aegis-input:focus {
+      border-color: var(--neon-sky) !important;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+    }
+
+    /* Toasts */
+    #toast-container {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 100;
-      backdrop-filter: blur(4px)
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
     }
 
+    .toast {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 12px;
+      padding: 14px 24px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transform: translateX(120%) scale(0.9);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      opacity: 0;
+      pointer-events: auto;
+    }
+
+    .toast.show {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    .toast-error {
+      border-left: 4px solid var(--neon-rose);
+    }
+
+    .toast-success {
+      border-left: 4px solid var(--neon-emerald);
+    }
+
+    .toast-warning {
+      border-left: 4px solid #F59E0B;
+    }
+
+    /* SOAR Buttons grid inside panel */
+    .soar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .soar-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+
+    .soar-btn:hover {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: rgba(14, 165, 233, 0.3);
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    .icon-24 {
+      width: 24px;
+      height: 24px;
+    }
+
+    .danger-action {
+      color: #f43f5e;
+      border-color: rgba(244, 63, 94, 0.2);
+    }
+
+    .danger-action:hover {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.5);
+      color: #fff;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(244, 63, 94, 0.2);
+    }
+
+    /* Modals */
     #ioc-modal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 101;
-      width: 560px;
-      max-height: 80vh
+      width: 600px;
+      max-height: 85vh;
+      display: none;
     }
 
     #screenshot-modal {
@@ -281,1035 +403,292 @@
       transform: translate(-50%, -50%);
       z-index: 101;
       width: 90%;
-      max-width: 900px
+      max-width: 1000px;
+      display: none;
     }
-  
-    /* Premium Glassmorphism & Animations */
-    .glass {
-      background: rgba(13, 17, 23, 0.55);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(14, 165, 233, 0.15);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .glass-hover {
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .glass-hover:hover {
-      border-color: rgba(14, 165, 233, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    }
-    
-    /* Toast System */
-    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-    .toast { background: rgba(20, 25, 35, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
-    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
-    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.15), rgba(20,25,35,0.95) 30%); }
-    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.15), rgba(20,25,35,0.95) 30%); }
-    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.15), rgba(20,25,35,0.95) 30%); }
-    
-    /* Base Input fixes */
-    input, select { color-scheme: dark; }
-
-    /* Button Animations */
-    button { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
-    button:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
-    button:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
-    .tab-btn { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
-    .tab-btn:hover { transform: translateY(-2px); }
-
-</style>
+  </style>
 </head>
 
 <body>
+
+  <!-- Toast Container -->
   <div id="toast-container"></div>
 
-
-  <header class="glass h-[52px] flex items-center justify-between px-5 border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <div
-        class="w-7 h-7 rounded-lg bg-gradient-to-br from-aegis-500 to-blue-700 flex items-center justify-center shrink-0">
-        <svg style="width:16px; height:16px;" class="text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      </div>
-      <span class="font-bold text-white tracking-wide glow-text">AEGIS <span class="text-aegis-500">SOC</span></span>
-      <span class="text-xs text-slate-500 hidden md:block">SIEM & EDR Platform v1.0</span>
+  <!-- Sidebar -->
+  <nav class="compact-sidebar">
+    <div class="side-icon active" title="Dashboard">
+      <i data-lucide="layout-dashboard"></i>
     </div>
-
-    <!-- Center Stats -->
-    <div id="header-stats" class="hidden lg:flex gap-4 text-xs items-center mx-auto">
-      <span class="text-slate-500">Agentes: <span id="stat-agents" class="text-white font-semibold">—</span></span>
-      <span class="text-slate-500">Online: <span id="stat-online" class="text-green-400 font-semibold">—</span></span>
-      <span class="text-slate-500">Incidentes: <span id="stat-incidents"
-          class="text-red-400 font-semibold">—</span></span>
-      <span class="text-slate-500">IoCs: <span id="stat-iocs" class="text-orange-400 font-semibold">—</span></span>
-      <div class="flex items-center gap-1.5 ml-2">
-        <span id="ajax-indicator" class="status-dot status-online"></span>
-        <span class="text-xs text-slate-500">Live</span>
-      </div>
+    <div class="side-icon" title="Threat Intel" onclick="openIocModal()">
+      <i data-lucide="radar"></i>
     </div>
-
-    <!-- Right Menu -->
-    <div class="flex items-center gap-3">
-      <a href="/admin/users"
-        class="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-all font-medium hidden sm:flex items-center gap-1.5">⚙️
-        Admin</a>
-      <button id="btn-open-ioc" onclick="openIocModal()"
-        class="text-xs bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1.5 rounded-lg hover:bg-orange-500/20 transition-all hidden sm:block">🎯
-        Threat Intel</button>
-
-      <!-- User Dropdown (Profile & Logout) -->
-      <a href="/profile"
-        class="text-xs bg-sky-500/10 border border-sky-500/30 text-sky-400 px-3 py-1.5 rounded-lg hover:bg-sky-500/20 transition-all font-medium flex items-center gap-1.5">👤
-        Meu Perfil</a>
-      <a href="/logout"
-        class="text-xs bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all font-medium flex items-center gap-1.5"
-        title="Sair (Logout)">❌ Sair</a>
+    <!-- Bottom block -->
+    <div class="mt-auto">
+      <a href="/admin/users" class="side-icon" title="Admin">
+        <i data-lucide="settings"></i>
+      </a>
+      <a href="/profile" class="side-icon" title="Meu Perfil">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed={{current_user}}&backgroundColor=0ea5e9"
+          class="w-8 h-8 rounded-full border border-sky-500/50" />
+      </a>
     </div>
-  </header>
+  </nav>
 
+  <!-- Main Area -->
+  <div class="main-content">
 
-  <div class="grid-layout p-4 pt-4">
-
-
-    <div class="col-scroll">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Endpoints</h2>
-        <div class="flex gap-1">
-          <button onclick="filterPlatform('')" id="filter-all"
-            class="tab-btn active text-[10px] py-1 px-2">Todos</button>
-          <button onclick="filterPlatform('windows')" id="filter-windows"
-            class="tab-btn text-[10px] py-1 px-2">Windows</button>
-          <button onclick="filterPlatform('android')" id="filter-android"
-            class="tab-btn text-[10px] py-1 px-2">Android</button>
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 p-2 shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+          <i data-lucide="shield" class="w-full h-full text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide text-white">AEGIS <span class="text-sky-400">SOC</span></h1>
+          <p class="text-xs text-slate-400">Next-Gen Endpoint Defense</p>
         </div>
       </div>
-      <div id="agents-list" class="space-y-2"></div>
-    </div>
 
+      <div class="flex gap-4 items-center">
+        <div
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          C2 Online
+        </div>
+        <a href="/logout"
+          class="btn-outline text-xs !py-1.5 !px-3 border-transparent hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400">Sair</a>
+      </div>
+    </header>
 
-    <div class="col-scroll">
+    <!-- Scrollable content -->
+    <div class="dashboard-scroll">
 
-      <div class="flex gap-1 mb-3">
-        <button onclick="switchTab('terminal')" id="tab-terminal" class="tab-btn active">💻 Terminal</button>
-        <button onclick="switchTab('soar')" id="tab-soar" class="tab-btn">🛰️ Atividades</button>
-        <button onclick="switchTab('vulns')" id="tab-vulns" class="tab-btn">🛡️ Vulnerabilidades</button>
-        <button onclick="switchTab('socchat')" id="tab-socchat" class="tab-btn">💬 Chat Agente</button>
-        <button onclick="switchTab('incidents')" id="tab-incidents" class="tab-btn">🚨 Incidentes</button>
-        <button onclick="switchTab('events')" id="tab-events" class="tab-btn">📋 Eventos</button>
-        <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn">📊 Stats</button>
+      <!-- BENTO BOX HERO STATS -->
+      <div class="grid grid-cols-4 gap-6">
+        <div class="bento-card p-6 flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium mb-1">Total Endpoints</p>
+            <h2 class="text-3xl font-bold text-white" id="stat-agents">—</h2>
+          </div>
+          <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400"><i data-lucide="monitor"></i></div>
+        </div>
+        <div class="bento-card p-6 flex items-center justify-between pointer-cursor transition"
+          onclick="filterPlatform('')">
+          <div>
+            <p class="text-slate-400 text-sm font-medium mb-1">Agentes Online</p>
+            <h2 class="text-3xl font-bold text-emerald-400" id="stat-online">—</h2>
+          </div>
+          <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400"><i data-lucide="wifi"></i></div>
+        </div>
+        <div class="bento-card p-6 flex items-center justify-between pointer-cursor transition"
+          onclick="filterIncidents('CRITICAL')">
+          <div>
+            <p class="text-slate-400 text-sm font-medium mb-1">Incidentes Críticos</p>
+            <h2 class="text-3xl font-bold text-rose-500" id="stat-incidents">—</h2>
+          </div>
+          <div class="p-3 bg-rose-500/10 rounded-xl text-rose-500"><i data-lucide="alert-triangle"></i></div>
+        </div>
+        <div class="bento-card p-6 flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium mb-1">Indicadores (IoCs)</p>
+            <h2 class="text-3xl font-bold text-orange-400" id="stat-iocs">—</h2>
+          </div>
+          <div class="p-3 bg-orange-500/10 rounded-xl text-orange-400"><i data-lucide="crosshairs"></i></div>
+        </div>
       </div>
 
+      <!-- MAIN GRID (Agents & Events/Incidents) -->
+      <div class="grid grid-cols-12 gap-6 flex-1 min-h-0">
 
-      <div id="tab-content-terminal">
-        <div class="glass rounded-xl p-4 mb-3">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-slate-300">Terminal Remoto</h3>
-            <span id="selected-agent-label" class="text-xs text-slate-500">Nenhum agente selecionado</span>
-          </div>
-          <div id="terminal-output"
-            class="terminal-output bg-dark-900 rounded-lg p-3 h-52 overflow-y-auto mb-3 text-xs leading-relaxed">
-            <span class="text-slate-600">Aguardando output...</span>
-          </div>
-          <div class="flex gap-2">
-            <span class="text-green-400 font-mono text-sm self-center">❯</span>
-            <input id="cmd-input" type="text" placeholder="Digite um comando shell..." autocomplete="off"
-              class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-slate-600 focus:outline-none focus:border-aegis-500 transition-colors" />
-            <button onclick="sendCommand()"
-              class="bg-aegis-600 hover:bg-aegis-500 text-white text-sm px-4 py-2 rounded-lg transition-all font-medium">Enviar</button>
-          </div>
-        </div>
-
-        <div class="glass rounded-xl p-4 mt-3">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Ações SOAR</h3>
-          <div class="grid grid-cols-5 gap-2">
-            <button onclick="soarAction('screenshot')"
-              class="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs py-2.5 px-3 rounded-lg hover:bg-blue-500/20 transition-all font-medium flex items-center gap-2 font-bold">🖥️
-              Screenshot</button>
-            <button onclick="soarAction('force_scan_vulns')"
-              class="bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs py-2.5 px-3 rounded-lg hover:bg-purple-500/20 transition-all font-medium flex items-center gap-2 font-bold">🛡️
-              Scan Vulnerabilidades</button>
-            <button onclick="soarAction('force_scan_fim')"
-              class="bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs py-2.5 px-3 rounded-lg hover:bg-cyan-500/20 transition-all font-medium flex items-center gap-2 font-bold">🔍
-              Check Integridade</button>
-            <button onclick="soarAction('force_scan_network')"
-              class="bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-400 text-xs py-2.5 px-3 rounded-lg hover:bg-fuchsia-500/20 transition-all font-medium flex items-center gap-2 font-bold">📡
-              Scan de Rede</button>
-            <button onclick="soarAction('force_logs')"
-              class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs py-2.5 px-3 rounded-lg hover:bg-emerald-500/20 transition-all font-medium flex items-center gap-2 font-bold">📥
-              Dump Event Logs</button>
-          </div>
-        </div>
-
-
-        <div class="mt-3 p-4 border border-red-500/20 bg-red-500/5 rounded-xl">
-          <h3 class="text-xs font-bold text-red-500 mb-3 flex items-center gap-2">☣️ ÁREA CRÍTICA (PERIGO)</h3>
-          <div class="grid grid-cols-1 gap-2">
-            <div class="grid grid-cols-2 gap-2">
-              <button onclick="soarAction('isolate')"
-                class="bg-red-500/10 border border-red-500/40 text-red-400 text-[10px] py-3 px-3 rounded-xl hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all font-bold flex items-center justify-center gap-2">🔒
-                ISOLAR AGENTE</button>
-              <button onclick="soarAction('unisolate')"
-                class="bg-dark-800 border border-dark-600 text-slate-300 text-[10px] py-3 px-3 rounded-xl hover:bg-dark-700 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all font-bold flex items-center justify-center gap-2">🔓
-                RETIRAR ISOLAMENTO</button>
+        <!-- Agents List (7 cols) -->
+        <div class="col-span-7 flex flex-col min-h-0">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white">Grid de Endpoints</h3>
+            <div class="flex gap-2">
+              <button class="btn-outline !py-1 !px-3 !text-xs !bg-sky-500/10 !border-sky-500/30 !text-white"
+                onclick="filterPlatform('')">Todos</button>
+              <button class="btn-outline !py-1 !px-3 !text-xs" onclick="filterPlatform('windows')">Windows</button>
+              <button class="btn-outline !py-1 !px-3 !text-xs" onclick="filterPlatform('android')">Android</button>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <button onclick="soarAction('uninstall')"
-                class="bg-orange-500/10 border border-orange-500/40 text-orange-400 text-[10px] py-3 px-3 rounded-xl hover:bg-orange-500/20 hover:shadow-[0_0_15px_rgba(249,115,22,0.4)] transition-all font-black flex items-center justify-center gap-2">🗑️
-                DESINSTALAR AGENTE</button>
-              <button onclick="soarAction('wipe')"
-                class="bg-red-600/10 border border-red-600/50 text-red-500 text-[10px] py-3 px-3 rounded-xl hover:bg-red-600/30 hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all font-black flex items-center justify-center gap-2">💣
-                WIPE COMPLETO DO ENDPOINT</button>
+          </div>
+
+          <div class="bento-card p-2 flex-1 overflow-y-auto">
+            <div id="agents-list" class="space-y-2 p-2">
+              <!-- Agents load here -->
+              <p class="text-center text-slate-500 py-10">Conectando ao C2...</p>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- Incidents & Feed (5 cols) -->
+        <div class="col-span-5 flex flex-col min-h-0 space-y-6">
 
-      <div id="tab-content-soar" class="hidden">
-        <div class="glass rounded-xl p-4 flex flex-col" style="height: calc(100vh - 120px);">
-          <div class="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
-            <h3 class="text-sm font-semibold text-slate-300">Resultados de Atividades SOAR</h3>
-            <button onclick="document.getElementById('soar-activities-log').innerHTML=''"
-              class="text-[10px] text-slate-500 hover:text-slate-300">Limpar Log</button>
-          </div>
-          <div id="soar-activities-log"
-            class="flex-1 overflow-y-auto font-mono text-[11px] space-y-3 pr-2 custom-scrollbar p-2 bg-dark-900/50 rounded-lg border border-white/5">
-            <div class="text-slate-600 italic">Nenhuma atividade registrada nesta sessão.</div>
-          </div>
-        </div>
-      </div>
-
-
-      <div id="tab-content-vulns" class="hidden">
-        <div class="glass rounded-xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Vulnerabilidades Detectadas</h3>
-          <div id="vulns-list" class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-            <p class="text-xs text-slate-600 text-center py-4">Selecione um agente para ver as vulnerabilidades.</p>
-          </div>
-        </div>
-      </div>
-
-
-      <div id="tab-content-socchat" class="hidden flex flex-col" style="height: calc(100vh - 120px);">
-        <div class="glass rounded-xl p-4 flex-1 flex flex-col">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Chat Direto (SOC ↔ Agente)</h3>
-          <div id="socchat-messages"
-            class="flex-1 overflow-y-auto space-y-2 mb-3 bg-dark-900 rounded-lg p-3 text-xs leading-relaxed border border-white/5">
-          </div>
-          <div class="flex gap-2">
-            <input id="socchat-input" type="text" placeholder="Digite uma mensagem para o endpoint..."
-              autocomplete="off"
-              class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500 transition-colors"
-              onkeydown="if(event.key==='Enter')sendSocChat()" />
-            <button onclick="sendSocChat()"
-              class="bg-aegis-600 hover:bg-aegis-500 text-white text-sm px-4 py-2 rounded-lg transition-all font-medium">Enviar</button>
-            <button onclick="resolveSocChat()"
-              class="bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/40 text-amber-500 text-sm px-4 py-2 rounded-lg transition-all font-medium"
-              title="Marcar chamado como atendido">✔️ Resolver</button>
-          </div>
-        </div>
-      </div>
-
-
-      <div id="tab-content-incidents" class="hidden">
-        <div class="glass rounded-xl p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-slate-300">Incidentes Ativos</h3>
-            <div class="flex gap-1">
-              <button onclick="filterIncidents('')" class="tab-btn text-[10px] py-1 px-2">Todos</button>
-              <button onclick="filterIncidents('CRITICAL')"
-                class="tab-btn text-[10px] py-1 px-2 text-red-400">Critical</button>
-              <button onclick="filterIncidents('HIGH')"
-                class="tab-btn text-[10px] py-1 px-2 text-orange-400">High</button>
+          <!-- Incidents -->
+          <div class="flex flex-col flex-1 min-h-0">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Incidentes Ativos</h3>
+              <button class="text-rose-400 text-xs hover:text-rose-300 font-medium" onclick="filterIncidents('')">Ver
+                Todos</button>
+            </div>
+            <div class="bento-card p-4 flex-1 overflow-y-auto">
+              <div id="incidents-list" class="space-y-3"></div>
             </div>
           </div>
-          <div id="incidents-list" class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto"></div>
-        </div>
-      </div>
 
-
-      <div id="tab-content-events" class="hidden">
-        <div class="glass rounded-xl p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-slate-300">Feed de Eventos</h3>
-            <div class="flex gap-1">
-              <select id="filter-severity" onchange="loadEvents()"
-                class="bg-dark-800 border border-dark-600 text-xs text-slate-300 px-2 py-1 rounded-lg focus:outline-none focus:border-aegis-500">
-                <option value="">Todas severidades</option>
-                <option value="CRITICAL">Critical</option>
-                <option value="HIGH">High</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LOW">Low</option>
-              </select>
-              <select id="filter-category" onchange="loadEvents()"
-                class="bg-dark-800 border border-dark-600 text-xs text-slate-300 px-2 py-1 rounded-lg focus:outline-none focus:border-aegis-500">
-                <option value="">Todas categorias</option>
-                <option value="auth">Auth</option>
-                <option value="process">Process</option>
-                <option value="network">Network</option>
-                <option value="file">File</option>
-                <option value="registry">Registry</option>
-              </select>
+          <!-- Quick Actions / AI Chat -->
+          <div
+            class="bento-card p-5 h-[300px] flex flex-col border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+            <h3 class="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2"><i data-lucide="sparkles"
+                class="w-4 h-4"></i> Aegis AI Copilot</h3>
+            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 mb-3 pr-2 text-sm text-slate-300">
+              <p class="text-slate-500 text-xs italic">A IA de segurança está pronta para ajudar.</p>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="chat-input" class="aegis-input !py-2 !text-sm"
+                placeholder="Pergunte sobre ameaças, táticas MITRE..." onkeydown="if(event.key==='Enter')sendChat()">
+              <button onclick="sendChat()"
+                class="btn-neon !bg-gradient-to-r !from-purple-500 !to-indigo-500 shadow-[0_4px_15px_rgba(168,85,247,0.3)]"><i
+                  data-lucide="send" class="w-4 h-4"></i></button>
             </div>
           </div>
-          <div id="events-list" class="space-y-1.5 max-h-[calc(100vh-200px)] overflow-y-auto"></div>
+
         </div>
+
       </div>
 
-
-      <div id="tab-content-stats" class="hidden space-y-3">
-        <div class="glass rounded-xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Eventos por Hora (24h)</h3>
-          <canvas id="chart-events" height="120"></canvas>
-        </div>
-        <div class="glass rounded-xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Distribuição por Severidade</h3>
-          <div class="flex items-center gap-6">
-            <div style="width:160px;height:160px"><canvas id="chart-severity"></canvas></div>
-            <div id="severity-legend" class="flex-1 space-y-2 text-sm"></div>
-          </div>
-        </div>
-        <div class="glass rounded-xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-3">Top Técnicas MITRE</h3>
-          <div id="mitre-top-list" class="space-y-2"></div>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="col-scroll space-y-3">
-
-      <div class="glass rounded-xl p-3">
-        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">MITRE ATT&CK</h3>
-        <div id="mitre-map" class="flex flex-wrap gap-1"></div>
-      </div>
-
-
-      <div class="glass rounded-xl p-3 flex flex-col" style="height:420px">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Aegis AI</h3>
-          <button onclick="clearChat()"
-            class="text-xs text-slate-600 hover:text-slate-400 transition-colors">Limpar</button>
-        </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2 mb-2 pr-1"></div>
-        <div class="flex gap-2">
-          <input id="chat-input" type="text" placeholder="Pergunte sobre ameaças..." autocomplete="off"
-            class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500 transition-colors"
-            onkeydown="if(event.key==='Enter')sendChat()" />
-          <button onclick="sendChat()"
-            class="bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/30 text-purple-300 text-xs px-3 py-2 rounded-lg transition-all">AI</button>
-        </div>
-      </div>
     </div>
   </div>
 
 
-  <div id="modal-overlay" onclick="closeAllModals()"></div>
+  <!-- PANEL OVERLAY -->
+  <div id="panel-overlay" onclick="closeSlidePanel()"></div>
 
+  <!-- SLIDE-IN PANEL (Agent Focus mode) -->
+  <div id="slide-panel">
 
-  <div id="ioc-modal" class="glass rounded-2xl p-5 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-white">🎯 Threat Intelligence — IoCs</h2>
-      <button onclick="closeAllModals()" class="text-slate-500 hover:text-white text-xl leading-none">✕</button>
-    </div>
-    <div class="flex gap-2 mb-4">
-      <select id="ioc-type"
-        class="bg-dark-800 border border-dark-600 text-sm text-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:border-aegis-500 flex-none w-28">
-        <option value="hash">Hash</option>
-        <option value="ip">IP</option>
-        <option value="domain">Domínio</option>
-        <option value="url">URL</option>
-      </select>
-      <input id="ioc-value" type="text" placeholder="Valor do IoC..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <input id="ioc-name" type="text" placeholder="Nome da ameaça..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <button onclick="addIoc()"
-        class="bg-orange-500/20 border border-orange-500/40 text-orange-400 text-sm px-4 py-2 rounded-lg hover:bg-orange-500/30 transition-all font-medium">+
-        Adicionar</button>
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between p-6 border-b border-white/5 bg-black/20">
+      <div>
+        <h2 id="panel-agent-name" class="text-2xl font-bold text-white mb-1">Nenhum Selecionado</h2>
+        <span id="panel-agent-id" class="text-xs font-mono text-slate-500">...</span>
+      </div>
+      <button onclick="closeSlidePanel()"
+        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-all"><i
+          data-lucide="x"></i></button>
     </div>
 
-    <div class="flex gap-2 mb-4">
-      <input id="ioc-check-val" type="text" placeholder="Verificar hash/IP/domínio..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <button onclick="checkIoc()"
-        class="bg-blue-500/20 border border-blue-500/40 text-blue-400 text-sm px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all">Verificar</button>
+    <div class="flex-1 overflow-y-auto p-6 space-y-8">
+
+      <!-- Terminal Area -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2"><i
+            data-lucide="terminal" class="w-4 h-4 text-sky-400"></i> Reverse Shell</h3>
+        <div id="terminal-output" class="terminal-box h-64 mb-3">
+          <span class="text-slate-600">Conecte a um agente para iniciar...</span>
+        </div>
+        <div class="flex gap-2 relative">
+          <span class="absolute left-4 top-3 text-sky-400 font-mono text-sm">❯</span>
+          <input id="cmd-input" type="text" class="aegis-input pl-8 font-mono"
+            placeholder="Execute um comando systema..." autocomplete="off">
+          <button onclick="sendCommand()" class="btn-neon shrink-0">Run</button>
+        </div>
+      </div>
+
+      <!-- SOAR Actions -->
+      <div>
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2"><i
+            data-lucide="zap" class="w-4 h-4 text-emerald-400"></i> Orquestração (SOAR)</h3>
+        <div class="soar-grid mb-3">
+          <div onclick="soarAction('screenshot')" class="soar-btn"><i data-lucide="monitor"
+              class="icon-24 text-blue-400"></i> Screenshot</div>
+          <div onclick="soarAction('force_scan_vulns')" class="soar-btn"><i data-lucide="shield-alert"
+              class="icon-24 text-purple-400"></i> Vuln Scan</div>
+          <div onclick="soarAction('force_scan_fim')" class="soar-btn"><i data-lucide="file-search"
+              class="icon-24 text-cyan-400"></i> Integridade</div>
+          <div onclick="soarAction('force_scan_network')" class="soar-btn"><i data-lucide="network"
+              class="icon-24 text-fuchsia-400"></i> Scan Rede</div>
+          <div onclick="soarAction('force_logs')" class="soar-btn"><i data-lucide="download"
+              class="icon-24 text-emerald-400"></i> Event Logs</div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="p-4 border border-rose-500/20 bg-rose-500/5 rounded-xl mt-6">
+          <h4 class="text-xs font-bold text-rose-500 mb-3 ml-1 uppercase tracking-wider">Zona de Risco</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="soarAction('isolate')"
+              class="btn-danger-neon py-3 flex flex-col items-center justify-center gap-1"><i data-lucide="lock"
+                class="w-4 h-4"></i> Isolar Rede</button>
+            <button onclick="soarAction('unisolate')"
+              class="btn-outline py-3 flex flex-col items-center justify-center gap-1 hover:border-emerald-500 hover:text-emerald-400"><i
+                data-lucide="unlock" class="w-4 h-4"></i> Restaurar</button>
+            <button onclick="soarAction('uninstall')"
+              class="btn-outline danger-action py-3 flex flex-col items-center justify-center gap-1"><i
+                data-lucide="trash-2" class="w-4 h-4"></i> Desinstalar</button>
+            <button onclick="soarAction('wipe')"
+              class="btn-neon !bg-gradient-to-br !from-rose-500 !to-red-700 py-3 flex flex-col items-center justify-center gap-1 shadow-[0_5px_15px_rgba(244,63,94,0.4)]"><i
+                data-lucide="bomb" class="w-4 h-4"></i> Wipe Físico</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vulnerabilidades do Agente List -->
+      <div id="panel-vulns-wrapper" class="hidden">
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2"><i
+            data-lucide="bug" class="w-4 h-4 text-orange-400"></i> Vulnerabilidades Encontradas</h3>
+        <div id="panel-vulns" class="space-y-2 bg-black/20 p-3 rounded-xl border border-white/5"></div>
+      </div>
+
     </div>
-    <div id="ioc-check-result" class="mb-3 text-xs hidden"></div>
-    <div id="ioc-list" class="overflow-y-auto max-h-80 space-y-1.5"></div>
   </div>
 
 
-  <div id="screenshot-modal" class="glass rounded-2xl p-5 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-white">🖥️ Screenshot Remoto</h2>
-      <button onclick="closeAllModals()" class="text-slate-500 hover:text-white text-xl leading-none">✕</button>
-    </div>
-    <img id="screenshot-img" src="" class="w-full rounded-xl border border-white/10" />
-  </div>
-
+  <!-- JS Logics -->
   <script>
-
-
-
+    // System setup
+    lucide.createIcons();
+    let agentsList = [];
     let selectedAgent = null;
-    let ajaxInterval = null;
-    let chartEvents = null;
-    let chartSeverity = null;
-    let activeTab = 'terminal';
-    let platformFilter = '';
-    let incidentSeverityFilter = '';
-    let detectedTechniques = new Set();
-    let chatSession = 'soc-' + Date.now();
-    let chatUnreadCounts = {};
-
-
-    const MITRE_TACTICS = [
-      { id: 'TA0001', name: 'Initial\nAccess' }, { id: 'TA0002', name: 'Execution' },
-      { id: 'TA0003', name: 'Persistence' }, { id: 'TA0004', name: 'Priv Esc' },
-      { id: 'TA0005', name: 'Defense\nEvasion' }, { id: 'TA0006', name: 'Cred\nAccess' },
-      { id: 'TA0007', name: 'Discovery' }, { id: 'TA0008', name: 'Lateral\nMovement' },
-      { id: 'TA0009', name: 'Collection' }, { id: 'TA0010', name: 'Exfiltration' },
-      { id: 'TA0011', name: 'C2' }, { id: 'TA0040', name: 'Impact' },
-    ];
-    const TECHNIQUE_TO_TACTIC = {
-      'T1110': 'TA0006', 'T1078': 'TA0005', 'T1068': 'TA0004', 'T1059': 'TA0002', 'T1059.001': 'TA0002',
-      'T1543': 'TA0003', 'T1543.003': 'TA0003', 'T1053': 'TA0003', 'T1021': 'TA0008', 'T1003': 'TA0006',
-      'T1071': 'TA0011', 'T1041': 'TA0010', 'T1070.001': 'TA0005', 'T1112': 'TA0005', 'T1098': 'TA0004',
-      'T1136': 'TA0003', 'T1565': 'TA0040',
-    };
-
-
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-      closeAllModals();
-      buildMitreMap();
-      loadAll();
-      ajaxInterval = setInterval(loadAll, 2000);
-      document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendCommand(); });
-    });
-
-    let lastCommandTime = null;
-
-    async function loadAll() {
-      flashIndicator();
-      try {
-        await Promise.all([
-          loadAgents(),
-          loadStats(),
-          activeTab === 'terminal' ? pollAgentTerminal() : Promise.resolve(),
-          activeTab === 'incidents' ? loadIncidents() : Promise.resolve(),
-          activeTab === 'events' ? loadEvents() : Promise.resolve(),
-          activeTab === 'vulns' ? loadVulns() : Promise.resolve(),
-          activeTab === 'socchat' ? refreshSocChat() : Promise.resolve(),
-        ]);
-      } catch (e) { console.warn('AJAX error:', e); }
-    }
-
-    async function pollAgentTerminal() {
-      if (!selectedAgent) return;
-      try {
-        const res = await fetch(`/api/agent/${selectedAgent.id}/detail`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const cmdRes = data.last_command_result;
-        if (cmdRes && cmdRes.timestamp !== lastCommandTime) {
-          lastCommandTime = cmdRes.timestamp;
-
-          let outText = cmdRes.output || '(sem saída do comando)';
-          let color = cmdRes.exit_code === 0 ? '#4ade80' : '#f87171';
-
-          const isSoar = (cmdRes.command && (
-            cmdRes.command.includes('netstat') ||
-            cmdRes.command.includes('AuditPol') ||
-            cmdRes.command.includes('Set-SmbServerConfiguration') ||
-            cmdRes.command.includes('EnableLUA')
-          ));
-
-          if (isSoar) {
-            addSoarActivityLog(cmdRes.command, outText, cmdRes.exit_code);
-          } else {
-            addTerminalLine(`[AGENT] Código de Saída: ${cmdRes.exit_code}`, color);
-            const lines = outText.split('\n');
-            lines.forEach(l => {
-              if (l.trim()) addTerminalLine(l, color);
-            });
-          }
-        }
-      } catch (e) { }
-    }
-
-    function addSoarActivityLog(cmd, output, exitCode) {
-      const el = document.getElementById('soar-activities-log');
-      if (!el) return;
-
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.className = "p-3 bg-white/5 border border-white/10 rounded-lg mb-3 fade-in";
-
-      let typeLabel = "ATIVIDADE";
-      if (cmd.includes('netstat')) typeLabel = "SCAN DE REDE";
-      else if (cmd.includes('AuditPol') || cmd.includes('EnableLUA') || cmd.includes('SMB1')) typeLabel = "VULNERABILIDADE";
-
-      div.innerHTML = `
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[10px] font-bold text-aegis-400 bg-aegis-500/10 px-2 py-0.5 rounded">${typeLabel}</span>
-          <span class="text-[9px] text-slate-500">${time}</span>
-        </div>
-        <div class="text-slate-400 mb-2 italic">❯ ${cmd}</div>
-        <pre class="whitespace-pre-wrap text-slate-300 bg-black/30 p-2 rounded border border-white/5 max-h-40 overflow-y-auto custom-scrollbar">${output}</pre>
-        <div class="mt-2 text-[9px] ${exitCode === 0 ? 'text-green-500' : 'text-red-500'}">Status: ${exitCode === 0 ? 'Sucesso' : 'Erro (' + exitCode + ')'}</div>
-      `;
-      el.prepend(div);
-
-
-      if (activeTab !== 'soar') {
-        showToast("Nova atividade SOAR concluída.", "success");
-        document.getElementById('tab-soar').classList.add('animate-pulse');
-      }
-    }
-
-    function flashIndicator() {
-      const el = document.getElementById('ajax-indicator');
-      el.classList.remove('status-online');
-      el.style.background = '#60a5fa';
-      setTimeout(() => { el.style.background = ''; el.classList.add('status-online'); }, 300);
-    }
-
-
-
-
-    async function loadAgents() {
-      const url = platformFilter ? `/api/agents?platform=${platformFilter}` : '/api/agents';
-      const res = await fetch(url);
-      const data = await res.json();
-      const el = document.getElementById('agents-list');
-
-      const selectedId = selectedAgent?.id;
-      el.innerHTML = data.map(a => agentCard(a)).join('');
-      if (selectedId) {
-        const updated = data.find(a => a.id === selectedId);
-        if (updated) selectedAgent = updated;
-      }
-    }
-
-    function agentCard(a) {
-      const statusClass = { online: 'status-online', offline: 'status-offline', isolated: 'status-isolated' }[a.status] || 'status-offline';
-      const tagsBadges = (a.tags || []).map(t => `<span class="text-[9px] bg-aegis-500/10 text-aegis-400 border border-aegis-500/20 px-1.5 py-0.5 rounded">${t}</span>`).join('');
-      const selected = selectedAgent?.id === a.id ? 'selected' : '';
-      const extra = a.extra_data || {};
-      const gps = extra.gps ? `📍 ${extra.gps.lat?.toFixed(4)},${extra.gps.lng?.toFixed(4)}` : '';
-      const battery = extra.battery ? `🔋 ${extra.battery}%` : '';
-      const chatAlert = a.has_unread_chat ? '<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">CHAT</span>' : '';
-      return `
-  <div class="glass glass-hover rounded-xl p-3 agent-card ${selected}" onclick="selectAgent(${a.id})" id="agent-${a.id}">
-    <div class="flex items-center justify-between mb-1.5">
-      <div class="flex items-center gap-2">
-        <span class="status-dot ${statusClass}"></span>
-        <span class="text-sm font-semibold text-white truncate max-w-[140px]">${a.hostname}</span>
-        <span class="text-[10px] text-slate-600">${a.platform === 'android' ? '🤖' : '🖥️'}</span>
-      </div>
-      <div class="flex items-center gap-1">
-        ${a.isolation_active ? '<span class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded font-bold">ISOLADO</span>' : ''}
-        ${chatAlert}
-      </div>
-    </div>
-    <div class="text-[10px] text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
-      ${a.ip_address ? `<span>🌐 ${a.ip_address}</span>` : ''}
-      ${a.mac_address ? `<span>🔗 ${a.mac_address}</span>` : ''}
-      ${gps}${battery}
-    </div>
-    ${a.os_info ? `<div class="text-[10px] text-slate-600 mt-1 truncate">${a.os_info}</div>` : ''}
-    ${tagsBadges ? `<div class="flex flex-wrap gap-1 mt-1.5">${tagsBadges}</div>` : ''}
-    <div class="text-[9px] text-slate-700 mt-1.5">Visto: ${timeAgo(a.last_seen)}</div>
-  </div>`;
-    }
-
-    function selectAgent(id) {
-      document.querySelectorAll('.agent-card').forEach(el => el.classList.remove('selected'));
-      const card = document.getElementById(`agent-${id}`);
-      if (card) card.classList.add('selected');
-      fetch(`/api/agents/${id}`).then(r => r.json()).then(a => {
-        selectedAgent = a;
-        lastCommandTime = null;
-        document.getElementById('selected-agent-label').textContent = `Agente: ${a.hostname}`;
-        addTerminalLine(`[AEGIS] Agente selecionado: ${a.hostname} (${a.ip_address || 'IP desconhecido'})`, '#60a5fa');
-
-        if (activeTab === 'socchat') refreshSocChat();
-      });
-    }
-
-    function filterPlatform(p) {
-      platformFilter = p;
-      ['all', 'windows', 'android'].forEach(id => {
-        const el = document.getElementById(`filter-${id}`);
-        if (el) el.className = 'tab-btn text-[10px] py-1 px-2' + ((p === '' && id === 'all') || (p === id) ? '  active' : '');
-      });
-      loadAgents();
-    }
-
-
-
-
-    async function loadStats() {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-
-      document.getElementById('stat-agents').textContent = data.agents.total;
-      document.getElementById('stat-online').textContent = data.agents.online;
-      document.getElementById('stat-incidents').textContent = data.incidents.critical;
-      document.getElementById('stat-iocs').textContent = data.threat_intel.ioc_count;
-
-
-      if (data.top_mitre) {
-        detectedTechniques = new Set(data.top_mitre.map(m => m.technique));
-        updateMitreMap();
-      }
-
-      if (activeTab === 'stats') renderCharts(data);
-    }
-
-    function renderCharts(data) {
-
-      const hours = data.chart_hours || [];
-      const labels = hours.map(h => h.hour);
-      const counts = hours.map(h => h.count);
-
-      if (chartEvents) { chartEvents.data.labels = labels; chartEvents.data.datasets[0].data = counts; chartEvents.update(); }
-      else {
-        const ctx = document.getElementById('chart-events')?.getContext('2d');
-        if (!ctx) return;
-        chartEvents = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Eventos', data: counts, borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,0.08)',
-              fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#0ea5e9'
-            }]
-          },
-          options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 } } } } }
-        });
-      }
-
-
-      const sev = data.events?.by_severity || {};
-      const sevColors = { CRITICAL: '#f87171', HIGH: '#fb923c', MEDIUM: '#fbbf24', LOW: '#4ade80' };
-      const sevKeys = Object.keys(sev);
-      const sevVals = sevKeys.map(k => sev[k]);
-      const sevCols = sevKeys.map(k => sevColors[k] || '#64748b');
-
-      if (chartSeverity) { chartSeverity.data.labels = sevKeys; chartSeverity.data.datasets[0].data = sevVals; chartSeverity.data.datasets[0].backgroundColor = sevCols; chartSeverity.update(); }
-      else {
-        const ctx2 = document.getElementById('chart-severity')?.getContext('2d');
-        if (!ctx2) return;
-        chartSeverity = new Chart(ctx2, {
-          type: 'doughnut',
-          data: { labels: sevKeys, datasets: [{ data: sevVals, backgroundColor: sevCols, borderWidth: 0 }] },
-          options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
-        });
-      }
-
-
-      const legend = document.getElementById('severity-legend');
-      if (legend) legend.innerHTML = sevKeys.map(k => `
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${sevColors[k] || '#64748b'}"></span><span class="text-xs text-slate-400">${k}</span></div>
-      <span class="text-xs font-semibold text-white">${sev[k]}</span>
-    </div>`).join('');
-
-
-      const mitreEl = document.getElementById('mitre-top-list');
-      if (mitreEl && data.top_mitre) {
-        const max = Math.max(...data.top_mitre.map(m => m.count), 1);
-        mitreEl.innerHTML = data.top_mitre.map(m => `
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-mono text-aegis-400 w-20">${m.technique}</span>
-        <div class="flex-1 bg-dark-700 rounded-full h-1.5"><div class="bg-aegis-500 h-1.5 rounded-full" style="width:${(m.count / max * 100).toFixed(0)}%"></div></div>
-        <span class="text-xs text-slate-400 w-8 text-right">${m.count}</span>
-      </div>`).join('');
-      }
-    }
-
-
-
-
-    function buildMitreMap() {
-      const el = document.getElementById('mitre-map');
-      if (!el) return;
-      el.innerHTML = MITRE_TACTICS.map(t => `
-    <div class="mitre-cell" id="mitre-${t.id}" title="${t.id}" onclick="filterByTactic('${t.id}')">
-      ${t.name}
-    </div>`).join('');
-    }
-
-    function updateMitreMap() {
-
-      MITRE_TACTICS.forEach(t => {
-        const el = document.getElementById(`mitre-${t.id}`);
-        if (el) el.classList.remove('active');
-      });
-
-      detectedTechniques.forEach(tech => {
-        const tacticId = TECHNIQUE_TO_TACTIC[tech];
-        if (tacticId) {
-          const el = document.getElementById(`mitre-${tacticId}`);
-          if (el) el.classList.add('active');
-        }
-      });
-    }
-
-    function filterByTactic(tacticId) {
-      addTerminalLine(`[AEGIS] Filtro MITRE aplicado: ${tacticId}`, '#a78bfa');
-    }
-
-
-
-
-    async function loadIncidents() {
-      const url = incidentSeverityFilter
-        ? `/api/incidents?status=OPEN&severity=${incidentSeverityFilter}&per_page=50`
-        : '/api/incidents?status=OPEN&per_page=50';
-      const res = await fetch(url);
-      const data = await res.json();
-      const el = document.getElementById('incidents-list');
-      if (!el) return;
-      el.innerHTML = (data.incidents || []).map(incidentCard).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum incidente aberto 🎉</p>';
-    }
-
-    function incidentCard(inc) {
-      const sev = inc.severity;
-      const steps = (inc.playbook_steps || []).map((s, i) => `<li class="text-[10px] text-slate-500">${i + 1}. ${s}</li>`).join('');
-      return `
-  <div class="glass rounded-xl p-3 bg-severity-${sev} border border-opacity-20 border-severity-${sev} fade-in">
-    <div class="flex items-start justify-between mb-1.5">
-      <span class="text-xs font-bold severity-${sev} leading-tight">${inc.title}</span>
-      <span class="text-[9px] font-bold severity-${sev} border border-current px-1.5 py-0.5 rounded ml-2 shrink-0">${sev}</span>
-    </div>
-    ${inc.mitre_technique ? `<span class="text-[9px] font-mono bg-dark-700 text-aegis-400 px-1.5 py-0.5 rounded">${inc.mitre_technique} · ${inc.mitre_tactic || ''}</span>` : ''}
-    <p class="text-[10px] text-slate-400 mt-1.5">${inc.description || ''}</p>
-    ${steps ? `<ul class="mt-2 pl-2 space-y-0.5">${steps}</ul>` : ''}
-    <div class="flex items-center justify-between mt-2">
-      <span class="text-[9px] text-slate-600">${inc.agent_hostname} · ${timeAgo(inc.created_at)}</span>
-      <div class="flex gap-1">
-        <button onclick="updateIncidentStatus(${inc.id},'INVESTIGATING')" class="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20">Investigar</button>
-        <button onclick="updateIncidentStatus(${inc.id},'RESOLVED')" class="text-[9px] bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded hover:bg-green-500/20">Resolver</button>
-        <button onclick="updateIncidentStatus(${inc.id},'FALSE_POSITIVE')" class="text-[9px] bg-slate-500/10 text-slate-400 border border-slate-500/20 px-2 py-0.5 rounded hover:bg-slate-500/20">Falso Pos.</button>
-      </div>
-    </div>
-  </div>`;
-    }
-
-    async function updateIncidentStatus(id, status) {
-      await fetch(`/api/incidents/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-      loadIncidents();
-    }
-
-    function filterIncidents(sev) { incidentSeverityFilter = sev; loadIncidents(); }
-
-
-
-
-    async function loadEvents() {
-      const sev = document.getElementById('filter-severity')?.value || '';
-      const cat = document.getElementById('filter-category')?.value || '';
-      const agentParam = selectedAgent ? `&agent_id=${selectedAgent.id}` : '';
-      const res = await fetch(`/api/events?per_page=60${sev ? '&severity=' + sev : ''}${cat ? '&category=' + cat : ''}${agentParam}`);
-      const data = await res.json();
-      const el = document.getElementById('events-list');
-      if (!el) return;
-      el.innerHTML = (data.events || []).map(eventRow).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum evento</p>';
-    }
-
-    function eventRow(e) {
-      const severityIcon = { CRITICAL: '🔴', HIGH: '🟠', MEDIUM: '🟡', LOW: '🟢' }[e.severity] || '⚪';
-      return `
-  <div class="flex items-start gap-2 px-3 py-2 rounded-lg bg-dark-800/50 hover:bg-dark-700/50 transition-colors cursor-default">
-    <span class="text-xs mt-0.5 shrink-0">${severityIcon}</span>
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-medium text-slate-300 truncate">${e.event_type}</span>
-        ${e.mitre_technique ? `<span class="text-[9px] font-mono text-aegis-400 bg-aegis-500/10 px-1 rounded">${e.mitre_technique}</span>` : ''}
-        ${e.ioc_matched ? '<span class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1 rounded">IoC ⚠</span>' : ''}
-      </div>
-      <div class="text-[10px] text-slate-600 flex gap-2 mt-0.5">
-        <span>${e.source}</span><span>·</span><span>${timeAgo(e.timestamp)}</span>
-      </div>
-    </div>
-  </div>`;
-    }
-
-
-
-
-    async function sendCommand() {
-      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
-      const inp = document.getElementById('cmd-input');
-      const cmd = inp.value.trim();
-      if (!cmd) return;
-      inp.value = '';
-      addTerminalLine(`[${selectedAgent.hostname}] ❯ ${cmd}`, '#e2e8f0');
-      await fetch('/control/command', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agent_id: selectedAgent.id, command: cmd })
-      });
-      addTerminalLine('[C2] Comando enfileirado — aguardando resposta do agente...', '#94a3b8');
-    }
-
-    function addTerminalLine(text, color = '#4ade80') {
-      const el = document.getElementById('terminal-output');
-      if (!el) return;
-      const line = document.createElement('div');
-      line.style.color = color;
-      line.textContent = `[${new Date().toLocaleTimeString('pt-BR')}] ${text}`;
-      el.appendChild(line);
-      el.scrollTop = el.scrollHeight;
-    }
-
-
-
-
-    async function soarAction(action) {
-      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
-      const id = selectedAgent.id;
-      const name = selectedAgent.hostname;
-
-      const genericSoarActions = ['force_scan_vulns', 'force_scan_fim', 'force_scan_network', 'force_logs'];
-      if (genericSoarActions.includes(action)) {
-        await fetch(`/api/soar/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) });
-
-        let msg = '[SOAR] Comando enviado...';
-        if (action === 'force_scan_vulns') msg = '[SOAR] Scan de Vulnerabilidades acionado. Verifique a aba Vulnerabilidades em instantes.';
-        if (action === 'force_scan_fim') msg = '[SOAR] Scan de Integridade (FIM) acionado.';
-        if (action === 'force_logs') msg = '[SOAR] Coleta de Logs Forçada acionada.';
-        if (action === 'force_scan_network') msg = '[SOAR] Scan de Portas/IPs Ativos acionado. O resultado deve cair no terminal logo mais.';
-
-        addTerminalLine(msg, '#fbbf24');
-        return;
-      }
-
-      if (action === 'wipe') {
-        if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar TODOS os dados de ${name}. Continuar?`)) return;
-        if (!confirm(`💣 ÚLTIMO AVISO: Isso é IRREVERSÍVEL. Confirmar wipe completo do ${name}?`)) return;
-        let code = prompt("Digite CONFIRMAR para autorizar o Wipe:");
-        if (code !== "CONFIRMAR") { addTerminalLine('[ERRO] Código incorreto. Wipe abortado.', '#f87171'); return; }
-        await fetch('/control/wipe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id, confirm: true }) });
-        addTerminalLine(`[SOAR] Wipe enfileirado para ${name}!`, '#f87171');
-        return;
-      }
-      if (action === 'uninstall') {
-        if (!confirm(`⚠️ ATENÇÃO: O agente C2 será permanentemente desinstalado de ${name} e removido do painel. Continuar?`)) return;
-
-        try {
-          const res = await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-          if (!res.ok) {
-            const err = await res.text();
-            addTerminalLine(`[ERRO SOAR] Backend recusou a desinstalação. Code: ${res.status}. Detalhes: ${err.substring(0, 100)}`, '#f87171');
-            return;
-          }
-          const data = await res.json();
-          if (data.error) {
-            addTerminalLine(`[ERRO] ${data.error}`, '#f87171');
-            return;
-          }
-
-          addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
-          setTimeout(() => location.reload(), 3500);
-        } catch (e) {
-          addTerminalLine(`[ERRO CRÍTICO] Falha ao contatar a API C2: ${e}`, '#f87171');
-        }
-        return;
-      }
-      if (action === 'isolate') {
-        await fetch('/control/isolate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Host ${name} marcado para ISOLAMENTO.`, '#fb923c');
-        return;
-      }
-      if (action === 'unisolate') {
-        await fetch('/control/unisolate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Isolamento removido de ${name}.`, '#4ade80');
-        return;
-      }
-      if (action === 'screenshot') {
-        await fetch('/control/screenshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Screenshot solicitado de ${name}. Verificando em 5s...`, '#60a5fa');
-        setTimeout(async () => {
-          const res = await fetch(`/api/screenshot/${id}`);
-          const data = await res.json();
-          if (data.screenshot_b64) {
-            document.getElementById('screenshot-img').src = 'data:image/png;base64,' + data.screenshot_b64;
-            document.getElementById('screenshot-modal').classList.remove('hidden');
-            document.getElementById('modal-overlay').style.display = 'block';
-          } else {
-            addTerminalLine('[SOAR] Screenshot não disponível ainda.', '#fbbf24');
-          }
-        }, 5000);
-      }
-    }
-
-
-
-
-    async function openIocModal() {
-      document.getElementById('ioc-modal').classList.remove('hidden');
-      document.getElementById('modal-overlay').style.display = 'block';
-      await renderIocList();
-    }
-
-    async function renderIocList() {
-      const res = await fetch('/api/threat_intel/ioc');
-      const data = await res.json();
-      const el = document.getElementById('ioc-list');
-      const typeIcons = { hash: '#️⃣', ip: '🌐', domain: '🔗', url: '📎', email: '✉️' };
-      el.innerHTML = data.map(ioc => `
-    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-800/80">
-      <span class="text-sm">${typeIcons[ioc.ioc_type] || '🔍'}</span>
-      <div class="flex-1 min-w-0">
-        <div class="text-xs font-mono text-white truncate">${ioc.value}</div>
-        <div class="text-[10px] text-slate-500 flex gap-2">
-          <span class="severity-${ioc.severity}">${ioc.severity}</span>
-          <span>${ioc.threat_name || ''}</span>
-          <span>Hits: ${ioc.hit_count || 0}</span>
-        </div>
-      </div>
-      <button onclick="deleteIoc(${ioc.id})" class="text-red-400/50 hover:text-red-400 text-lg leading-none transition-colors">×</button>
-    </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum IoC cadastrado</p>';
-    }
-
-    async function addIoc() {
-      const val = document.getElementById('ioc-value').value.trim();
-      const type = document.getElementById('ioc-type').value;
-      const name = document.getElementById('ioc-name').value.trim();
-      if (!val) return;
-      await fetch('/api/threat_intel/ioc', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: val, ioc_type: type, threat_name: name || 'Manual' })
-      });
-      document.getElementById('ioc-value').value = '';
-      document.getElementById('ioc-name').value = '';
-      await renderIocList();
-    }
-
-    async function deleteIoc(id) {
-      await fetch(`/api/threat_intel/ioc/${id}`, { method: 'DELETE' });
-      await renderIocList();
-    }
-
-    async function checkIoc() {
-      const val = document.getElementById('ioc-check-val').value.trim();
-      if (!val) return;
-      const res = await fetch('/api/ioc/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: val }) });
-      const data = await res.json();
-      const el = document.getElementById('ioc-check-result');
-      el.classList.remove('hidden');
-      if (data.matched) {
-        el.innerHTML = `<div class="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-2 rounded-lg">⚠️ IoC CONFIRMADO: <strong>${data.ioc.threat_name}</strong> (${data.ioc.severity})</div>`;
+    let currentPlatformFilter = '';
+
+    // Slide Panel logic
+    function openSlidePanel(agentId) {
+      selectedAgent = agentId;
+      const ag = agentsList.find(a => a.id === agentId);
+      if (!ag) return;
+
+      document.getElementById('panel-agent-name').innerText = ag.hostname;
+      document.getElementById('panel-agent-id').innerText = ag.id;
+
+      // Populate vulns if exist
+      const pv = document.getElementById('panel-vulns');
+      const pvw = document.getElementById('panel-vulns-wrapper');
+      if (ag.vulnerabilities && ag.vulnerabilities.length > 0) {
+        pvw.classList.remove('hidden');
+        pv.innerHTML = ag.vulnerabilities.map(v => `<div class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg"><p class="text-sm text-red-400 font-bold">${v.cve_id} <span class="bg-red-500/20 text-[10px] px-2 py-0.5 rounded text-white ml-2">CVSS ${v.cvss_score}</span></p><p class="text-xs text-slate-400 mt-1">${v.title}</p></div>`).join('');
       } else {
-        el.innerHTML = `<div class="bg-green-500/10 border border-green-500/30 text-green-400 px-3 py-2 rounded-lg">✅ Valor limpo — não encontrado na base de IoCs.</div>`;
+        pvw.classList.add('hidden');
       }
+
+      // Open
+      document.getElementById('slide-panel').classList.add('open');
+      document.getElementById('panel-overlay').classList.add('open');
+      addTerminalLine(`Conectado ao canal reverso de ${ag.hostname}...`, '#10b981');
     }
 
-    function closeAllModals() {
-      document.getElementById('ioc-modal').classList.add('hidden');
-      document.getElementById('screenshot-modal').classList.add('hidden');
-      document.getElementById('modal-overlay').style.display = 'none';
+    function closeSlidePanel() {
+      document.getElementById('slide-panel').classList.remove('open');
+      document.getElementById('panel-overlay').classList.remove('open');
     }
 
-
-
-
-    async function sendChat() {
-      const inp = document.getElementById('chat-input');
-      const msg = inp.value.trim();
-      if (!msg) return;
-      inp.value = '';
-      appendChatBubble('user', msg);
-      const thinking = appendChatBubble('assistant', '⏳ Analisando...');
-      try {
-        const payload = { message: msg, session: chatSession };
-        if (selectedAgent) payload.agent_id = selectedAgent.id;
-
-        const res = await fetch('/api/chat', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        thinking.textContent = data.response;
-        thinking.dataset.model = data.model || '';
-      } catch (e) {
-        thinking.textContent = '❌ Erro ao contatar AI.';
-      }
-    }
-
-    function appendChatBubble(role, text) {
-      const el = document.getElementById('chat-messages');
-      const div = document.createElement('div');
-      div.className = `p-2.5 text-xs leading-relaxed fade-in ${role === 'user' ? 'chat-bubble-user ml-4' : 'chat-bubble-ai mr-4'}`;
-      div.textContent = text;
-      el.appendChild(div);
-      el.scrollTop = el.scrollHeight;
-      return div;
-    }
-
-    async function clearChat() {
-      await fetch(`/api/chat/clear?session=${chatSession}`, { method: 'DELETE' });
-      chatSession = 'soc-' + Date.now();
-      document.getElementById('chat-messages').innerHTML = '';
-    }
-
-
-
-
-    function switchTab(tab) {
-      activeTab = tab;
-      if (tab === 'soar') document.getElementById('tab-soar').classList.remove('animate-pulse');
-
-      ['terminal', 'soar', 'vulns', 'socchat', 'incidents', 'events', 'stats'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        const content = document.getElementById(`tab-content-${t}`);
-        if (btn) btn.className = 'tab-btn' + (t === tab ? ' active' : '');
-        if (content) content.classList.toggle('hidden', t !== tab);
-        if (content && (t === 'socchat')) {
-          if (t === tab) content.style.display = 'flex';
-          else content.style.display = 'none';
-        }
-      });
-      if (tab === 'incidents') loadIncidents();
-      if (tab === 'events') loadEvents();
-      if (tab === 'vulns') loadVulns();
-      if (tab === 'socchat') refreshSocChat();
-      if (tab === 'stats') loadStats().then(() => {
-        fetch('/api/stats').then(r => r.json()).then(renderCharts);
-      });
-    }
-
-
-
-
-    function timeAgo(iso) {
-      if (!iso) return '—';
-      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-      if (diff < 60) return `${diff}s atrás`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
-      return `${Math.floor(diff / 86400)}d atrás`;
-    }
-
-
-    
+    // Tools & Toasts
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       if (!container) return;
       if (message.includes('[ERRO]') && type === 'info') type = 'error';
       message = message.replace('[ERRO]', '').trim();
       const toast = document.createElement('div');
-      let typeClass = '';
-      let icon = 'ℹ️';
+      let typeClass = ''; let icon = 'ℹ️';
       if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
       if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
       if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
@@ -1319,168 +698,170 @@
       setTimeout(() => toast.classList.add('show'), 10);
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 5000);
     }
-): ${message}`);
 
-
-
+    function addTerminalLine(text, color = '#e2e8f0') {
+      const el = document.getElementById('terminal-output');
+      if (el.innerHTML.includes('Conecte a um agente')) el.innerHTML = '';
+      const div = document.createElement('div');
+      div.style.color = color; div.className = 'mb-1 leading-tight';
+      div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
     }
 
-
-    async function apiCall(url, method = 'GET', body = null) {
-      const options = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-      };
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || `API call failed with status ${response.status}`);
-      }
-      return response.json();
-    }
-
-
-
-
-    async function loadVulns() {
-      if (!selectedAgent) return;
-      const res = await fetch(`/api/agent/${selectedAgent.id}/vulnerabilities`);
-      const vulns = await res.json();
-      const el = document.getElementById('vulns-list');
-      if (!el) return;
-
-      if (vulns.length === 0) {
-        el.innerHTML = '<p class="text-xs text-slate-600 text-center py-4">Nenhuma vulnerabilidade detectada.</p>';
-        return;
-      }
-
-      el.innerHTML = vulns.map(v => `
-    <div class="glass rounded-xl p-3 border border-opacity-20 border-severity-${v.severity}">
-      <div class="flex items-start justify-between mb-1.5">
-        <span class="text-xs font-bold severity-${v.severity}">${v.title}</span>
-        <span class="text-[9px] font-bold severity-${v.severity} border border-current px-1.5 py-0.5 rounded">${v.severity}</span>
-      </div>
-      <p class="text-[10px] text-slate-400 mb-2">${v.description}</p>
-      ${v.remediation_cmd ? `
-        <div class="mt-2 flex items-center justify-between bg-dark-900 border border-dark-600 rounded p-1.5">
-          <div class="text-[9px] font-mono text-green-400 break-all select-all flex-1 pr-2">❯ ${v.remediation_cmd}</div>
-          <button onclick="fixVulnerability('${v.remediation_cmd.replace(/'/g, "\\'")}', '${v.title.replace(/'/g, "\\'")}')" 
-                  class="bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded text-[10px] font-bold transition-colors whitespace-nowrap">
-            🔧 Corrigir
-          </button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-    }
-
-    async function fixVulnerability(cmd, title) {
-      if (!selectedAgent) return;
-      if (!confirm(`Deseja enviar o comando de correção para '${title}' no agente ${selectedAgent.hostname}?\n\nComando: ${cmd}`)) {
-        return;
-      }
-
+    // Core Fetches
+    async function loadData() {
       try {
-        await fetch('/control/command', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agent_id: selectedAgent.id, command: cmd })
-        });
-        showToast("Comando de correção enviado com sucesso!", "success");
-        switchTab('terminal');
-        addTerminalLine(`[SOAR] Executando correção para: ${title}`, '#fb923c');
-        addTerminalLine(`[${selectedAgent.hostname}] ❯ ${cmd}`, '#e2e8f0');
-      } catch (err) {
-        showToast("Erro ao enviar comando de correção.", "error");
-        console.error(err);
-      }
+        const resp = await fetch('/api/stats');
+        const data = await resp.json();
+
+        // Header Stats
+        document.getElementById('stat-agents').innerText = data.agents_total || 0;
+        document.getElementById('stat-online').innerText = data.agents_online || 0;
+        document.getElementById('stat-incidents').innerText = data.active_incidents || 0;
+        document.getElementById('stat-iocs').innerText = data.total_iocs || 0;
+
+        agentsList = data.agents || [];
+        renderAgents();
+        renderIncidents(data.incidents || []);
+      } catch (e) { console.error("Error fetching stats:", e); }
     }
 
+    function filterPlatform(p) { currentPlatformFilter = p; renderAgents(); }
 
+    function renderAgents() {
+      const c = document.getElementById('agents-list');
+      c.innerHTML = '';
+      let list = agentsList;
+      if (currentPlatformFilter) list = agentsList.filter(a => a.platform.toLowerCase().includes(currentPlatformFilter));
 
+      if (list.length === 0) { c.innerHTML = '<p class="text-slate-500 text-sm p-4">Nenhum endpoint encontrado.</p>'; return; }
 
-    async function refreshSocChat() {
-      if (!selectedAgent) return;
-      const currentAgentId = selectedAgent.id;
-      try {
-        const data = await apiCall(`/api/chat/agent/${currentAgentId}/history`);
-        if (!data) return;
-        const box = document.getElementById("socchat-messages");
-
-        let shouldScroll = box.scrollHeight - box.clientHeight <= box.scrollTop + 10;
-
-        box.innerHTML = (data || []).map(msg => {
-          const isSOC = msg.sender === "admin";
-          const d = new Date(msg.timestamp).toLocaleString();
-          return `
-            <div class="flex flex-col ${isSOC ? 'items-end' : 'items-start'} mb-2">
-              <span class="text-[9px] text-slate-500 mb-0.5">${d} - ${isSOC ? 'SOC Admin' : 'Usuário (Endpoint)'}</span>
-              <div class="px-3 py-2 rounded-xl text-xs max-w-[80%] ${isSOC ? 'bg-aegis-600/30 border border-aegis-500/30 text-aegis-100' : 'bg-dark-800 border border-dark-600 text-slate-300'
-            }">
-                ${msg.message}
+      list.forEach(ag => {
+        const statusColor = ag.status === 'online' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-600';
+        const isolated = ag.is_isolated ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 ml-2">ISOLADO</span>` : '';
+        const html = `
+              <div class="p-4 rounded-xl mb-2 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-sky-500/30 transition-all cursor-pointer flex items-center justify-between group" onclick="openSlidePanel('${ag.id}')">
+                <div class="flex items-center gap-3">
+                   <div class="w-10 h-10 rounded-lg bg-black/30 flex items-center justify-center text-slate-400 group-hover:text-sky-400 transition-colors">
+                     ${ag.platform.toLowerCase().includes('win') ? '<i data-lucide="server"></i>' : '<i data-lucide="smartphone"></i>'}
+                   </div>
+                   <div>
+                     <div class="flex items-center gap-2">
+                       <span class="w-2 h-2 rounded-full ${statusColor}"></span>
+                       <h4 class="font-bold text-slate-200">${ag.hostname}</h4>
+                       ${isolated}
+                     </div>
+                     <p class="text-xs text-slate-500 font-mono mt-0.5">${ag.os_version || 'Unknown OS'} • IP: ${ag.last_ip || 'N/A'}</p>
+                   </div>
+                </div>
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                   <div class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+                </div>
               </div>
-            </div>
-          `;
-        }).join("");
-
-        if (shouldScroll) {
-          box.scrollTop = box.scrollHeight;
-        }
-
-        chatUnreadCounts[currentAgentId] = 0;
-        loadAgents();
-      } catch (error) {
-        console.error("Error refreshing SOC Chat:", error);
-      }
+            `;
+        c.insertAdjacentHTML('beforeend', html);
+      });
+      lucide.createIcons();
     }
 
-    async function sendSocChat() {
-      if (!selectedAgent) {
-        showToast("Selecione um agente primeiro!", "warning");
-        return;
-      }
-      const currentAgentId = selectedAgent.id;
-      const inp = document.getElementById("socchat-input");
-      const text = inp.value.trim();
-      if (!text) return;
+    function renderIncidents(incidents) {
+      const c = document.getElementById('incidents-list');
+      c.innerHTML = '';
+      if (incidents.length === 0) { c.innerHTML = '<p class="text-slate-500 text-sm p-4">Nenhum incidente ativo.</p>'; return; }
 
-      inp.value = '';
+      incidents.forEach(inc => {
+        const badgeClass = inc.severity === 'CRITICAL' ? 'badge-critical' : inc.severity === 'HIGH' ? 'badge-high' : 'badge-medium';
+        const icon = inc.severity === 'CRITICAL' ? 'alert-octagon' : 'alert-triangle';
+        c.insertAdjacentHTML('beforeend', `
+              <div class="p-3 rounded-lg bg-black/30 border border-white/5 flex gap-3 cursor-pointer hover:border-white/10 transition-colors">
+                 <div class="mt-0.5 ${badgeClass} p-1.5 rounded-md self-start"><i data-lucide="${icon}" class="w-4 h-4"></i></div>
+                 <div>
+                    <h4 class="text-sm font-semibold text-slate-200">${inc.title}</h4>
+                    <p class="text-xs text-slate-400 mt-1 line-clamp-2">${inc.description}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                       <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeClass}">${inc.severity}</span>
+                       <span class="text-[10px] text-slate-500">${new Date(inc.created_at).toLocaleString()}</span>
+                    </div>
+                 </div>
+              </div>
+            `);
+      });
+      lucide.createIcons();
+    }
+
+    // Actions
+    async function sendCommand() {
+      const i = document.getElementById('cmd-input');
+      const cmd = i.value.trim();
+      if (!cmd || !selectedAgent) return;
+      addTerminalLine(`> ${cmd}`, '#38bdf8');
+      i.value = '';
 
       try {
-        const res = await apiCall(`/api/chat/agent/${currentAgentId}/send`, "POST", { message: text });
-        if (res && res.status === "ok") {
-          refreshSocChat();
+        const res = await fetch(`/control/${selectedAgent}/shell`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: cmd })
+        });
+        const data = await res.json();
+        if (data.status === 'queued') {
+          addTerminalLine('Comando enfileirado.', '#64748b');
         } else {
-          showToast("Erro ao enviar mensagem.", "error");
+          addTerminalLine(`Falha: ${data.message}`, '#f87171');
         }
-      } catch (error) {
-        console.error("Error sending SOC Chat message:", error);
-        showToast("Erro ao enviar mensagem.", "error");
+      } catch (e) { addTerminalLine('Erro de rede ao enviar comando.', '#f87171'); }
+    }
+
+    document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendCommand(); });
+
+    async function soarAction(action) {
+      if (!selectedAgent) { showToast('Nenhum agente selecionado no painel!', 'warning'); return; }
+      if (['wipe', 'uninstall', 'isolate'].includes(action)) {
+        if (!confirm('AÇÃO DELETÉRIA OU DE ISOLAMENTO. Você tem absoluta certeza?')) return;
+      }
+
+      showToast(`Despachando ordem SOAR: ${action.toUpperCase()}`, 'info');
+      try {
+        const res = await fetch(`/control/${selectedAgent}/soar`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action })
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch (ex) { data = { message: text }; }
+
+        if (res.ok) {
+          showToast(`Sucesso: ${data.message}`, 'success');
+          addTerminalLine(`[SOAR] ${action} -> OK`, '#10b981');
+        } else {
+          showToast(`Erro na Ação: ${data.message}`, 'error');
+        }
+      } catch (e) {
+        showToast('Falha na comunicação C2.', 'error');
       }
     }
 
-    async function resolveSocChat() {
-      if (!selectedAgent) {
-        showToast("Selecione um agente primeiro!", "warning");
-        return;
-      }
-      const currentAgentId = selectedAgent.id;
+    async function sendChat() {
+      const i = document.getElementById('chat-input');
+      const m = i.value.trim();
+      if (!m) return;
+      const cm = document.getElementById('chat-messages');
+      cm.innerHTML += `<div class="bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-lg ml-6 text-slate-200"><strong>User:</strong> ${m}</div>`;
+      i.value = '';
+      cm.scrollTop = cm.scrollHeight;
+
       try {
-        const res = await apiCall(`/api/chat/agent/${currentAgentId}/resolve`, "POST");
-        if (res && res.status === "ok") {
-          showToast("Alerta visual de chat removido do Card.", "success");
-          loadAgents();
-        } else {
-          showToast("Erro ao resolver chat.", "error");
-        }
-      } catch (error) {
-        console.error("Error resolving SOC Chat:", error);
-        showToast("Erro ao resolver chat.", "error");
+        const r = await fetch('/api/copilot/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: m }) });
+        const d = await r.json();
+        cm.innerHTML += `<div class="bg-black/30 border border-white/5 p-2 rounded-lg mr-6 text-sky-200"><strong>AegisAI:</strong> ${d.reply || 'Erro cognitivo.'}</div>`;
+        cm.scrollTop = cm.scrollHeight;
+      } catch (e) {
+        cm.innerHTML += `<div class="text-rose-400 text-xs">Erro ao contatar IA.</div>`;
       }
     }
+
+    function openIocModal() { alert("Módulo Threat Intel Integrado. Por favor utilize a versão completa."); }
+
+    setInterval(loadData, 5000);
+    loadData();
   </script>
 </body>
 

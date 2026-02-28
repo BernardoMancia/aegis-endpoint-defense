@@ -10,228 +10,115 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #080c14;
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
-
-        .card {
-            background: rgba(13, 17, 23, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .7px;
-            color: #475569;
-            margin-bottom: 14px;
-        }
-
-        .input-field {
-            background: rgba(22, 27, 36, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #e2e8f0;
-            padding: 10px 14px;
-            font-size: 14px;
-            width: 100%;
-            outline: none;
-            transition: all .2s;
-        }
-
-        .input-field:focus {
-            border-color: rgba(14, 165, 233, 0.5);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: white;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all .2s;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.12);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            padding: 9px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all .2s;
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background: rgba(34, 197, 94, 0.15);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.25);
-        }
-
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-        }
-
-        .history-row:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .toggle {
-            position: relative;
-            width: 40px;
-            height: 22px;
-        }
-
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            inset: 0;
-            background: #1e293b;
-            border-radius: 22px;
-            cursor: pointer;
-            transition: .3s;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toggle input:checked+.slider {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background: white;
-            border-radius: 50%;
-            transition: .3s;
-        }
-
-        .toggle input:checked+.slider:before {
-            transform: translateX(18px);
-        }
-
-        label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #64748b;
-            letter-spacing: .4px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .role-badge-superadmin {
-            background: rgba(239, 68, 68, .15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, .25);
-        }
-
-        .role-badge-admin {
-            background: rgba(245, 158, 11, .15);
-            color: #fde68a;
-            border: 1px solid rgba(245, 158, 11, .25);
-        }
-
-        .role-badge-analyst {
-            background: rgba(14, 165, 233, .15);
-            color: #7dd3fc;
-            border: 1px solid rgba(14, 165, 233, .25);
-        }
-
-        .role-badge-operator {
-            background: rgba(99, 102, 241, .15);
-            color: #c4b5fd;
-            border: 1px solid rgba(99, 102, 241, .25);
-        }
-
-        .role-badge-viewer {
-            background: rgba(100, 116, 139, .15);
-            color: #94a3b8;
-            border: 1px solid rgba(100, 116, 139, .25);
-        }
+    /* Aegis Next-Gen Deep Space & Neon Theme */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
     
-    /* Premium Glassmorphism & Animations */
-    .glass {
-      background: rgba(13, 17, 23, 0.55);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(14, 165, 233, 0.15);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    :root {
+        --deep-space: #0B0F19;
+        --card-bg: rgba(17, 24, 39, 0.6);
+        --neon-sky: #0EA5E9;
+        --neon-emerald: #10B981;
+        --neon-rose: #F43F5E;
+        --border-subtle: rgba(255, 255, 255, 0.05);
     }
-    .glass-hover {
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .glass-hover:hover {
-      border-color: rgba(14, 165, 233, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    }
+
+    * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
     
-    /* Toast System */
+    body {
+        background-color: var(--deep-space);
+        background-image: radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.06), transparent 25%), 
+                          radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.04), transparent 25%);
+        color: #E2E8F0;
+        min-height: 100vh;
+        overflow-x: hidden;
+        margin: 0;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-sky); }
+
+    /* Bento Cards & Glassmorphism */
+    .bento-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .bento-card:hover { 
+        transform: translateY(-4px); 
+        border-color: rgba(14, 165, 233, 0.3);
+        box-shadow: 0 12px 30px rgba(14, 165, 233, 0.15);
+    }
+
+    /* Base Input fixes (To prevent white background/text bugs) */
+    .aegis-input {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #F8FAFC !important;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        transition: all 0.3s ease;
+        color-scheme: dark; /* AutoFill Support */
+    }
+    .aegis-input:focus {
+        border-color: var(--neon-sky) !important;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+    }
+
+    /* Buttons */
+    .btn-neon {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 15px rgba(14,165,233,0.3);
+    }
+    .btn-neon:hover:not(:disabled) {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(14,165,233,0.5);
+    }
+    .btn-danger-neon {
+        background: rgba(244, 63, 94, 0.1);
+        border: 1px solid rgba(244, 63, 94, 0.3);
+        color: #FDA4AF;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .btn-danger-neon:hover {
+        background: rgba(244, 63, 94, 0.2);
+        border-color: var(--neon-rose);
+        box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Toasts */
     #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-    .toast { background: rgba(20, 25, 35, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
+    .toast { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
     .toast.show { transform: translateX(0) scale(1); opacity: 1; }
-    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.15), rgba(20,25,35,0.95) 30%); }
-    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.15), rgba(20,25,35,0.95) 30%); }
-    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.15), rgba(20,25,35,0.95) 30%); }
-    
-    /* Base Input fixes */
-    input, select { color-scheme: dark; }
-
-    /* Button Animations */
-    button { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
-    button:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
-    button:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
-    .tab-btn { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
-    .tab-btn:hover { transform: translateY(-2px); }
-
+    .toast-error { border-left: 4px solid var(--neon-rose); }
+    .toast-success { border-left: 4px solid var(--neon-emerald); }
+    .toast-warning { border-left: 4px solid #F59E0B; }
 </style>
 </head>
 
-<body class="p-4 md:p-8">
+<body>
+    <div id="toast-container"></div>
     <div class="max-w-3xl mx-auto">
 
         <!-- Header -->
@@ -271,12 +158,12 @@
         <div class="grid gap-5">
 
             <!-- Informações pessoais -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <p class="section-title">Informações Pessoais</p>
                 <form method="POST" action="/profile/update" class="grid sm:grid-cols-2 gap-4">
                     <div>
                         <label>Nome de exibição</label>
-                        <input name="display_name" type="text" class="input-field" value="{{ user.display_name or '' }}"
+                        <input name="display_name" type="text" class="aegis-input" value="{{ user.display_name or '' }}"
                             placeholder="Seu nome completo" />
                     </div>
                     <div>
@@ -288,22 +175,22 @@
                         <input type="email" class="input-field opacity-50" value="{{ user.email or '' }}" disabled />
                     </div>
                     <div class="sm:col-span-2 flex justify-end">
-                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                        <button type="submit" class="btn-neon">Salvar Alterações</button>
                     </div>
                 </form>
             </div>
 
             <!-- Trocar Email -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <p class="section-title">Solicitar Troca de Email</p>
                 <form method="POST" action="/profile/request-email" class="flex gap-3">
                     <div class="flex-1">
                         <label>Novo email</label>
-                        <input name="new_email" type="email" class="input-field" placeholder="novo@email.com"
+                        <input name="new_email" type="email" class="aegis-input" placeholder="novo@email.com"
                             required />
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="btn-primary whitespace-nowrap">Enviar Confirmação</button>
+                        <button type="submit" class="btn-neon">Enviar Confirmação</button>
                     </div>
                 </form>
                 <p class="text-xs text-slate-600 mt-3">Um link de confirmação será enviado ao email atual. O email só
@@ -311,32 +198,32 @@
             </div>
 
             <!-- Trocar Senha -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <p class="section-title">Alterar Senha</p>
                 <form method="POST" action="/profile/change-password" class="space-y-3">
                     <div>
                         <label>Senha atual</label>
-                        <input name="current_password" type="password" class="input-field" required />
+                        <input name="current_password" type="password" class="aegis-input" required />
                     </div>
                     <div class="grid sm:grid-cols-2 gap-3">
                         <div>
                             <label>Nova senha</label>
-                            <input name="new_password" type="password" class="input-field"
+                            <input name="new_password" type="password" class="aegis-input"
                                 placeholder="Mínimo 8 caracteres" required />
                         </div>
                         <div>
                             <label>Confirmar senha</label>
-                            <input name="confirm_password" type="password" class="input-field" required />
+                            <input name="confirm_password" type="password" class="aegis-input" required />
                         </div>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="btn-primary">Alterar Senha</button>
+                        <button type="submit" class="btn-neon">Alterar Senha</button>
                     </div>
                 </form>
             </div>
 
             <!-- MFA -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="section-title mb-1">Autenticação em Dois Fatores (MFA)</p>
@@ -354,7 +241,7 @@
             </div>
 
             <!-- Preferências de notificação -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <p class="section-title">Preferências de Notificação por Email</p>
                 <form method="POST" action="/profile/notifications" class="space-y-3">
                     {% set prefs = user.notification_settings %}
@@ -369,13 +256,13 @@
                     </div>
                     {% endfor %}
                     <div class="flex justify-end pt-2">
-                        <button type="submit" class="btn-primary">Salvar Preferências</button>
+                        <button type="submit" class="btn-neon">Salvar Preferências</button>
                     </div>
                 </form>
             </div>
 
             <!-- Histórico de logins -->
-            <div class="card p-6">
+            <div class="bento-card p-8">
                 <p class="section-title">Histórico de Acesso Recente</p>
                 {% if history %}
                 <div class="space-y-1">
@@ -402,6 +289,27 @@
 
         </div>
     </div>
+
+            <script>
+            function showToast(message, type = 'info') {
+              const container = document.getElementById('toast-container');
+              if (!container) return;
+              if (message.includes('[ERRO]') && type === 'info') type = 'error';
+              message = message.replace('[ERRO]', '').trim();
+              const toast = document.createElement('div');
+              let typeClass = '';
+              let icon = 'ℹ️';
+              if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
+              if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
+              if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
+              toast.className = `toast ${typeClass}`;
+              toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+              container.appendChild(toast);
+              setTimeout(() => toast.classList.add('show'), 10);
+              setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 5000);
+            }
+            </script>
+            
 </body>
 
 </html>
