@@ -999,7 +999,7 @@ def rebuild_mfa_flow():
             <h1 class="text-3xl font-black">PROTEÇÃO EXTRA</h1>
             <p class="text-slate-400 text-sm">Escaneie o código abaixo com seu app autenticador nível SOC.</p>
             <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl border-4 border-indigo-600/50">
-                <img src="data:image/png;base64,{{ qr_b64 }}" alt="MFA QR" class="w-48 h-48">
+                <img src="/mfa/qr" alt="MFA QR" class="w-48 h-48">
             </div>
             <div class="space-y-4 max-w-sm mx-auto">
                 <p class="text-[10px] text-slate-500 font-mono italic">Manual Key: {{ secret }}</p>

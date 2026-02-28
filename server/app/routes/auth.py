@@ -195,19 +195,32 @@ def mfa_do_verify():
 def mfa_setup_page():
     if "soc_user" not in session:
         return redirect(url_for("auth.login_page"))
-    import pyotp
-    import qrcode
     user = SocUser.query.filter_by(username=session["soc_user"]).first_or_404()
     if not user.mfa_secret:
+        import pyotp
         user.mfa_secret = pyotp.random_base32()
         db.session.commit()
+    return render_template("mfa_setup.html", secret=user.mfa_secret, mfa_enabled=user.mfa_enabled)
+
+
+@auth_bp.route("/mfa/qr")
+def mfa_qr_image():
+    if "soc_user" not in session:
+        abort(403)
+    import pyotp
+    import qrcode
+    from flask import Response
+    user = SocUser.query.filter_by(username=session["soc_user"]).first_or_404()
+    if not user.mfa_secret:
+        abort(400)
+    
     totp = pyotp.TOTP(user.mfa_secret)
     uri = totp.provisioning_uri(name=user.username, issuer_name=MFA_ISSUER)
     qr = qrcode.make(uri)
     buf = io.BytesIO()
     qr.save(buf, format="PNG")
-    qr_b64 = base64.b64encode(buf.getvalue()).decode()
-    return render_template("mfa_setup.html", qr_b64=qr_b64, secret=user.mfa_secret, mfa_enabled=user.mfa_enabled)
+    buf.seek(0)
+    return Response(buf.getvalue(), mimetype='image/png')
 
 
 @auth_bp.route("/mfa/confirm", methods=["POST"])
