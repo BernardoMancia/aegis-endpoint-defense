@@ -1074,9 +1074,25 @@
       }
       if (action === 'uninstall') {
         if (!confirm(`⚠️ ATENÇÃO: O agente C2 será permanentemente desinstalado de ${name} e removido do painel. Continuar?`)) return;
-        await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
-        setTimeout(() => location.reload(), 3500);
+
+        try {
+          const res = await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
+          if (!res.ok) {
+            const err = await res.text();
+            addTerminalLine(`[ERRO SOAR] Backend recusou a desinstalação. Code: ${res.status}. Detalhes: ${err.substring(0, 100)}`, '#f87171');
+            return;
+          }
+          const data = await res.json();
+          if (data.error) {
+            addTerminalLine(`[ERRO] ${data.error}`, '#f87171');
+            return;
+          }
+
+          addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
+          setTimeout(() => location.reload(), 3500);
+        } catch (e) {
+          addTerminalLine(`[ERRO CRÍTICO] Falha ao contatar a API C2: ${e}`, '#f87171');
+        }
         return;
       }
       if (action === 'isolate') {
