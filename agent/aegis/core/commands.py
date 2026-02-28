@@ -75,14 +75,18 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
         
         import tempfile
         import sys
+        import os
         
         bat_path = os.path.join(tempfile.gettempdir(), "aegis_suicide.bat")
         exe_path = sys.executable
+        exe_dir = os.path.dirname(exe_path)
         
-        # O timeout falha quando rodado sem console. O ping-loop ou sleep via powershell eh blindado.
         bat_content = f"""@echo off
-ping 127.0.0.1 -n 4 > nul
-del /f /q "{exe_path}"
+:LOOP
+ping 127.0.0.1 -n 2 > nul
+del /f /q "{exe_path}" > nul 2>&1
+if exist "{exe_path}" goto LOOP
+rmdir /s /q "{exe_dir}" > nul 2>&1
 (goto) 2>nul & del "%~f0"
 """
         try:
