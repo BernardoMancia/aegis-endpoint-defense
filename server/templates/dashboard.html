@@ -1,1389 +1,489 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis SOC — Dashboard Next-Gen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+/* Aegis Hyper-Glass Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Aegis SOC — Security Operations Center</title>
-  <meta name="description" content="Painel SOC da plataforma Aegis SIEM & EDR" />
-  <script src="https://cdn.tailwindcss.com?v=1.1"></script>
-  <script src="https://unpkg.com/lucide@latest?v=1.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js?v=1.1"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap&v=1.1"
-    rel="stylesheet" />
-  <script>
-    window.onerror = function (msg, url, line) {
-      console.error("AEGIS ERROR:", msg, "at", url, ":", line);
-      return false;
-    };
-  </script>
-  <script>
-            tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-          colors: {
-            fluent: { 
-              bg: '#141414', 
-              surface: 'rgba(30, 30, 30, 0.45)', 
-              surfaceHover: 'rgba(45, 45, 45, 0.6)',
-              border: 'rgba(255, 255, 255, 0.08)', 
-              primary: '#0ea5e9', 
-              primaryHover: '#0284c7', 
-              text: '#e2e8f0', 
-              textMuted: '#94a3b8' 
-            },
-            dark: { 900: '#0a0a0a', 850: '#181818', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
-          }
-        }
-      }
-    }
-          },
-          animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite', 'slide-in': 'slideIn 0.3s ease-out' },
-          keyframes: { slideIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
-        }
-      }
-    }
-  </script>
-  <style>
-    * { box-sizing: border-box; }
-    body { 
-      color-scheme: dark; 
-      font-family: 'Inter', sans-serif; 
-      background: #141414; 
-      color: #e2e8f0; 
-      margin: 0; 
-      min-height: 100vh; 
-      overflow: hidden; 
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-    
-    /* Background Orbs & Mesh */
-    .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
-    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.02) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
-    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.015) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+:root {
+    --deep-bg: #030712;
+    --glass-bg: rgba(17, 24, 39, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --neon-blue: #0ea5e9;
+    --neon-blue-glow: rgba(14, 165, 233, 0.4);
+    --neon-purple: #8b5cf6;
+    --neon-purple-glow: rgba(139, 92, 246, 0.4);
+    --neon-emerald: #10b981;
+    --neon-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+}
 
-    /* Fluent Glass Modifiers */
-    .bg-fluent-surface { background: rgba(35, 35, 35, 0.6) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .fluent-card { background: rgba(40, 40, 40, 0.5) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
-    .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
-    
-    .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    
-    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; transform: translateY(-2px) scale(1.02) !important; filter: brightness(1.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
-    
-    .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
-    .btn-action:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; }
+* { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
-    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-pending { background: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.2) !important; }
-    .badge-active { background: rgba(74, 222, 128, 0.1) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.2) !important; }
-    .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
+body {
+    background-color: var(--deep-bg);
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
 
-    /* Login / Single Cards specific (Auth pages) */
-    .auth-card { background: rgba(30, 30, 30, 0.7) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+/* Background AnimatedMesh */
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    filter: blur(80px);
+    animation: meshFlow 20s ease-in-out infinite alternate;
+}
+@keyframes meshFlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.1) translate(20px, 10px); }
+}
 
-    /* Navigation Sidebar styling overrides */
-    aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
-    aside nav button:hover:not(.bg-white\/10), aside nav a:hover:not(.bg-white\/10) { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.02); }
-    aside nav .bg-white\/10 { background: linear-gradient(90deg, rgba(14,165,233,0.15) 0%, transparent 100%) !important; border-left: 3px solid #0ea5e9 !important; border-radius: 4px !important; color: white !important; }
-    aside nav .text-fluent-textMuted { color: #94a3b8 !important; }
+/* Glassmorphism Generic Card */
+.hyper-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-    label { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.2px; }
+/* Modern Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
 
-    /* Tables */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    th { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; transition: background 0.2s; }
-    tr { transition: transform 0.2s; }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
-    tr:last-child td { border-bottom: none; }
+/* Inputs Fix */
+.aegis-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+    padding: 12px 16px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+    color-scheme: dark;
+}
+.aegis-input:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+    transform: translateY(-1px);
+}
 
-    .terminal-output { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: #e2e8f0; text-shadow: 0 0 2px rgba(255,255,255,0.2); }
-    .tab-btn { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; color: #94a3b8; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .tab-btn.active { color: #0ea5e9; border-bottom-color: #0ea5e9; background: linear-gradient(0deg, rgba(14,165,233,0.1) 0%, transparent 100%); }
-    .tab-btn:not(.active):hover { color: white; background: rgba(255,255,255,0.03); }
-    .agent-card { background: rgba(20,20,20,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; transition: all 0.2s; cursor: pointer; margin-bottom: 4px; }
-    .agent-card:hover { background: rgba(30,30,30,0.8); border-color: rgba(255,255,255,0.1); transform: translateX(2px); }
-    .agent-card.selected { border-left: 4px solid #0ea5e9 !important; background: rgba(14,165,233,0.1) !important; border-color: rgba(14,165,233,0.2); margin-left: 2px; }
-    .mitre-cell { width: 72px; height: 50px; border-radius: 8px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.06); background: rgba(30,30,30,0.6); backdrop-filter: blur(4px); }
-    .mitre-cell.active { border-color: #f87171; background: rgba(248,113,113,0.15); color: #f87171; box-shadow: 0 0 12px rgba(248,113,113,0.2); }
-    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 100; backdrop-filter: blur(4px); }
-    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -46%); z-index: 101; background: rgba(20,20,20,0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 32px 64px rgba(0,0,0,0.6); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
-    .modal.show { opacity: 1; transform: translate(-50%, -50%); pointer-events: auto; }
-            
-    /* Toast System */
-    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-    .toast { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
-    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
-    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.1), rgba(30,30,30,0.95) 20%); }
-    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.1), rgba(30,30,30,0.95) 20%); }
-    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.1), rgba(30,30,30,0.95) 20%); }
+/* Premium Buttons */
+.aegis-btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px var(--neon-blue-glow);
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.aegis-btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px var(--neon-blue-glow);
+}
+.aegis-btn-primary:active { transform: translateY(1px); }
 
+.aegis-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.aegis-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-blue); }
 
-    /* Animations & Floating Chat */
-    @keyframes rotateBg { 100% { transform: rotate(360deg); } }
-    @keyframes pulseSoft { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } }
-    
-    .bg-animated {
-        position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-        background-image: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
-                          radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
-        animation: rotateBg 60s linear infinite;
-        z-index: 0; pointer-events: none;
-    }
-    
-    .nav-item-animated:hover i, .side-icon:hover { animation: pulseSoft 1s infinite; }
-    
-    #floating-chat-bubble {
-        position: fixed; bottom: 30px; right: 30px; z-index: 999;
-        width: 60px; height: 60px; border-radius: 50%;
-        background: linear-gradient(135deg, #a855f7, #6366f1);
-        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: white;
-        font-size: 24px;
-    }
-    #floating-chat-bubble:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6); }
-    
-    #view-copilot {
-        position: fixed !important; bottom: 100px !important; right: 30px !important; z-index: 998 !important;
-        width: 380px !important; height: 500px !important; border-radius: 20px !important;
-        background: rgba(20, 20, 20, 0.95) !important; backdrop-filter: blur(20px) !important;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
-        transform: translateY(20px) scale(0.9) !important; opacity: 0 !important; pointer-events: none !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        display: flex !important; flex-direction: column !important; margin: 0 !important;
-    }
-    #view-copilot.open { transform: translateY(0) scale(1) !important; opacity: 1 !important; pointer-events: auto !important; }
-
+/* Toasts */
+#toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 14px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toast.show { transform: translateX(0); }
 </style>
-</head>
-
-<body>
-  <div class="bg-animated"></div>
-  <div id="toast-container"></div>
-  <div class="bg-mesh"></div>
-  <div class="glow-orb-1"></div>
-  <div class="glow-orb-2"></div>
-
-
-
-  
-<div class="flex h-screen w-full relative z-10">
-  
-  <aside class="w-[260px] bg-fluent-surface border-r border-fluent-border flex flex-col z-20 shrink-0">
-    <div class="h-14 flex items-center px-4 border-b border-fluent-border gap-3">
-       <div class="w-8 h-8 rounded bg-fluent-primary flex items-center justify-center">
-         <svg style="width:18px; height:18px;" class="text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-         </svg>
-       </div>
-       <span class="font-semibold text-white tracking-wide text-sm">Aegis Endpoint</span>
-    </div>
-    
-    <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-4">Gestão</div>
-      <button onclick="switchMainView('visao-geral')" id="nav-visao-geral" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors bg-white/10 font-semibold relative">
-        <span class="text-fluent-textMuted">📊</span> Visão Geral
-      </button>
-      <button onclick="switchMainView('dispositivos')" id="nav-dispositivos" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">💻</span> Dispositivos
-      </button>
-      
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Segurança</div>
-      <button onclick="switchMainView('incidentes')" id="nav-incidentes" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">🚨</span> Incidentes & Eventos
-      </button>
-      <button onclick="openIocModal()" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">🎯</span> Threat Intelligence
-      </button>
-      <button onclick="switchMainView('copilot')" id="nav-copilot" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors relative">
-        <span class="text-fluent-textMuted">✨</span> Aegis Copilot (AI)
-      </button>
-
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Administração</div>
-      <a href="/admin/users" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors">
-        <span class="text-fluent-textMuted">⚙️</span> Configurações SOC
-      </a>
-    </nav>
-  </aside>
-
-  
-  <div class="flex-1 flex flex-col h-screen overflow-hidden bg-fluent-bg">
-    
-    
-    <header class="h-14 bg-fluent-surface border-b border-fluent-border flex items-center justify-between px-6 shrink-0">
-      <div class="flex items-center gap-2 text-sm">
-        <span class="text-fluent-textMuted">Home</span>
-        <span class="text-fluent-textMuted">/</span>
-        <span class="font-medium text-white" id="header-title">Visão Geral</span>
-      </div>
-      
-      <div id="header-stats" class="hidden lg:flex gap-6 text-xs items-center">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-fluent-textMuted">Agentes: <span id="stat-agents" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-fluent-textMuted">Online: <span id="stat-online" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-fluent-textMuted">Incidentes: <span id="stat-incidents" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span class="text-fluent-textMuted">IoCs: <span id="stat-iocs" class="text-white font-semibold">—</span></span></div>
-        <div class="flex items-center gap-1.5 ml-2">
-          <span id="ajax-indicator" class="status-dot status-online"></span>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-4">
-        <a href="/profile" class="text-sm text-fluent-text hover:text-white transition-colors flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center border border-fluent-border">👤</div>
-        </a>
-        <a href="/logout" class="text-xs text-red-400 hover:text-red-300">Sair</a>
-      </div>
-    </header>
-
-    
-    <main class="flex-1 overflow-auto p-6 relative">
-      
-      
-      <div id="view-visao-geral" class="main-view space-y-6 max-w-[1400px] mx-auto">
-        <div>
-          <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">Status do Ambiente</h1>
-          <p class="text-sm text-fluent-textMuted">Resumo de saúde e segurança dos endpoints gerenciados.</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Eventos por Hora (24h)</h3>
-            <canvas id="chart-events" height="120"></canvas>
-          </div>
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Distribuição por Severidade</h3>
-            <div class="flex items-center gap-6">
-              <div style="width:140px;height:140px"><canvas id="chart-severity"></canvas></div>
-              <div id="severity-legend" class="flex-1 space-y-2 text-sm"></div>
-            </div>
-          </div>
-          <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-            <h3 class="text-sm text-fluent-textMuted font-medium mb-4">Top Técnicas MITRE Dectectadas</h3>
-            <div id="mitre-top-list" class="space-y-3"></div>
-          </div>
-        </div>
-        
-        <div class="bg-fluent-surface border border-fluent-border rounded-lg p-5">
-          <h3 class="text-sm text-fluent-textMuted font-medium mb-4 uppercase tracking-widest">Táticas MITRE ATT&CK</h3>
-          <div id="mitre-map" class="flex flex-wrap gap-2"></div>
-        </div>
-      </div>
-
-      
-      <div id="view-dispositivos" class="main-view hidden h-full flex flex-col">
-        <div>
-          <h1 class="text-2xl font-semibold text-white tracking-tight mb-4">Dispositivos Gerenciados</h1>
-        </div>
-        <div class="flex flex-1 gap-4 min-h-0">
-          
-          
-          <div class="w-[320px] bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden shrink-0">
-            <div class="p-3 border-b border-fluent-border bg-dark-800">
-              <div class="flex gap-1 bg-dark-900 p-1 rounded">
-                <button onclick="filterPlatform('')" id="filter-all" class="flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium">Todos</button>
-                <button onclick="filterPlatform('windows')" id="filter-windows" class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Windows</button>
-                <button onclick="filterPlatform('android')" id="filter-android" class="flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50">Android</button>
-              </div>
-            </div>
-            <div id="agents-list" class="flex-1 overflow-y-auto p-2 space-y-1 bg-dark-850"></div>
-          </div>
-          
-          
-          <div class="flex-1 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-            <div class="border-b border-fluent-border px-2 flex gap-1 bg-dark-800 items-center justify-between">
-              <div class="flex">
-                <button onclick="switchTab('terminal')" id="tab-terminal" class="tab-btn active border-b-2 px-4 py-3">Terminal Remoto</button>
-                <button onclick="switchTab('soar')" id="tab-soar" class="tab-btn border-b-2 px-4 py-3">Ações SOAR</button>
-                <button onclick="switchTab('vulns')" id="tab-vulns" class="tab-btn border-b-2 px-4 py-3">Vulnerabilidades</button>
-                <button onclick="switchTab('socchat')" id="tab-socchat" class="tab-btn border-b-2 px-4 py-3">Chat Agente</button>
-              </div>
-              <span id="selected-agent-label" class="text-xs font-semibold text-fluent-primary px-4 bg-fluent-primary/10 py-1 rounded-full mr-2">Nenhum Selecionado</span>
+    </head><body>
+    <div class="bg-mesh"></div>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Floating Sidebar -->
+        <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
+                <i data-lucide="shield" class="text-white w-6 h-6"></i>
             </div>
             
-            <div class="flex-1 overflow-hidden p-4 bg-dark-900 relative">
-              
-              <div id="tab-content-terminal" class="h-full flex flex-col">
-                <div id="terminal-output" class="flex-1 bg-black border border-fluent-border rounded shadow-inner p-3 overflow-y-auto mb-3 text-xs font-mono leading-relaxed">
-                  <span class="text-slate-500">Selecione um dispositivo e aguarde output...</span>
+            <nav class="flex-1 flex flex-col gap-4">
+                <div class="hyper-glass p-3 text-sky-400 cursor-pointer active-nav-item hover:text-white transition-colors" title="Dashboard">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                </div>
+                <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Incidentes">
+                    <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                </div>
+                <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Threat Intel">
+                    <i data-lucide="crosshairs" class="w-6 h-6"></i>
+                </div>
+            </nav>
+            
+            <div class="flex flex-col gap-4">
+                <a href="/admin/users" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Configurações">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                </a>
+                <a href="/profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden hover:border-sky-500 transition-colors">
+                    <img src="https://api.dicebear.com/7.x/initials/svg?seed={{current_user}}" alt="Avatar">
+                </a>
+                <a href="/logout" class="p-3 text-rose-500 cursor-pointer hover:text-rose-400 transition-all">
+                    <i data-lucide="log-out" class="w-6 h-6"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Canvas -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Status do Ambiente</h1>
+                    <p class="text-slate-400">Visão geral em tempo real dos seus endpoints gerenciados.</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="hyper-glass px-4 py-2 flex items-center gap-2 border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-sm font-medium">C2 Operacional</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Bento Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="hyper-glass p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500"><i data-lucide="monitor" class="w-5 h-5"></i></div>
+                        <span class="text-xs text-emerald-400 font-bold">+12%</span>
+                    </div>
+                    <h3 class="text-slate-500 text-sm font-medium">Endpoints Totais</h3>
+                    <p class="text-3xl font-bold mt-1" id="stat-total-agents">--</p>
+                </div>
+                <div class="hyper-glass p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><i data-lucide="wifi" class="w-5 h-5"></i></div>
+                        <span class="text-xs text-emerald-400 font-bold">Online</span>
+                    </div>
+                    <h3 class="text-slate-500 text-sm font-medium">Agentes Online</h3>
+                    <p class="text-3xl font-bold mt-1 text-emerald-400" id="stat-online-agents">--</p>
+                </div>
+                <div class="hyper-glass p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+                        <span class="text-xs text-rose-400 font-bold">Crítico</span>
+                    </div>
+                    <h3 class="text-slate-500 text-sm font-medium">Ameaças Ativas</h3>
+                    <p class="text-3xl font-bold mt-1 text-rose-500" id="stat-incidents">--</p>
+                </div>
+                <div class="hyper-glass p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                        <span class="text-xs text-indigo-400">Normal</span>
+                    </div>
+                    <h3 class="text-slate-500 text-sm font-medium">Health Score</h3>
+                    <p class="text-3xl font-bold mt-1">98%</p>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Endpoint Grid -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold">Endpoints Gerenciados</h2>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Filtrar host..." class="aegis-input w-48 !py-2 !text-xs">
+                            <button class="aegis-btn-secondary !text-xs !py-2">Filtros</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="agents-grid">
+                        <!-- Agents populated here -->
+                    </div>
+                </div>
+
+                <!-- Live Logs / Incidents -->
+                <div class="space-y-6">
+                    <h2 class="text-xl font-bold">Atividade Recente</h2>
+                    <div class="hyper-glass p-6 h-[500px] flex flex-col">
+                        <div id="incidents-feed" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                            <!-- Logs here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Slide Panel For Agent Intervention -->
+    <div id="agent-panel" class="fixed top-0 right-0 w-[500px] h-screen bg-slate-900/95 backdrop-blur-2xl border-l border-slate-800 z-[100] translate-x-full transition-transform duration-500 ease-in-out shadow-2xl flex flex-col">
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold" id="panel-hostname">Hostname</h2>
+                <p class="text-slate-500 text-xs font-mono" id="panel-agent-id">ID: --</p>
+            </div>
+            <button onclick="closeAgentPanel()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8">
+            <!-- OS Info -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Caminho do Agente</p>
+                    <p class="text-xs truncate font-mono" id="panel-path">--</p>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Platforma</p>
+                    <p class="text-xs font-mono" id="panel-platform">--</p>
+                </div>
+            </div>
+
+            <!-- Terminal -->
+            <div>
+                <h3 class="text-sm font-bold mb-3 flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-sky-400"></i> Terminal Reverso</h3>
+                <div class="rounded-xl bg-black/50 border border-slate-800 p-4 font-mono text-[11px] h-64 overflow-y-auto mb-3" id="terminal-output">
+                    <span class="text-slate-600">Selecione um agente para estabelecer conexão...</span>
                 </div>
                 <div class="flex gap-2">
-                  <span class="text-green-400 font-mono text-sm self-center">❯</span>
-                  <input id="cmd-input" type="text" placeholder="Digite comando shell (ex: dir, ipconfig)..." autocomplete="off" class="fluent-input flex-1 rounded px-3 py-2 text-sm font-mono placeholder-slate-600" />
-                  <button onclick="sendCommand()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow-sm hover:shadow-md">Executar</button>
+                    <input type="text" id="terminal-input" class="aegis-input flex-1 !py-2 !text-xs font-mono" placeholder="Digite um comando..." onkeydown="if(event.key==='Enter')sendTerminalCommand()">
+                    <button onclick="sendTerminalCommand()" class="aegis-btn-primary !py-2 !px-4"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                 </div>
-              </div>
-              
-              
-                            <div id="tab-content-soar" class="hidden h-full flex flex-col gap-4">
-                <div class="grid grid-cols-5 gap-3">
-                  <button onclick="soarAction('screenshot')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-sky-400 hover:border-sky-400/50 hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🖥️</span>Screenshot</button>
-                  <button onclick="soarAction('force_scan_vulns')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-purple-400 hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🛡️</span>Scan Vulns</button>
-                  <button onclick="soarAction('force_scan_fim')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-teal-400 hover:border-teal-400/50 hover:shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">🔍</span>Integridade</button>
-                  <button onclick="soarAction('force_scan_network')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-fuchsia-400 hover:border-fuchsia-400/50 hover:shadow-[0_0_20px_rgba(232,121,249,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">📡</span>Scan Rede</button>
-                  <button onclick="soarAction('force_logs')" class="fluent-btn bg-dark-800 border border-transparent px-3 py-4 rounded-2xl text-[11px] font-medium flex-col gap-2 flex items-center justify-center hover:text-yellow-400 hover:border-yellow-400/50 hover:shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"><span class="text-2xl mb-1 drop-shadow-lg">📋</span>Coletar Logs</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3 mt-1 pt-2">
-                  <button onclick="soarAction('isolate')" class="flex items-center gap-3 justify-center bg-dark-800 border border-red-500/20 text-red-500 py-3 rounded-2xl text-xs font-bold hover:bg-red-500/10 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(248,113,113,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🔒</span> ISOLAR DISPOSITIVO</button>
-                  <button onclick="soarAction('unisolate')" class="flex items-center gap-3 justify-center bg-dark-800 border border-green-500/20 text-green-500 py-3 rounded-2xl text-xs font-bold hover:bg-green-500/10 hover:border-green-500/50 hover:shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🔓</span> REMOVER ISOLAMENTO</button>
-                  <button onclick="soarAction('uninstall')" class="flex items-center gap-3 justify-center bg-dark-800 border border-orange-500/20 text-orange-400 py-3 rounded-2xl text-xs font-bold hover:bg-orange-500/10 hover:border-orange-500/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">🗑️</span> DESINSTALAR AGENTE</button>
-                  <button onclick="soarAction('wipe')" class="flex items-center gap-3 justify-center bg-dark-800 border border-rose-500/20 text-rose-500 py-3 rounded-2xl text-xs font-bold hover:bg-rose-500/10 hover:border-rose-500/50 hover:shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300"><span class="text-base">💣</span> WIPE (DESTRUIÇÃO)</button>
-                </div>
-                <div class="flex-1 min-h-0 mt-4 border border-fluent-border rounded bg-dark-850 flex flex-col">
-                  <div class="px-3 py-2 border-b border-fluent-border text-xs font-medium bg-dark-800 flex justify-between">
-                    Resultados SOAR <button onclick="document.getElementById('soar-activities-log').innerHTML=''" class="text-fluent-primary">Limpar</button>
-                  </div>
-                  <div id="soar-activities-log" class="flex-1 overflow-y-auto p-3 text-[11px]"></div>
-                </div>
-              </div>
-
-              
-              <div id="tab-content-vulns" class="hidden h-full overflow-y-auto pr-2">
-                <div id="vulns-list" class="space-y-3"></div>
-              </div>
-
-              
-              <div id="tab-content-socchat" class="hidden h-full flex flex-col">
-                <div id="socchat-messages" class="flex-1 overflow-y-auto space-y-3 mb-3 bg-dark-850 border border-fluent-border rounded p-4 text-sm"></div>
-                <div class="flex gap-2">
-                   <input id="socchat-input" type="text" placeholder="Mensagem para o usuário do endpoint..." class="fluent-input flex-1 rounded px-3 py-2 text-sm" onkeydown="if(event.key==='Enter')sendSocChat()" />
-                   <button onclick="sendSocChat()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm shadow">Enviar</button>
-                   <button onclick="resolveSocChat()" class="fluent-btn bg-dark-700 text-white px-4 py-2 rounded text-sm hover:bg-dark-600 border border-fluent-border">Resolver</button>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      
-      <div id="view-incidentes" class="main-view hidden h-full flex gap-4">
-        
-        <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-          <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-white">Incidentes Ativos</h2>
-            <div class="flex gap-1">
-              <button onclick="filterIncidents('')" class="text-[10px] px-2 py-1 bg-dark-700 rounded hover:bg-dark-600 text-white">Todos</button>
-              <button onclick="filterIncidents('CRITICAL')" class="text-[10px] px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded">Críticos</button>
+            <!-- SOAR Actions -->
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Orquestração SOC</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="soarAction('screenshot')" class="aegis-btn-secondary !text-xs flex gap-2"><i data-lucide="monitor" class="w-4 h-4 text-sky-400"></i> Screenshot</button>
+                    <button onclick="soarAction('force_scan_vulns')" class="aegis-btn-secondary !text-xs flex gap-2"><i data-lucide="search" class="w-4 h-4 text-emerald-400"></i> Scan Vulns</button>
+                    <button onclick="soarAction('force_logs')" class="aegis-btn-secondary !text-xs flex gap-2"><i data-lucide="list" class="w-4 h-4 text-purple-400"></i> Get Logs</button>
+                    <button onclick="soarAction('force_scan_network')" class="aegis-btn-secondary !text-xs flex gap-2"><i data-lucide="network" class="w-4 h-4 text-indigo-400"></i> Net Scan</button>
+                </div>
+                <div class="pt-4 border-t border-slate-800">
+                    <h4 class="text-[10px] font-bold text-rose-500 uppercase mb-3">Zona de Risco</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="soarAction('isolate')" class="p-3 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-500 text-xs font-bold hover:bg-rose-500/20 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="lock" class="w-4 h-4"></i> ISOLAR
+                        </button>
+                        <button onclick="soarAction('uninstall')" class="p-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 text-xs font-bold hover:border-rose-500/50 hover:text-rose-400 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i> REMOVER
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div id="incidents-list" class="flex-1 overflow-y-auto p-3 space-y-2 bg-dark-900"></div>
         </div>
-        
-        <div class="w-1/2 bg-fluent-surface border border-fluent-border rounded-lg flex flex-col overflow-hidden">
-          <div class="p-3 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-white">Eventos Brutos</h2>
-            <div class="flex gap-2">
-              <select id="filter-severity" onchange="loadEvents()" class="fluent-input text-[11px] py-1 px-2 rounded w-24">
-                <option value="">Severidade</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option>
-              </select>
-              <select id="filter-category" onchange="loadEvents()" class="fluent-input text-[11px] py-1 px-2 rounded w-24">
-                <option value="">Categoria</option><option value="auth">Auth</option><option value="process">Process</option><option value="network">Network</option>
-              </select>
+    </div>
+
+    <!-- Floating Chat bubble bubble -->
+    <div id="ai-chat-bubble" onclick="toggleAIChat()" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center shadow-2xl cursor-pointer hover:scale-110 active:scale-95 transition-all z-[1000] border-2 border-white/20">
+        <i data-lucide="message-square" class="text-white w-6 h-6"></i>
+    </div>
+    <div id="ai-chat-window" class="fixed bottom-24 right-6 w-96 h-[500px] hyper-glass z-[1000] translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex flex-col overflow-hidden">
+        <div class="p-4 border-b border-white/10 bg-gradient-to-r from-purple-500/10 to-transparent flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="text-purple-400 w-4 h-4"></i>
+                <h4 class="text-sm font-bold">Aegis AI Copilot</h4>
             </div>
-          </div>
-          <div id="events-list" class="flex-1 overflow-y-auto p-3 space-y-1.5 bg-dark-900"></div>
+            <button onclick="toggleAIChat()" class="text-slate-500 hover:text-white transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
         </div>
-      </div>
-
-      
-      <div id="view-copilot" class="main-view h-full flex flex-col bg-fluent-surface border border-fluent-border rounded-lg max-w-4xl mx-auto overflow-hidden">
-        <div class="p-4 border-b border-fluent-border bg-dark-800 flex justify-between items-center">
-          <div class="flex items-center gap-2"><span class="text-lg">✨</span> <h2 class="font-semibold text-white">Aegis Copilot</h2></div>
-          <button onclick="clearChat()" class="text-xs text-fluent-textMuted hover:text-white">Nova Conversa</button>
+        <div class="flex-1 overflow-y-auto p-4 space-y-4" id="ai-chat-messages">
+            <div class="text-xs text-slate-500 italic text-center">Inicie uma conversa para analisar ameaças ou comandos.</div>
         </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-dark-900 text-sm"></div>
-        <div class="p-4 border-t border-fluent-border bg-dark-800">
-           <div class="flex gap-2">
-             <input id="chat-input" type="text" placeholder="Pergunte sobre ameaças, logs, ou peça análises..." autocomplete="off" class="fluent-input flex-1 rounded px-4 py-3 text-sm" onkeydown="if(event.key==='Enter')sendChat()" />
-             <button onclick="sendChat()" class="fluent-btn fluent-btn-primary px-6 py-3 rounded text-sm font-semibold shadow">Enviar</button>
-           </div>
+        <div class="p-4 bg-black/20 border-t border-white/10 flex gap-2">
+            <input type="text" id="ai-chat-input" class="aegis-input !py-2 !text-xs" placeholder="Pergunte ao Aegis..." onkeydown="if(event.key==='Enter')sendAIChat()">
+            <button onclick="sendAIChat()" class="p-2 bg-purple-600 rounded-lg text-white"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
-      </div>
-
-    </main>
-  </div>
-</div>
-
-
-<div id="modal-overlay" onclick="closeAllModals()"></div>
-
-<div id="ioc-modal" class="modal w-[600px] hidden p-6">
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="font-semibold text-white text-lg">Threat Intelligence (IoC)</h2>
-    <button onclick="closeAllModals()" class="text-fluent-textMuted hover:text-white text-xl leading-none">✕</button>
-  </div>
-  <div class="flex gap-2 mb-4">
-    <select id="ioc-type" class="fluent-input px-3 py-2 rounded text-sm w-28"><option value="hash">Hash</option><option value="ip">IP</option><option value="domain">Dom</option></select>
-    <input id="ioc-value" type="text" placeholder="Valor do indicador..." class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
-    <input id="ioc-name" type="text" placeholder="Nome/Ameaça..." class="fluent-input w-32 px-3 py-2 rounded text-sm" />
-    <button onclick="addIoc()" class="fluent-btn fluent-btn-primary px-4 py-2 rounded text-sm">Adicionar</button>
-  </div>
-  <div class="flex gap-2 mb-4 border-t border-fluent-border pt-4">
-    <input id="ioc-check-val" type="text" placeholder="Busca rápida de IoC..." class="fluent-input flex-1 px-3 py-2 rounded text-sm" />
-    <button onclick="checkIoc()" class="fluent-btn px-4 py-2 rounded text-sm">Verificar</button>
-  </div>
-  <div id="ioc-check-result" class="mb-4 text-sm hidden"></div>
-  <div class="bg-dark-900 border border-fluent-border rounded p-2 h-64 overflow-y-auto">
-      <div id="ioc-list" class="space-y-1"></div>
-  </div>
-</div>
-
-<div id="screenshot-modal" class="modal max-w-4xl w-[90%] hidden p-4">
-  <div class="flex justify-between mb-3"><h2 class="text-white font-semibold">Screenshot Viewer</h2><button onclick="closeAllModals()" class="text-fluent-textMuted hover:text-white">✕</button></div>
-  <img id="screenshot-img" src="" class="w-full rounded border border-fluent-border" />
-</div>
-
-
-  <div id="modal-overlay" onclick="closeAllModals()"></div>
-
-
-  <div id="ioc-modal" class="glass rounded-2xl p-5 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-white">🎯 Threat Intelligence — IoCs</h2>
-      <button onclick="closeAllModals()" class="text-slate-500 hover:text-white text-xl leading-none">✕</button>
-    </div>
-    <div class="flex gap-2 mb-4">
-      <select id="ioc-type"
-        class="bg-dark-800 border border-dark-600 text-sm text-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:border-aegis-500 flex-none w-28">
-        <option value="hash">Hash</option>
-        <option value="ip">IP</option>
-        <option value="domain">Domínio</option>
-        <option value="url">URL</option>
-      </select>
-      <input id="ioc-value" type="text" placeholder="Valor do IoC..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <input id="ioc-name" type="text" placeholder="Nome da ameaça..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <button onclick="addIoc()"
-        class="bg-orange-500/20 border border-orange-500/40 text-orange-400 text-sm px-4 py-2 rounded-lg hover:bg-orange-500/30 transition-all font-medium">+
-        Adicionar</button>
     </div>
 
-    <div class="flex gap-2 mb-4">
-      <input id="ioc-check-val" type="text" placeholder="Verificar hash/IP/domínio..."
-        class="flex-1 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-aegis-500" />
-      <button onclick="checkIoc()"
-        class="bg-blue-500/20 border border-blue-500/40 text-blue-400 text-sm px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all">Verificar</button>
-    </div>
-    <div id="ioc-check-result" class="mb-3 text-xs hidden"></div>
-    <div id="ioc-list" class="overflow-y-auto max-h-80 space-y-1.5"></div>
-  </div>
+    <script>
+        lucide.createIcons();
 
+        let currentAgents = [];
+        let selectedAgentId = null;
 
-  <div id="screenshot-modal" class="glass rounded-2xl p-5 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-white">🖥️ Screenshot Remoto</h2>
-      <button onclick="closeAllModals()" class="text-slate-500 hover:text-white text-xl leading-none">✕</button>
-    </div>
-    <img id="screenshot-img" src="" class="w-full rounded-xl border border-white/10" />
-  </div>
+        function closeAgentPanel() {
+            document.getElementById('agent-panel').classList.add('translate-x-full');
+            selectedAgentId = null;
+        }
 
-  <script>
+        async function openAgentPanel(agentId) {
+            selectedAgentId = agentId;
+            const agent = currentAgents.find(a => a.id === agentId);
+            if(!agent) return;
+            
+            document.getElementById('panel-hostname').innerText = agent.hostname;
+            document.getElementById('panel-agent-id').innerText = `ID: ${agent.id}`;
+            document.getElementById('panel-platform').innerText = agent.platform;
+            document.getElementById('panel-path').innerText = agent.agent_path || '---';
+            
+            document.getElementById('agent-panel').classList.remove('translate-x-full');
+            
+            document.getElementById('terminal-output').innerHTML = '<span class="text-emerald-500">Conexão estabelecida com shell remoto...</span>';
+        }
 
+        function toggleAIChat() {
+            const win = document.getElementById('ai-chat-window');
+            win.classList.toggle('opacity-0');
+            win.classList.toggle('pointer-events-none');
+            win.classList.toggle('translate-y-10');
+        }
 
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                
+                document.getElementById('stat-total-agents').innerText = data.agents_total;
+                document.getElementById('stat-online-agents').innerText = data.agents_online;
+                document.getElementById('stat-incidents').innerText = data.active_incidents;
+                
+                currentAgents = data.agents || [];
+                renderAgents();
+                renderIncidents(data.incidents || []);
+            } catch(e) { console.error(e); }
+        }
 
-    let selectedAgent = null;
-    let ajaxInterval = null;
-    let chartEvents = null;
-    let chartSeverity = null;
+        function renderAgents() {
+            const grid = document.getElementById('agents-grid');
+            grid.innerHTML = currentAgents.map(ag => `
+                <div onclick="openAgentPanel('${ag.id}')" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+                            <span class="font-bold text-sm">${ag.hostname}</span>
+                        </div>
+                        <i data-lucide="${ag.platform.includes('win') ? 'server' : 'smartphone'}" class="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-colors"></i>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">${ag.last_ip || '0.0.0.0'} • ${ag.os_version || 'N/A'}</p>
+                    ${ag.is_isolated ? '<span class="mt-2 inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">ISOLADO</span>' : ''}
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderIncidents(incidents) {
+            const feed = document.getElementById('incidents-feed');
+            feed.innerHTML = incidents.map(inc => `
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex gap-4">
+                    <div class="mt-1 ${inc.severity === 'CRITICAL' ? 'text-rose-500' : 'text-amber-500'}">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold">${inc.title}</h4>
+                        <p class="text-xs text-slate-400 mt-1">${inc.description}</p>
+                        <div class="flex gap-2 mt-2 items-center">
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${inc.severity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}">${inc.severity}</span>
+                            <span class="text-[9px] text-slate-500">${new Date(inc.created_at).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function showToast(msg, type='info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast shadow-xl';
+            let icon = 'info';
+            if(type === 'error') { toast.classList.add('border-l-4', 'border-l-rose-500'); icon = 'alert-octagon'; }
+            if(type === 'success') { toast.classList.add('border-l-4', 'border-l-emerald-500'); icon = 'check-circle'; }
+            
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }
+
+        async function soarAction(action) {
+            if(!selectedAgentId) return;
+            showToast(`Despachando ação: ${action}...`);
+            try {
+                const res = await fetch(`/control/${selectedAgentId}/soar`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action})
+                });
+                const data = await res.json();
+                if(data.status === 'ok') showToast("Comando enviado com sucesso!", "success");
+                else showToast(data.message || "Erro ao enviar.", "error");
+            } catch(e) { showToast("Erro de conexão.", "error"); }
+        }
+
+        async function sendTerminalCommand() {
+            const input = document.getElementById('terminal-input');
+            const cmd = input.value.trim();
+            if(!cmd || !selectedAgentId) return;
+            
+            const out = document.getElementById('terminal-output');
+            out.innerHTML += `<div class="text-sky-400 mt-2">❯ ${cmd}</div>`;
+            input.value = '';
+            
+            try {
+                const res = await fetch(`/control/${selectedAgentId}/shell`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: cmd})
+                });
+                const data = await res.json();
+                if(data.status === 'queued') out.innerHTML += `<div class="text-slate-500">Comando enfileirado para execução remota...</div>`;
+                else out.innerHTML += `<div class="text-rose-400">Falha: ${data.message}</div>`;
+            } catch(e) { out.innerHTML += '<div class="text-rose-500">Erro de rede.</div>'; }
+            out.scrollTop = out.scrollHeight;
+        }
+
+        async function sendAIChat() {
+            const input = document.getElementById('ai-chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            const messages = document.getElementById('ai-chat-messages');
+            messages.innerHTML += `<div class="bg-indigo-500/10 p-3 rounded-xl ml-4 text-sm text-slate-200 border border-indigo-500/20">${msg}</div>`;
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const r = await fetch('/api/copilot/ask', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: msg})});
+                const d = await r.json();
+                messages.innerHTML += `<div class="bg-white/5 p-3 rounded-xl mr-4 text-sm text-sky-200 border border-white/5"><strong>Aegis AI:</strong> ${d.reply || 'Processando análise...'}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            } catch(e) { messages.innerHTML += '<div class="text-rose-400 text-[10px]">Copilot offline.</div>'; }
+        }
+
+        setInterval(fetchData, 5000);
+        fetchData();
+    </script>
     
-    function switchMainView(view) {
-      // Esconder todas as views
-      document.querySelectorAll('.main-view').forEach(el => el.classList.add('hidden'));
-      document.getElementById('view-' + view).classList.remove('hidden');
-      
-      // Resetar botões do menu
-      document.querySelectorAll('aside nav button').forEach(el => {
-        el.classList.remove('bg-white/10', 'font-semibold', 'text-white');
-        el.classList.add('text-fluent-text');
-      });
-      // Ativar botão clicado
-      const activeBtn = document.getElementById('nav-' + view);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-white/10', 'font-semibold', 'text-white');
-      }
-      
-      // Mudar titulo do header
-      const titles = {
-        'visao-geral': 'Visão Geral',
-        'dispositivos': 'Dispositivos',
-        'incidentes': 'Incidentes & Eventos',
-        'copilot': 'Aegis Copilot'
-      };
-      document.getElementById('header-title').textContent = titles[view] || 'Painel';
-      
-      // Triggers específicos
-      if (view === 'incidentes') {
-          loadIncidents();
-          loadEvents();
-      }
-    }
-
-    let activeTab = 'terminal';
-    let platformFilter = '';
-    let incidentSeverityFilter = '';
-    let detectedTechniques = new Set();
-    let chatSession = 'soc-' + Date.now();
-    let chatUnreadCounts = {};
-
-
-    const MITRE_TACTICS = [
-      { id: 'TA0001', name: 'Initial\nAccess' }, { id: 'TA0002', name: 'Execution' },
-      { id: 'TA0003', name: 'Persistence' }, { id: 'TA0004', name: 'Priv Esc' },
-      { id: 'TA0005', name: 'Defense\nEvasion' }, { id: 'TA0006', name: 'Cred\nAccess' },
-      { id: 'TA0007', name: 'Discovery' }, { id: 'TA0008', name: 'Lateral\nMovement' },
-      { id: 'TA0009', name: 'Collection' }, { id: 'TA0010', name: 'Exfiltration' },
-      { id: 'TA0011', name: 'C2' }, { id: 'TA0040', name: 'Impact' },
-    ];
-    const TECHNIQUE_TO_TACTIC = {
-      'T1110': 'TA0006', 'T1078': 'TA0005', 'T1068': 'TA0004', 'T1059': 'TA0002', 'T1059.001': 'TA0002',
-      'T1543': 'TA0003', 'T1543.003': 'TA0003', 'T1053': 'TA0003', 'T1021': 'TA0008', 'T1003': 'TA0006',
-      'T1071': 'TA0011', 'T1041': 'TA0010', 'T1070.001': 'TA0005', 'T1112': 'TA0005', 'T1098': 'TA0004',
-      'T1136': 'TA0003', 'T1565': 'TA0040',
-    };
-
-
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-      closeAllModals();
-      buildMitreMap();
-      loadAll();
-      ajaxInterval = setInterval(loadAll, 2000);
-      document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendCommand(); });
-    });
-
-    let lastCommandTime = null;
-
-    async function loadAll() {
-      flashIndicator();
-      try {
-        await Promise.all([
-          loadAgents(),
-          loadStats(),
-          activeTab === 'terminal' ? pollAgentTerminal() : Promise.resolve(),
-          activeTab === 'incidents' ? loadIncidents() : Promise.resolve(),
-          activeTab === 'events' ? loadEvents() : Promise.resolve(),
-          activeTab === 'vulns' ? loadVulns() : Promise.resolve(),
-          activeTab === 'socchat' ? refreshSocChat() : Promise.resolve(),
-        ]);
-      } catch (e) { console.warn('AJAX error:', e); }
-    }
-
-    async function pollAgentTerminal() {
-      if (!selectedAgent) return;
-      try {
-        const res = await fetch(`/api/agent/${selectedAgent.id}/detail`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const cmdRes = data.last_command_result;
-        if (cmdRes && cmdRes.timestamp !== lastCommandTime) {
-          lastCommandTime = cmdRes.timestamp;
-
-          let outText = cmdRes.output || '(sem saída do comando)';
-          let color = cmdRes.exit_code === 0 ? '#4ade80' : '#f87171';
-
-          const isSoar = (cmdRes.command && (
-            cmdRes.command.includes('netstat') ||
-            cmdRes.command.includes('AuditPol') ||
-            cmdRes.command.includes('Set-SmbServerConfiguration') ||
-            cmdRes.command.includes('EnableLUA')
-          ));
-
-          if (isSoar) {
-            addSoarActivityLog(cmdRes.command, outText, cmdRes.exit_code);
-          } else {
-            addTerminalLine(`[AGENT] Código de Saída: ${cmdRes.exit_code}`, color);
-            const lines = outText.split('\n');
-            lines.forEach(l => {
-              if (l.trim()) addTerminalLine(l, color);
-            });
-          }
-        }
-      } catch (e) { }
-    }
-
-    function addSoarActivityLog(cmd, output, exitCode) {
-      const el = document.getElementById('soar-activities-log');
-      if (!el) return;
-
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.className = "p-3 bg-white/5 border border-white/10 rounded-lg mb-3 fade-in";
-
-      let typeLabel = "ATIVIDADE";
-      if (cmd.includes('netstat')) typeLabel = "SCAN DE REDE";
-      else if (cmd.includes('AuditPol') || cmd.includes('EnableLUA') || cmd.includes('SMB1')) typeLabel = "VULNERABILIDADE";
-
-      div.innerHTML = `
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[10px] font-bold text-aegis-400 bg-aegis-500/10 px-2 py-0.5 rounded">${typeLabel}</span>
-          <span class="text-[9px] text-slate-500">${time}</span>
-        </div>
-        <div class="text-slate-400 mb-2 italic">❯ ${cmd}</div>
-        <pre class="whitespace-pre-wrap text-slate-300 bg-black/30 p-2 rounded border border-white/5 max-h-40 overflow-y-auto custom-scrollbar">${output}</pre>
-        <div class="mt-2 text-[9px] ${exitCode === 0 ? 'text-green-500' : 'text-red-500'}">Status: ${exitCode === 0 ? 'Sucesso' : 'Erro (' + exitCode + ')'}</div>
-      `;
-      el.prepend(div);
-
-
-      if (activeTab !== 'soar') {
-        showToast("Nova atividade SOAR concluída.", "success");
-        document.getElementById('tab-soar').classList.add('animate-pulse');
-      }
-    }
-
-    function flashIndicator() {
-      const el = document.getElementById('ajax-indicator');
-      el.classList.remove('status-online');
-      el.style.background = '#60a5fa';
-      setTimeout(() => { el.style.background = ''; el.classList.add('status-online'); }, 300);
-    }
-
-
-
-
-    async function loadAgents() {
-      const url = platformFilter ? `/api/agents?platform=${platformFilter}` : '/api/agents';
-      const res = await fetch(url);
-      const data = await res.json();
-      const el = document.getElementById('agents-list');
-
-      const selectedId = selectedAgent?.id;
-      el.innerHTML = data.map(a => agentCard(a)).join('');
-      if (selectedId) {
-        const updated = data.find(a => a.id === selectedId);
-        if (updated) selectedAgent = updated;
-      }
-    }
-
-    function agentCard(a) {
-      const statusClass = { online: 'status-online', offline: 'status-offline', isolated: 'status-isolated' }[a.status] || 'status-offline';
-      const tagsBadges = (a.tags || []).map(t => `<span class="text-[9px] bg-aegis-500/10 text-aegis-400 border border-aegis-500/20 px-1.5 py-0.5 rounded">${t}</span>`).join('');
-      const selected = selectedAgent?.id === a.id ? 'selected' : '';
-      const extra = a.extra_data || {};
-      const gps = extra.gps ? `📍 ${extra.gps.lat?.toFixed(4)},${extra.gps.lng?.toFixed(4)}` : '';
-      const battery = extra.battery ? `🔋 ${extra.battery}%` : '';
-      const chatAlert = a.has_unread_chat ? '<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">CHAT</span>' : '';
-      return `
-  <div class="glass glass-hover rounded-xl p-3 agent-card ${selected}" onclick="selectAgent(${a.id})" id="agent-${a.id}">
-    <div class="flex items-center justify-between mb-1.5">
-      <div class="flex items-center gap-2">
-        <span class="status-dot ${statusClass}"></span>
-        <span class="text-sm font-semibold text-white truncate max-w-[140px]">${a.hostname}</span>
-        <span class="text-[10px] text-slate-600">${a.platform === 'android' ? '🤖' : '🖥️'}</span>
-      </div>
-      <div class="flex items-center gap-1">
-        ${a.isolation_active ? '<span class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded font-bold">ISOLADO</span>' : ''}
-        ${chatAlert}
-      </div>
-    </div>
-    <div class="text-[10px] text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
-      ${a.ip_address ? `<span>🌐 ${a.ip_address}</span>` : ''}
-      ${a.mac_address ? `<span>🔗 ${a.mac_address}</span>` : ''}
-      ${gps}${battery}
-    </div>
-    ${a.os_info ? `<div class="text-[10px] text-slate-600 mt-1 truncate">${a.os_info}</div>` : ''}
-    ${tagsBadges ? `<div class="flex flex-wrap gap-1 mt-1.5">${tagsBadges}</div>` : ''}
-    <div class="text-[9px] text-slate-700 mt-1.5">Visto: ${timeAgo(a.last_seen)}</div>
-  </div>`;
-    }
-
-    function selectAgent(id) {
-      document.querySelectorAll('.agent-card').forEach(el => el.classList.remove('selected'));
-      const card = document.getElementById(`agent-${id}`);
-      if (card) card.classList.add('selected');
-      fetch(`/api/agents/${id}`).then(r => r.json()).then(a => {
-        selectedAgent = a;
-        lastCommandTime = null;
-        document.getElementById('selected-agent-label').textContent = `Agente: ${a.hostname}`;
-        addTerminalLine(`[AEGIS] Agente selecionado: ${a.hostname} (${a.ip_address || 'IP desconhecido'})`, '#60a5fa');
-
-        if (activeTab === 'socchat') refreshSocChat();
-      });
-    }
-
-    
-    function filterPlatform(p) {
-      platformFilter = p;
-      ['all', 'windows', 'android'].forEach(id => {
-        const el = document.getElementById(`filter-${id}`);
-        if (el) {
-           if ((p === '' && id === 'all') || (p === id)) {
-              el.className = 'flex-1 text-[11px] py-1.5 rounded bg-dark-700 text-white font-medium';
-           } else {
-              el.className = 'flex-1 text-[11px] py-1.5 rounded text-fluent-textMuted hover:bg-dark-700/50';
-           }
-        }
-      });
-      loadAgents();
-    }
-
-
-
-
-
-    async function loadStats() {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-
-      document.getElementById('stat-agents').textContent = data.agents.total;
-      document.getElementById('stat-online').textContent = data.agents.online;
-      document.getElementById('stat-incidents').textContent = data.incidents.critical;
-      document.getElementById('stat-iocs').textContent = data.threat_intel.ioc_count;
-
-
-      if (data.top_mitre) {
-        detectedTechniques = new Set(data.top_mitre.map(m => m.technique));
-        updateMitreMap();
-      }
-
-      if (activeTab === 'stats') renderCharts(data);
-    }
-
-    function renderCharts(data) {
-
-      const hours = data.chart_hours || [];
-      const labels = hours.map(h => h.hour);
-      const counts = hours.map(h => h.count);
-
-      if (chartEvents) { chartEvents.data.labels = labels; chartEvents.data.datasets[0].data = counts; chartEvents.update(); }
-      else {
-        const ctx = document.getElementById('chart-events')?.getContext('2d');
-        if (!ctx) return;
-        chartEvents = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Eventos', data: counts, borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,0.08)',
-              fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#0ea5e9'
-            }]
-          },
-          options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 } } } } }
-        });
-      }
-
-
-      const sev = data.events?.by_severity || {};
-      const sevColors = { CRITICAL: '#f87171', HIGH: '#fb923c', MEDIUM: '#fbbf24', LOW: '#4ade80' };
-      const sevKeys = Object.keys(sev);
-      const sevVals = sevKeys.map(k => sev[k]);
-      const sevCols = sevKeys.map(k => sevColors[k] || '#64748b');
-
-      if (chartSeverity) { chartSeverity.data.labels = sevKeys; chartSeverity.data.datasets[0].data = sevVals; chartSeverity.data.datasets[0].backgroundColor = sevCols; chartSeverity.update(); }
-      else {
-        const ctx2 = document.getElementById('chart-severity')?.getContext('2d');
-        if (!ctx2) return;
-        chartSeverity = new Chart(ctx2, {
-          type: 'doughnut',
-          data: { labels: sevKeys, datasets: [{ data: sevVals, backgroundColor: sevCols, borderWidth: 0 }] },
-          options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
-        });
-      }
-
-
-      const legend = document.getElementById('severity-legend');
-      if (legend) legend.innerHTML = sevKeys.map(k => `
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${sevColors[k] || '#64748b'}"></span><span class="text-xs text-slate-400">${k}</span></div>
-      <span class="text-xs font-semibold text-white">${sev[k]}</span>
-    </div>`).join('');
-
-
-      const mitreEl = document.getElementById('mitre-top-list');
-      if (mitreEl && data.top_mitre) {
-        const max = Math.max(...data.top_mitre.map(m => m.count), 1);
-        mitreEl.innerHTML = data.top_mitre.map(m => `
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-mono text-aegis-400 w-20">${m.technique}</span>
-        <div class="flex-1 bg-dark-700 rounded-full h-1.5"><div class="bg-aegis-500 h-1.5 rounded-full" style="width:${(m.count / max * 100).toFixed(0)}%"></div></div>
-        <span class="text-xs text-slate-400 w-8 text-right">${m.count}</span>
-      </div>`).join('');
-      }
-    }
-
-
-
-
-    function buildMitreMap() {
-      const el = document.getElementById('mitre-map');
-      if (!el) return;
-      el.innerHTML = MITRE_TACTICS.map(t => `
-    <div class="mitre-cell" id="mitre-${t.id}" title="${t.id}" onclick="filterByTactic('${t.id}')">
-      ${t.name}
-    </div>`).join('');
-    }
-
-    function updateMitreMap() {
-
-      MITRE_TACTICS.forEach(t => {
-        const el = document.getElementById(`mitre-${t.id}`);
-        if (el) el.classList.remove('active');
-      });
-
-      detectedTechniques.forEach(tech => {
-        const tacticId = TECHNIQUE_TO_TACTIC[tech];
-        if (tacticId) {
-          const el = document.getElementById(`mitre-${tacticId}`);
-          if (el) el.classList.add('active');
-        }
-      });
-    }
-
-    function filterByTactic(tacticId) {
-      addTerminalLine(`[AEGIS] Filtro MITRE aplicado: ${tacticId}`, '#a78bfa');
-    }
-
-
-
-
-    async function loadIncidents() {
-      const url = incidentSeverityFilter
-        ? `/api/incidents?status=OPEN&severity=${incidentSeverityFilter}&per_page=50`
-        : '/api/incidents?status=OPEN&per_page=50';
-      const res = await fetch(url);
-      const data = await res.json();
-      const el = document.getElementById('incidents-list');
-      if (!el) return;
-      el.innerHTML = (data.incidents || []).map(incidentCard).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum incidente aberto 🎉</p>';
-    }
-
-    function incidentCard(inc) {
-      const sev = inc.severity;
-      const steps = (inc.playbook_steps || []).map((s, i) => `<li class="text-[10px] text-slate-500">${i + 1}. ${s}</li>`).join('');
-      return `
-  <div class="glass rounded-xl p-3 bg-severity-${sev} border border-opacity-20 border-severity-${sev} fade-in">
-    <div class="flex items-start justify-between mb-1.5">
-      <span class="text-xs font-bold severity-${sev} leading-tight">${inc.title}</span>
-      <span class="text-[9px] font-bold severity-${sev} border border-current px-1.5 py-0.5 rounded ml-2 shrink-0">${sev}</span>
-    </div>
-    ${inc.mitre_technique ? `<span class="text-[9px] font-mono bg-dark-700 text-aegis-400 px-1.5 py-0.5 rounded">${inc.mitre_technique} · ${inc.mitre_tactic || ''}</span>` : ''}
-    <p class="text-[10px] text-slate-400 mt-1.5">${inc.description || ''}</p>
-    ${steps ? `<ul class="mt-2 pl-2 space-y-0.5">${steps}</ul>` : ''}
-    <div class="flex items-center justify-between mt-2">
-      <span class="text-[9px] text-slate-600">${inc.agent_hostname} · ${timeAgo(inc.created_at)}</span>
-      <div class="flex gap-1">
-        <button onclick="updateIncidentStatus(${inc.id},'INVESTIGATING')" class="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20">Investigar</button>
-        <button onclick="updateIncidentStatus(${inc.id},'RESOLVED')" class="text-[9px] bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded hover:bg-green-500/20">Resolver</button>
-        <button onclick="updateIncidentStatus(${inc.id},'FALSE_POSITIVE')" class="text-[9px] bg-slate-500/10 text-slate-400 border border-slate-500/20 px-2 py-0.5 rounded hover:bg-slate-500/20">Falso Pos.</button>
-      </div>
-    </div>
-  </div>`;
-    }
-
-    async function updateIncidentStatus(id, status) {
-      await fetch(`/api/incidents/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-      loadIncidents();
-    }
-
-    function filterIncidents(sev) { incidentSeverityFilter = sev; loadIncidents(); }
-
-
-
-
-    async function loadEvents() {
-      const sev = document.getElementById('filter-severity')?.value || '';
-      const cat = document.getElementById('filter-category')?.value || '';
-      const agentParam = selectedAgent ? `&agent_id=${selectedAgent.id}` : '';
-      const res = await fetch(`/api/events?per_page=60${sev ? '&severity=' + sev : ''}${cat ? '&category=' + cat : ''}${agentParam}`);
-      const data = await res.json();
-      const el = document.getElementById('events-list');
-      if (!el) return;
-      el.innerHTML = (data.events || []).map(eventRow).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum evento</p>';
-    }
-
-    function eventRow(e) {
-      const severityIcon = { CRITICAL: '🔴', HIGH: '🟠', MEDIUM: '🟡', LOW: '🟢' }[e.severity] || '⚪';
-      return `
-  <div class="flex items-start gap-2 px-3 py-2 rounded-lg bg-dark-800/50 hover:bg-dark-700/50 transition-colors cursor-default">
-    <span class="text-xs mt-0.5 shrink-0">${severityIcon}</span>
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-medium text-slate-300 truncate">${e.event_type}</span>
-        ${e.mitre_technique ? `<span class="text-[9px] font-mono text-aegis-400 bg-aegis-500/10 px-1 rounded">${e.mitre_technique}</span>` : ''}
-        ${e.ioc_matched ? '<span class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1 rounded">IoC ⚠</span>' : ''}
-      </div>
-      <div class="text-[10px] text-slate-600 flex gap-2 mt-0.5">
-        <span>${e.source}</span><span>·</span><span>${timeAgo(e.timestamp)}</span>
-      </div>
-    </div>
-  </div>`;
-    }
-
-
-
-
-    async function sendCommand() {
-      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
-      const inp = document.getElementById('cmd-input');
-      const cmd = inp.value.trim();
-      if (!cmd) return;
-      inp.value = '';
-      addTerminalLine(`[${selectedAgent.hostname}] ❯ ${cmd}`, '#e2e8f0');
-      await fetch('/control/command', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agent_id: selectedAgent.id, command: cmd })
-      });
-      addTerminalLine('[C2] Comando enfileirado — aguardando resposta do agente...', '#94a3b8');
-    }
-
-    function addTerminalLine(text, color = '#4ade80') {
-      const el = document.getElementById('terminal-output');
-      if (!el) return;
-      const line = document.createElement('div');
-      line.style.color = color;
-      line.textContent = `[${new Date().toLocaleTimeString('pt-BR')}] ${text}`;
-      el.appendChild(line);
-      el.scrollTop = el.scrollHeight;
-    }
-
-
-
-
-    async function soarAction(action) {
-      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
-      const id = selectedAgent.id;
-      const name = selectedAgent.hostname;
-
-      const genericSoarActions = ['force_scan_vulns', 'force_scan_fim', 'force_scan_network', 'force_logs'];
-      if (genericSoarActions.includes(action)) {
-        await fetch(`/api/soar/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) });
-
-        let msg = '[SOAR] Comando enviado...';
-        if (action === 'force_scan_vulns') msg = '[SOAR] Scan de Vulnerabilidades acionado. Verifique a aba Vulnerabilidades em instantes.';
-        if (action === 'force_scan_fim') msg = '[SOAR] Scan de Integridade (FIM) acionado.';
-        if (action === 'force_logs') msg = '[SOAR] Coleta de Logs Forçada acionada.';
-        if (action === 'force_scan_network') msg = '[SOAR] Scan de Portas/IPs Ativos acionado. O resultado deve cair no terminal logo mais.';
-
-        addTerminalLine(msg, '#fbbf24');
-        return;
-      }
-
-      if (action === 'wipe') {
-        if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar TODOS os dados de ${name}. Continuar?`)) return;
-        if (!confirm(`💣 ÚLTIMO AVISO: Isso é IRREVERSÍVEL. Confirmar wipe completo do ${name}?`)) return;
-        let code = prompt("Digite CONFIRMAR para autorizar o Wipe:");
-        if (code !== "CONFIRMAR") { addTerminalLine('[ERRO] Código incorreto. Wipe abortado.', '#f87171'); return; }
-        await fetch('/control/wipe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id, confirm: true }) });
-        addTerminalLine(`[SOAR] Wipe enfileirado para ${name}!`, '#f87171');
-        return;
-      }
-      if (action === 'uninstall') {
-        if (!confirm(`⚠️ ATENÇÃO: O agente C2 será permanentemente desinstalado de ${name} e removido do painel. Continuar?`)) return;
-
-        try {
-          const res = await fetch('/control/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-          if (!res.ok) {
-            const err = await res.text();
-            addTerminalLine(`[ERRO SOAR] Backend recusou a desinstalação. Code: ${res.status}. Detalhes: ${err.substring(0, 100)}`, '#f87171');
-            return;
-          }
-          const data = await res.json();
-          if (data.error) {
-            addTerminalLine(`[ERRO] ${data.error}`, '#f87171');
-            return;
-          }
-
-          addTerminalLine(`[SOAR] Desinstalação remota enviada! ${name} irá se auto-destruir.`, '#fb923c');
-          setTimeout(() => location.reload(), 3500);
-        } catch (e) {
-          addTerminalLine(`[ERRO CRÍTICO] Falha ao contatar a API C2: ${e}`, '#f87171');
-        }
-        return;
-      }
-      if (action === 'isolate') {
-        await fetch('/control/isolate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Host ${name} marcado para ISOLAMENTO.`, '#fb923c');
-        return;
-      }
-      if (action === 'unisolate') {
-        await fetch('/control/unisolate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Isolamento removido de ${name}.`, '#4ade80');
-        return;
-      }
-      if (action === 'screenshot') {
-        await fetch('/control/screenshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agent_id: id }) });
-        addTerminalLine(`[SOAR] Screenshot solicitado de ${name}. Verificando em 5s...`, '#60a5fa');
-        setTimeout(async () => {
-          const res = await fetch(`/api/screenshot/${id}`);
-          const data = await res.json();
-          if (data.screenshot_b64) {
-            document.getElementById('screenshot-img').src = 'data:image/png;base64,' + data.screenshot_b64;
-            document.getElementById('screenshot-modal').classList.remove('hidden');
-            document.getElementById('modal-overlay').style.display = 'block';
-          } else {
-            addTerminalLine('[SOAR] Screenshot não disponível ainda.', '#fbbf24');
-          }
-        }, 5000);
-      }
-    }
-
-
-
-
-    async function openIocModal() {
-      document.getElementById('ioc-modal').classList.remove('hidden');
-      document.getElementById('modal-overlay').style.display = 'block';
-      await renderIocList();
-    }
-
-    async function renderIocList() {
-      const res = await fetch('/api/threat_intel/ioc');
-      const data = await res.json();
-      const el = document.getElementById('ioc-list');
-      const typeIcons = { hash: '#️⃣', ip: '🌐', domain: '🔗', url: '📎', email: '✉️' };
-      el.innerHTML = data.map(ioc => `
-    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-800/80">
-      <span class="text-sm">${typeIcons[ioc.ioc_type] || '🔍'}</span>
-      <div class="flex-1 min-w-0">
-        <div class="text-xs font-mono text-white truncate">${ioc.value}</div>
-        <div class="text-[10px] text-slate-500 flex gap-2">
-          <span class="severity-${ioc.severity}">${ioc.severity}</span>
-          <span>${ioc.threat_name || ''}</span>
-          <span>Hits: ${ioc.hit_count || 0}</span>
-        </div>
-      </div>
-      <button onclick="deleteIoc(${ioc.id})" class="text-red-400/50 hover:text-red-400 text-lg leading-none transition-colors">×</button>
-    </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhum IoC cadastrado</p>';
-    }
-
-    async function addIoc() {
-      const val = document.getElementById('ioc-value').value.trim();
-      const type = document.getElementById('ioc-type').value;
-      const name = document.getElementById('ioc-name').value.trim();
-      if (!val) return;
-      await fetch('/api/threat_intel/ioc', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: val, ioc_type: type, threat_name: name || 'Manual' })
-      });
-      document.getElementById('ioc-value').value = '';
-      document.getElementById('ioc-name').value = '';
-      await renderIocList();
-    }
-
-    async function deleteIoc(id) {
-      await fetch(`/api/threat_intel/ioc/${id}`, { method: 'DELETE' });
-      await renderIocList();
-    }
-
-    async function checkIoc() {
-      const val = document.getElementById('ioc-check-val').value.trim();
-      if (!val) return;
-      const res = await fetch('/api/ioc/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: val }) });
-      const data = await res.json();
-      const el = document.getElementById('ioc-check-result');
-      el.classList.remove('hidden');
-      if (data.matched) {
-        el.innerHTML = `<div class="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-2 rounded-lg">⚠️ IoC CONFIRMADO: <strong>${data.ioc.threat_name}</strong> (${data.ioc.severity})</div>`;
-      } else {
-        el.innerHTML = `<div class="bg-green-500/10 border border-green-500/30 text-green-400 px-3 py-2 rounded-lg">✅ Valor limpo — não encontrado na base de IoCs.</div>`;
-      }
-    }
-
-    function closeAllModals() {
-      document.getElementById('ioc-modal').classList.add('hidden');
-      document.getElementById('screenshot-modal').classList.add('hidden');
-      document.getElementById('modal-overlay').style.display = 'none';
-    }
-
-
-
-
-    async function sendChat() {
-      const inp = document.getElementById('chat-input');
-      const msg = inp.value.trim();
-      if (!msg) return;
-      inp.value = '';
-      appendChatBubble('user', msg);
-      const thinking = appendChatBubble('assistant', '⏳ Analisando...');
-      try {
-        const payload = { message: msg, session: chatSession };
-        if (selectedAgent) payload.agent_id = selectedAgent.id;
-
-        const res = await fetch('/api/chat', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        thinking.textContent = data.response;
-        thinking.dataset.model = data.model || '';
-      } catch (e) {
-        thinking.textContent = '❌ Erro ao contatar AI.';
-      }
-    }
-
-    function appendChatBubble(role, text) {
-      const el = document.getElementById('chat-messages');
-      const div = document.createElement('div');
-      div.className = `p-2.5 text-xs leading-relaxed fade-in ${role === 'user' ? 'chat-bubble-user ml-4' : 'chat-bubble-ai mr-4'}`;
-      div.textContent = text;
-      el.appendChild(div);
-      el.scrollTop = el.scrollHeight;
-      return div;
-    }
-
-    async function clearChat() {
-      await fetch(`/api/chat/clear?session=${chatSession}`, { method: 'DELETE' });
-      chatSession = 'soc-' + Date.now();
-      document.getElementById('chat-messages').innerHTML = '';
-    }
-
-
-
-
-    
-    function switchTab(tab) {
-      activeTab = tab;
-      
-      ['terminal', 'soar', 'vulns', 'socchat'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        const content = document.getElementById(`tab-content-${t}`);
-        if (btn) btn.className = 'tab-btn' + (t === tab ? ' active border-b-2 px-4 py-3' : ' border-b-2 px-4 py-3 border-transparent');
-        if (content) content.classList.toggle('hidden', t !== tab);
-      });
-      if (tab === 'vulns') loadVulns();
-      if (tab === 'socchat') refreshSocChat();
-    }
-
-
-
-
-
-    function timeAgo(iso) {
-      if (!iso) return '—';
-      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-      if (diff < 60) return `${diff}s atrás`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
-      return `${Math.floor(diff / 86400)}d atrás`;
-    }
-
-
-    
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      
-      // Auto mapping "ERRO" to error toast if not specified
-      if (message.includes('[ERRO]') && type === 'info') type = 'error';
-      message = message.replace('[ERRO]', '').trim();
-      
-      const toast = document.createElement('div');
-      let typeClass = '';
-      let icon = 'ℹ️';
-      if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
-      if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
-      if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
-      
-      toast.className = `toast ${typeClass}`;
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      container.appendChild(toast);
-      
-      // Animate entry
-      setTimeout(() => toast.classList.add('show'), 10);
-      
-      // Remove after 5 seconds
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 600);
-      }, 5000);
-    }
-): ${message}`);
-
-
-
-    }
-
-
-    async function apiCall(url, method = 'GET', body = null) {
-      const options = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-      };
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || `API call failed with status ${response.status}`);
-      }
-      return response.json();
-    }
-
-
-
-
-    async function loadVulns() {
-      if (!selectedAgent) return;
-      const res = await fetch(`/api/agent/${selectedAgent.id}/vulnerabilities`);
-      const vulns = await res.json();
-      const el = document.getElementById('vulns-list');
-      if (!el) return;
-
-      if (vulns.length === 0) {
-        el.innerHTML = '<p class="text-xs text-slate-600 text-center py-4">Nenhuma vulnerabilidade detectada.</p>';
-        return;
-      }
-
-      el.innerHTML = vulns.map(v => `
-    <div class="glass rounded-xl p-3 border border-opacity-20 border-severity-${v.severity}">
-      <div class="flex items-start justify-between mb-1.5">
-        <span class="text-xs font-bold severity-${v.severity}">${v.title}</span>
-        <span class="text-[9px] font-bold severity-${v.severity} border border-current px-1.5 py-0.5 rounded">${v.severity}</span>
-      </div>
-      <p class="text-[10px] text-slate-400 mb-2">${v.description}</p>
-      ${v.remediation_cmd ? `
-        <div class="mt-2 flex items-center justify-between bg-dark-900 border border-dark-600 rounded p-1.5">
-          <div class="text-[9px] font-mono text-green-400 break-all select-all flex-1 pr-2">❯ ${v.remediation_cmd}</div>
-          <button onclick="fixVulnerability('${v.remediation_cmd.replace(/'/g, "\\'")}', '${v.title.replace(/'/g, "\\'")}')" 
-                  class="bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded text-[10px] font-bold transition-colors whitespace-nowrap">
-            🔧 Corrigir
-          </button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-    }
-
-    async function fixVulnerability(cmd, title) {
-      if (!selectedAgent) return;
-      if (!confirm(`Deseja enviar o comando de correção para '${title}' no agente ${selectedAgent.hostname}?\n\nComando: ${cmd}`)) {
-        return;
-      }
-
-      try {
-        await fetch('/control/command', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agent_id: selectedAgent.id, command: cmd })
-        });
-        showToast("Comando de correção enviado com sucesso!", "success");
-        switchTab('terminal');
-        addTerminalLine(`[SOAR] Executando correção para: ${title}`, '#fb923c');
-        addTerminalLine(`[${selectedAgent.hostname}] ❯ ${cmd}`, '#e2e8f0');
-      } catch (err) {
-        showToast("Erro ao enviar comando de correção.", "error");
-        console.error(err);
-      }
-    }
-
-
-
-
-    async function refreshSocChat() {
-      if (!selectedAgent) return;
-      const currentAgentId = selectedAgent.id;
-      try {
-        const data = await apiCall(`/api/chat/agent/${currentAgentId}/history`);
-        if (!data) return;
-        const box = document.getElementById("socchat-messages");
-
-        let shouldScroll = box.scrollHeight - box.clientHeight <= box.scrollTop + 10;
-
-        box.innerHTML = (data || []).map(msg => {
-          const isSOC = msg.sender === "admin";
-          const d = new Date(msg.timestamp).toLocaleString();
-          return `
-            <div class="flex flex-col ${isSOC ? 'items-end' : 'items-start'} mb-2">
-              <span class="text-[9px] text-slate-500 mb-0.5">${d} - ${isSOC ? 'SOC Admin' : 'Usuário (Endpoint)'}</span>
-              <div class="px-3 py-2 rounded-xl text-xs max-w-[80%] ${isSOC ? 'bg-aegis-600/30 border border-aegis-500/30 text-aegis-100' : 'bg-dark-800 border border-dark-600 text-slate-300'
-            }">
-                ${msg.message}
-              </div>
-            </div>
-          `;
-        }).join("");
-
-        if (shouldScroll) {
-          box.scrollTop = box.scrollHeight;
-        }
-
-        chatUnreadCounts[currentAgentId] = 0;
-        loadAgents();
-      } catch (error) {
-        console.error("Error refreshing SOC Chat:", error);
-      }
-    }
-
-    async function sendSocChat() {
-      if (!selectedAgent) {
-        showToast("Selecione um agente primeiro!", "warning");
-        return;
-      }
-      const currentAgentId = selectedAgent.id;
-      const inp = document.getElementById("socchat-input");
-      const text = inp.value.trim();
-      if (!text) return;
-
-      inp.value = '';
-
-      try {
-        const res = await apiCall(`/api/chat/agent/${currentAgentId}/send`, "POST", { message: text });
-        if (res && res.status === "ok") {
-          refreshSocChat();
-        } else {
-          showToast("Erro ao enviar mensagem.", "error");
-        }
-      } catch (error) {
-        console.error("Error sending SOC Chat message:", error);
-        showToast("Erro ao enviar mensagem.", "error");
-      }
-    }
-
-    async function resolveSocChat() {
-      if (!selectedAgent) {
-        showToast("Selecione um agente primeiro!", "warning");
-        return;
-      }
-      const currentAgentId = selectedAgent.id;
-      try {
-        const res = await apiCall(`/api/chat/agent/${currentAgentId}/resolve`, "POST");
-        if (res && res.status === "ok") {
-          showToast("Alerta visual de chat removido do Card.", "success");
-          loadAgents();
-        } else {
-          showToast("Erro ao resolver chat.", "error");
-        }
-      } catch (error) {
-        console.error("Error resolving SOC Chat:", error);
-        showToast("Erro ao resolver chat.", "error");
-      }
-    }
-  </script>
-
-  <div id="floating-chat-bubble" onclick="toggleChat()">
-      ✨
-  </div>
-
-<script>
-
-    let chatOpen = false;
-    function toggleChat() {
-        chatOpen = !chatOpen;
-        const w = document.getElementById('view-copilot');
-        const b = document.getElementById('floating-chat-bubble');
-        if(chatOpen) { w.classList.add('open'); b.innerText = '❌'; }
-        else { w.classList.remove('open'); b.innerText = '✨'; }
-    }
-    
-</script>
-</body>
-
-</html>
+    <div id="toast-container"></div>
+</body></html>

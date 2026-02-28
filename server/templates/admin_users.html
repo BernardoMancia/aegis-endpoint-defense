@@ -1,338 +1,196 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aegis SOC — Gestão de Usuários</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <script>
-          tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-          colors: {
-            fluent: { 
-              bg: '#141414', 
-              surface: 'rgba(30, 30, 30, 0.45)', 
-              surfaceHover: 'rgba(45, 45, 45, 0.6)',
-              border: 'rgba(255, 255, 255, 0.08)', 
-              primary: '#0ea5e9', 
-              primaryHover: '#0284c7', 
-              text: '#e2e8f0', 
-              textMuted: '#94a3b8' 
-            },
-            dark: { 900: '#0a0a0a', 850: '#181818', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
-          }
-        }
-      }
-    }
-            }
-          }
-        }
-      }
-    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-    * { box-sizing: border-box; }
-    body { 
-      color-scheme: dark; 
-      font-family: 'Inter', sans-serif; 
-      background: #141414; 
-      color: #e2e8f0; 
-      margin: 0; 
-      min-height: 100vh; 
-      overflow: hidden; 
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-    
-    /* Background Orbs & Mesh */
-    .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
-    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.02) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
-    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.015) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+/* Aegis Hyper-Glass Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* Fluent Glass Modifiers */
-    .bg-fluent-surface { background: rgba(35, 35, 35, 0.6) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .fluent-card { background: rgba(40, 40, 40, 0.5) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
-    .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
-    
-    .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    
-    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; transform: translateY(-2px) scale(1.02) !important; filter: brightness(1.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
-    
-    .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
-    .btn-action:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; }
+:root {
+    --deep-bg: #030712;
+    --glass-bg: rgba(17, 24, 39, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --neon-blue: #0ea5e9;
+    --neon-blue-glow: rgba(14, 165, 233, 0.4);
+    --neon-purple: #8b5cf6;
+    --neon-purple-glow: rgba(139, 92, 246, 0.4);
+    --neon-emerald: #10b981;
+    --neon-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+}
 
-    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-pending { background: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.2) !important; }
-    .badge-active { background: rgba(74, 222, 128, 0.1) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.2) !important; }
-    .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
+* { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
-    /* Login / Single Cards specific (Auth pages) */
-    .auth-card { background: rgba(30, 30, 30, 0.7) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+body {
+    background-color: var(--deep-bg);
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
 
-    /* Navigation Sidebar styling overrides */
-    aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
-    aside nav button:hover:not(.bg-white\/10), aside nav a:hover:not(.bg-white\/10) { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.02); }
-    aside nav .bg-white\/10 { background: linear-gradient(90deg, rgba(14,165,233,0.15) 0%, transparent 100%) !important; border-left: 3px solid #0ea5e9 !important; border-radius: 4px !important; color: white !important; }
-    aside nav .text-fluent-textMuted { color: #94a3b8 !important; }
+/* Background AnimatedMesh */
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    filter: blur(80px);
+    animation: meshFlow 20s ease-in-out infinite alternate;
+}
+@keyframes meshFlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.1) translate(20px, 10px); }
+}
 
-    label { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.2px; }
+/* Glassmorphism Generic Card */
+.hyper-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-    /* Tables */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    th { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; transition: background 0.2s; }
-    tr { transition: transform 0.2s; }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
-    tr:last-child td { border-bottom: none; }
+/* Modern Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+/* Inputs Fix */
+.aegis-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+    padding: 12px 16px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+    color-scheme: dark;
+}
+.aegis-input:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+    transform: translateY(-1px);
+}
+
+/* Premium Buttons */
+.aegis-btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px var(--neon-blue-glow);
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.aegis-btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px var(--neon-blue-glow);
+}
+.aegis-btn-primary:active { transform: translateY(1px); }
+
+.aegis-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.aegis-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-blue); }
+
+/* Toasts */
+#toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 14px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toast.show { transform: translateX(0); }
 </style>
-</head>
+    </head><body>
+    <div class="bg-mesh"></div>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar placeholder or logic -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Gestão de Usuários</h1>
+                    <p class="text-slate-400">Administre analistas e permissões do Aegis SOC.</p>
+                </div>
+                <div class="flex gap-4">
+                    <a href="/" class="aegis-btn-secondary !text-xs flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Dashboard</a>
+                    <a href="/admin/users/new" class="aegis-btn-primary !text-xs flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Novo Usuário</a>
+                </div>
+            </header>
 
-<body>
-  <div class="bg-mesh"></div>
-  <div class="glow-orb-1"></div>
-  <div class="glow-orb-2"></div>
-
-<div class="flex h-screen w-full relative z-10">
-  
-  <aside class="w-[260px] bg-fluent-surface border-r border-fluent-border flex flex-col z-20 shrink-0">
-    <div class="h-14 flex items-center px-4 border-b border-fluent-border gap-3">
-       <div class="w-8 h-8 rounded bg-fluent-primary flex items-center justify-center">
-         <svg style="width:18px; height:18px;" class="text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-         </svg>
-       </div>
-       <span class="font-semibold text-white tracking-wide text-sm">Aegis Endpoint</span>
+            <div class="hyper-glass overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 border-b border-white/10">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Usuário</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">MFA</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Criado em</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for u in users %}
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs uppercase">{{ u.username[0] }}</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-white">{{ u.display_name or u.username }}</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">{{ u.email or 'no-email@aegis.defense' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{{ u.role }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if u.mfa_enabled %}
+                                <span class="text-emerald-500 flex items-center gap-1 text-[10px] font-bold"><i data-lucide="check-circle-2" class="w-3 h-3"></i> ATIVO</span>
+                                {% else %}
+                                <span class="text-slate-600 text-[10px] font-bold">INATIVO</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-[10px] text-slate-500 font-mono">{{ u.created_at.strftime('%d/%m/%Y %H:%M') if u.created_at else '---' }}</td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="/admin/users/{{ u.id }}/edit" class="p-2 hover:bg-sky-500/20 text-sky-400 rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+                                    {% if u.id != current_user.id %}
+                                    <button onclick="confirmDelete('{{ u.id }}', '{{ u.username }}')" class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
-    <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-4">Navegação</div>
-      <a href="/" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors">
-        <span class="text-fluent-textMuted">↩️</span> Voltar ao Dashboard
-      </a>
-      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Administração</div>
-      <a href="/admin/users" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-white rounded bg-white/10 font-semibold transition-colors">
-        <span class="text-fluent-textMuted">👥</span> Gestão de Usuários
-      </a>
-    </nav>
-  </aside>
-
-  
-  <div class="flex-1 flex flex-col h-screen overflow-hidden bg-fluent-bg">
+    <script>lucide.createIcons();</script>
     
-    <header class="h-14 bg-fluent-surface border-b border-fluent-border flex items-center justify-between px-6 shrink-0">
-      <div class="flex items-center gap-2 text-sm">
-        <span class="text-fluent-textMuted">Admin</span>
-        <span class="text-fluent-textMuted">/</span>
-        <span class="font-medium text-white">Usuários</span>
-      </div>
-      <div class="flex items-center gap-4">
-        <span class="text-xs text-fluent-textMuted">Admin: <span class="text-white font-medium">{{ current_user }}</span></span>
-        <a href="/profile" class="text-sm text-fluent-text hover:text-white transition-colors flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center border border-fluent-border">👤</div>
-        </a>
-        <a href="/logout" class="text-xs text-red-400 hover:text-red-300">Sair</a>
-      </div>
-    </header>
-
-    
-    <main class="flex-1 overflow-auto p-8 relative max-w-[1200px] mx-auto w-full space-y-8">
-      
-      <div>
-        <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">Gestão de Usuários</h1>
-        <p class="text-sm text-fluent-textMuted">Aprove, edite ou remova acessos ao painel SOC.</p>
-      </div>
-
-        {% if pending %}
-        <section class="fluent-card p-5">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                <h2 class="section-title">Aguardando Aprovação <span class="badge badge-pending ml-2">{{ pending|length
-                        }}</span></h2>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Usuário</th>
-                        <th>Nome / E-mail</th>
-                        <th>Justificativa</th>
-                        <th>Solicitado em</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in pending %}
-                    <tr>
-                        <td>
-                            <div class="font-mono font-semibold text-white">{{ u.username }}</div>
-                            <div class="text-[10px] text-slate-600 mt-0.5">Analista</div>
-                        </td>
-                        <td>
-                            <div class="text-slate-300">{{ u.display_name or '—' }}</div>
-                            <div class="text-[11px] text-slate-600">{{ u.email or '—' }}</div>
-                        </td>
-                        <td class="max-w-xs">
-                            <div class="text-slate-400 text-xs leading-relaxed line-clamp-2">{{ u.reason or '—' }}</div>
-                        </td>
-                        <td class="text-slate-500 text-xs whitespace-nowrap">{{ u.created_at.strftime('%d/%m/%Y %H:%M')
-                            }}</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <form method="POST" action="/admin/users/{{ u.id }}/approve" style="display:inline">
-                                    <button type="submit" class="btn-approve">✓ Aprovar</button>
-                                </form>
-                                <form method="POST" action="/admin/users/{{ u.id }}/reject" style="display:inline">
-                                    <button type="submit" class="btn-reject">✕ Recusar</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-        {% else %}
-        <section class="fluent-card p-5">
-            <h2 class="section-title mb-3">Aguardando Aprovação</h2>
-            <p class="text-sm text-slate-600 text-center py-6">Nenhuma solicitação pendente. 🎉</p>
-        </section>
-        {% endif %}
-
-        <section class="fluent-card p-5">
-            <h2 class="section-title mb-4">Usuários Ativos <span class="badge badge-active ml-2">{{ approved|length
-                    }}</span></h2>
-            {% if approved %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Usuário</th>
-                        <th>Nome / E-mail</th>
-                        <th>Perfil</th>
-                        <th>Aprovado por</th>
-                        <th>Desde</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in approved %}
-                    <tr>
-                        <td class="font-mono font-semibold text-white">{{ u.username }}</td>
-                        <td>
-                            <div class="text-slate-300">{{ u.display_name or '—' }}</div>
-                            <div class="text-[11px] text-slate-600">{{ u.email or '—' }}</div>
-                        </td>
-                        <td>
-                            <span
-                                class="badge {% if u.role == 'superadmin' %}badge-rejected{% elif u.role == 'admin' %}badge-pending{% else %}badge-active{% endif %}">
-                                {{ all_roles[u.role].label if u.role in all_roles else u.role.upper() }}
-                            </span>
-                            {% if u.mfa_enabled %}<span class="badge badge-active text-[9px] ml-1"
-                                title="MFA Ativo">🔐</span>{% endif %}
-                            {% if u.is_locked %}<span class="badge badge-rejected text-[9px] ml-1"
-                                title="Conta Bloqueada">🔒</span>{% endif %}
-                        </td>
-                        <td class="text-slate-500 text-xs">{{ u.approved_by or 'Sistema' }}</td>
-                        <td class="text-slate-500 text-xs whitespace-nowrap">{{ u.approved_at.strftime('%d/%m/%Y') if
-                            u.approved_at else '—' }}</td>
-                        <td>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                {% if current_role == 'superadmin' %}
-                                <a href="/admin/users/{{ u.id }}/profile"
-                                    class="text-[10px] bg-sky-500/10 text-sky-400 drop-shadow-[0_0_4px_rgba(56,189,248,0.2)] border border-sky-500/30 px-2 py-1 rounded hover:bg-sky-500/20">✏️
-                                    Editar Perfil</a>
-                                {% endif %}
-                                <button onclick="openPasswordModal({{ u.id }}, '{{ u.username }}')"
-                                    class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-1 rounded hover:bg-blue-500/20">Trocar
-                                    Senha</button>
-                                {% if current_role == 'superadmin' and u.role != 'superadmin' %}
-                                <form method="POST" action="/admin/users/{{ u.id }}/delete" style="display:inline"
-                                    onsubmit="return confirm('Tem certeza que deseja DELETAR o usuário {{ u.username }}?');">
-                                    <button type="submit"
-                                        class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-1 rounded hover:bg-red-500/20">Excluir</button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p class="text-sm text-slate-600 text-center py-4">Nenhum usuário ativo ainda.</p>
-            {% endif %}
-        </section>
-
-        
-        <div id="password-modal" style="display:none;"
-            class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-            <div class="fluent-card p-6 w-full max-w-sm">
-                <h3 class="text-lg font-bold text-white mb-2">Trocar Senha</h3>
-                <p class="text-xs text-slate-400 mb-4">Definir nova senha para <span id="pwd-username"
-                        class="font-mono text-sky-400 drop-shadow-[0_0_4px_rgba(56,189,248,0.2)]"></span></p>
-                <form id="pwd-form" method="POST" action="">
-                    <input type="password" name="new_password" required placeholder="Nova Senha..."
-                        class="fluent-input w-full mt-2 mb-4 block" />
-                    <div class="flex justify-end gap-2">
-                        <button type="button" onclick="closePasswordModal()"
-                            class="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancelar</button>
-                        <button type="submit"
-                            class="fluent-btn bg-[#4cc2ff] text-black hover:bg-[#3bb1eb]">Salvar
-                            Nova Senha</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            function openPasswordModal(id, username) {
-                document.getElementById('pwd-username').innerText = username;
-                document.getElementById('pwd-form').action = '/admin/users/' + id + '/password';
-                document.getElementById('password-modal').style.display = 'flex';
-            }
-            function closePasswordModal() {
-                document.getElementById('password-modal').style.display = 'none';
-            }
-        </script>
-
-        {% if rejected %}
-        <section class="fluent-card p-5">
-            <h2 class="section-title mb-4">Recusados <span class="badge badge-rejected ml-2">{{ rejected|length
-                    }}</span></h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Usuário</th>
-                        <th>Nome / E-mail</th>
-                        <th>Recusado por</th>
-                        <th>Data</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in rejected %}
-                    <tr>
-                        <td class="font-mono text-slate-400">{{ u.username }}</td>
-                        <td class="text-slate-500">{{ u.display_name or '—' }}</td>
-                        <td class="text-slate-500 text-xs">{{ u.approved_by or '—' }}</td>
-                        <td class="text-slate-600 text-xs">{{ u.created_at.strftime('%d/%m/%Y') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-        {% endif %}
-
-    </main>
-  </div>
-</div>
-</body>
-
-</html>
+    <div id="toast-container"></div>
+</body></html>

@@ -1,265 +1,182 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aegis SOC — Editar Perfil</title>
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis SOC — Editar Usuário</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <script>
-          tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-          colors: {
-            fluent: { 
-              bg: '#141414', 
-              surface: 'rgba(30, 30, 30, 0.45)', 
-              surfaceHover: 'rgba(45, 45, 45, 0.6)',
-              border: 'rgba(255, 255, 255, 0.08)', 
-              primary: '#0ea5e9', 
-              primaryHover: '#0284c7', 
-              text: '#e2e8f0', 
-              textMuted: '#94a3b8' 
-            },
-            dark: { 900: '#0a0a0a', 850: '#181818', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
-          }
-        }
-      }
-    }
-            }
-          }
-        }
-      }
-    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-    * { box-sizing: border-box; }
-    body { 
-      color-scheme: dark; 
-      font-family: 'Inter', sans-serif; 
-      background: #141414; 
-      color: #e2e8f0; 
-      margin: 0; 
-      min-height: 100vh; 
-      overflow: hidden; 
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-    
-    /* Background Orbs & Mesh */
-    .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
-    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.02) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
-    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.015) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+/* Aegis Hyper-Glass Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* Fluent Glass Modifiers */
-    .bg-fluent-surface { background: rgba(35, 35, 35, 0.6) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .fluent-card { background: rgba(40, 40, 40, 0.5) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
-    .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
-    
-    .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    
-    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; transform: translateY(-2px) scale(1.02) !important; filter: brightness(1.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
-    
-    .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
-    .btn-action:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; }
+:root {
+    --deep-bg: #030712;
+    --glass-bg: rgba(17, 24, 39, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --neon-blue: #0ea5e9;
+    --neon-blue-glow: rgba(14, 165, 233, 0.4);
+    --neon-purple: #8b5cf6;
+    --neon-purple-glow: rgba(139, 92, 246, 0.4);
+    --neon-emerald: #10b981;
+    --neon-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+}
 
-    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-pending { background: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.2) !important; }
-    .badge-active { background: rgba(74, 222, 128, 0.1) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.2) !important; }
-    .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
+* { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
-    /* Login / Single Cards specific (Auth pages) */
-    .auth-card { background: rgba(30, 30, 30, 0.7) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+body {
+    background-color: var(--deep-bg);
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
 
-    /* Navigation Sidebar styling overrides */
-    aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
-    aside nav button:hover:not(.bg-white\/10), aside nav a:hover:not(.bg-white\/10) { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.02); }
-    aside nav .bg-white\/10 { background: linear-gradient(90deg, rgba(14,165,233,0.15) 0%, transparent 100%) !important; border-left: 3px solid #0ea5e9 !important; border-radius: 4px !important; color: white !important; }
-    aside nav .text-fluent-textMuted { color: #94a3b8 !important; }
+/* Background AnimatedMesh */
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    filter: blur(80px);
+    animation: meshFlow 20s ease-in-out infinite alternate;
+}
+@keyframes meshFlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.1) translate(20px, 10px); }
+}
 
-    label { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.2px; }
+/* Glassmorphism Generic Card */
+.hyper-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-    /* Tables */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    th { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; transition: background 0.2s; }
-    tr { transition: transform 0.2s; }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
-    tr:last-child td { border-bottom: none; }
+/* Modern Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+/* Inputs Fix */
+.aegis-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+    padding: 12px 16px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+    color-scheme: dark;
+}
+.aegis-input:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+    transform: translateY(-1px);
+}
+
+/* Premium Buttons */
+.aegis-btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px var(--neon-blue-glow);
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.aegis-btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px var(--neon-blue-glow);
+}
+.aegis-btn-primary:active { transform: translateY(1px); }
+
+.aegis-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.aegis-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-blue); }
+
+/* Toasts */
+#toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 14px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toast.show { transform: translateX(0); }
 </style>
-</head>
-
-<body class="p-4 md:p-8">
-    
-    <header class="glass rounded-xl px-5 py-3 flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-            <a href="/admin/users"
-                class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5 text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Usuários
-            </a>
-            <span class="text-slate-700">/</span>
-            <span class="text-sm text-slate-300">Perfil de <span class="text-sky-400 drop-shadow-[0_0_4px_rgba(56,189,248,0.2)] font-semibold">{{ target.username
-                    }}</span></span>
-        </div>
-        <div class="flex items-center gap-3 text-xs text-slate-500">
-            <span>Admin: <span class="text-white font-medium">{{ current_user }}</span></span>
-            <a href="/logout" class="hover:text-red-400 transition-colors">Sair</a>
-        </div>
-    </header>
-
-    <div class="max-w-2xl mx-auto space-y-5">
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for cat, msg in messages %}
-        <div class="flash-{{ cat }}">{{ msg }}</div>
-        {% endfor %}
-        {% endwith %}
-
-        
-        <div class="card p-6">
+    </head><body>
+    <div class="bg-mesh"></div>
+    <div class="max-w-4xl mx-auto py-10 px-6">
+        <div class="flex justify-between items-center mb-12">
             <div class="flex items-center gap-4">
-                <div
-                    class="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-2xl font-bold text-white">
-                    {{ (target.display_name or target.username)[0].upper() }}
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white">{{ target.display_name or target.username }}</h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <p class="text-sm text-slate-500">@{{ target.username }}</p>
-                        <span class="badge role-badge-{{ target.role }}">{{ target.role_info.label }}</span>
-                        {% if target.mfa_enabled %}<span class="badge"
-                            style="background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.25);">🔐
-                            MFA Ativo</span>{% endif %}
-                        {% if target.is_locked %}<span class="badge"
-                            style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);">🔒
-                            Bloqueado</span>{% endif %}
-                    </div>
-                </div>
-                <div class="ml-auto text-right text-xs text-slate-500">
-                    <p>Criado em {{ target.created_at.strftime('%d/%m/%Y') }}</p>
-                    {% if target.last_login_at %}
-                    <p>Último login: {{ target.last_login_at.strftime('%d/%m/%Y %H:%M') }}</p>
-                    <p>IP: {{ target.last_login_ip or '—' }}</p>
-                    {% endif %}
-                </div>
+                 <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </a>
+                <h1 class="text-3xl font-bold text-white">Editar Usuário: <span class="text-sky-500">{{ user.username }}</span></h1>
             </div>
         </div>
 
-        
-        <div class="card p-6">
-            <p class="section-title">Editar Informações</p>
-            <form method="POST" action="/admin/users/{{ target.id }}/profile/update" class="space-y-4">
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div>
-                        <label>Nome de Exibição</label>
-                        <input name="display_name" type="text" class="fluent-input"
-                            value="{{ target.display_name or '' }}" placeholder="{{ target.username }}" />
+        <div class="grid gap-6">
+            <!-- Informações Básicas -->
+            <div class="hyper-glass p-8">
+                <form action="/admin/users/{{ user.id }}/update" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nome de Exibição</label>
+                            <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">E-mail</label>
+                            <input type="email" name="email" class="aegis-input" value="{{ user.email or '' }}">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Role do Sistema</label>
+                            <select name="role" class="aegis-input">
+                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="superadmin" {% if user.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label>Email</label>
-                        <input name="email" type="email" class="fluent-input" value="{{ target.email or '' }}"
-                            placeholder="email@empresa.com" />
+                    <div class="pt-4 flex justify-end gap-3">
+                        <button type="submit" class="aegis-btn-primary">Atualizar Usuário</button>
                     </div>
-                </div>
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-
-        
-        <div class="card p-6">
-            <p class="section-title">Nível de Acesso</p>
-            {% if target.role == 'superadmin' and target.id != session.get('soc_uid') %}
-            <p class="text-xs text-slate-500">Não é possível alterar o nível de outro Super Administrador.</p>
-            {% else %}
-            <form method="POST" action="/admin/users/{{ target.id }}/role" class="flex items-center gap-3">
-                <select name="role" class="fluent-input">
-                    {% for role_key, role_data in all_roles.items() %}
-                    <option value="{{ role_key }}" {% if target.role==role_key %}selected{% endif %}>{{ role_data.label
-                        }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn-primary whitespace-nowrap">Alterar Role</button>
-            </form>
-            {% endif %}
-        </div>
-
-        
-        <div class="card p-6">
-            <p class="section-title">Redefinir Senha</p>
-            <form method="POST" action="/admin/users/{{ target.id }}/password" class="flex gap-3">
-                <input name="new_password" type="text" class="fluent-input"
-                    placeholder="Nova senha (mín. 8 caracteres)" />
-                <button type="submit" class="btn-primary whitespace-nowrap">Redefinir</button>
-            </form>
-        </div>
-
-        
-        {% if target.mfa_enabled %}
-        <div class="card p-6">
-            <p class="section-title">MFA do Usuário</p>
-            <div class="flex items-center justify-between">
-                <p class="text-sm text-green-400">MFA está ativo na conta deste usuário.</p>
-                <form method="POST" action="/admin/users/{{ target.id }}/profile/reset-mfa"
-                    onsubmit="return confirm('Tem certeza que deseja desativar o MFA deste usuário?')">
-                    <button type="submit" class="btn-danger">Desativar MFA</button>
                 </form>
             </div>
-        </div>
-        {% endif %}
 
-        
-        {% if target.is_locked %}
-        <div class="card p-6" style="border-color:rgba(239,68,68,.3);">
-            <div class="flex items-center justify-between">
-                <p class="text-sm text-red-400">🔒 Conta bloqueada — {{ target.lock_remaining_minutes }} min restantes.
-                </p>
-                <form method="POST" action="/admin/users/{{ target.id }}/unlock">
-                    <button type="submit" class="btn-primary">Desbloquear Conta</button>
+            <!-- Reset Password Admin -->
+            <div class="hyper-glass p-8 border-l-4 border-l-amber-500">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-amber-500"><i data-lucide="key" class="w-5 h-5"></i> Redefinir Senha (Admin)</h3>
+                <form action="/admin/users/{{ user.id }}/reset-password" method="POST" class="flex gap-4">
+                    <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Nova senha administrativa..." required>
+                    <button type="submit" class="aegis-btn-secondary border-amber-500/30 hover:bg-amber-500/10 text-amber-500">Resetar Senha</button>
                 </form>
+                <p class="text-[10px] text-slate-500 mt-2">Atenção: Esta ação mudará a senha do usuário instantaneamente sem confirmação.</p>
             </div>
         </div>
-        {% endif %}
-
-        
-        <div class="card p-6">
-            <p class="section-title">Histórico de Acesso Recente</p>
-            {% if history %}
-            <div class="space-y-1">
-                {% for h in history %}
-                <div class="history-row flex items-center gap-3 px-3 py-2 rounded-lg">
-                    <span class="text-lg">{{ '✅' if h.success else '❌' }}</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs text-slate-300 font-mono truncate">{{ h.ip_address }}</p>
-                        <p class="text-xs text-slate-600 truncate">{{ h.user_agent[:60] if h.user_agent else 'N/A' }}
-                        </p>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-xs text-slate-500">{{ h.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
-                        {% if not h.success and h.reason %}<p class="text-xs text-red-400">{{ h.reason }}</p>{% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-sm text-slate-600">Nenhum histórico disponível.</p>
-            {% endif %}
-        </div>
-
     </div>
-</body>
-
-</html>
+    <script>lucide.createIcons();</script>
+    
+    <div id="toast-container"></div>
+</body></html>

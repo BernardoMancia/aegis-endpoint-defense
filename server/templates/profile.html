@@ -1,270 +1,208 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aegis SOC — Meu Perfil</title>
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis SOC — Perfil</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <script>
-          tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-          colors: {
-            fluent: { 
-              bg: '#141414', 
-              surface: 'rgba(30, 30, 30, 0.45)', 
-              surfaceHover: 'rgba(45, 45, 45, 0.6)',
-              border: 'rgba(255, 255, 255, 0.08)', 
-              primary: '#0ea5e9', 
-              primaryHover: '#0284c7', 
-              text: '#e2e8f0', 
-              textMuted: '#94a3b8' 
-            },
-            dark: { 900: '#0a0a0a', 850: '#181818', 800: '#1a1a1a', 750: '#222222', 700: '#2a2a2a', 600: '#333333' }
-          }
-        }
-      }
-    }
-    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-    * { box-sizing: border-box; }
-    body { 
-      color-scheme: dark; 
-      font-family: 'Inter', sans-serif; 
-      background: #141414; 
-      color: #e2e8f0; 
-      margin: 0; 
-      min-height: 100vh; 
-      overflow: hidden; 
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-    
-    /* Background Orbs & Mesh */
-    .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
-    .glow-orb-1 { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14,165,233,0.02) 0%, transparent 60%); top: -200px; left: -200px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
-    .glow-orb-2 { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.015) 0%, transparent 60%); bottom: -100px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(40px); }
+/* Aegis Hyper-Glass Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* Fluent Glass Modifiers */
-    .bg-fluent-surface { background: rgba(35, 35, 35, 0.6) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .fluent-card { background: rgba(40, 40, 40, 0.5) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
-    .fluent-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1) !important; }
-    
-    .fluent-input { background: #1e1e1e !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #e2e8f0 !important; outline: none; transition: all 0.2s !important; border-radius: 8px !important; padding: 10px 14px !important; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    .fluent-input:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important; }
-    
-    .fluent-btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary, .fluent-btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; border: none !important; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3) !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-primary:hover, .fluent-btn-primary:hover { box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; transform: translateY(-2px) scale(1.02) !important; filter: brightness(1.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .btn-primary:active, .fluent-btn-primary:active { transform: translateY(1px) !important; }
-    
-    .btn-action { background: rgba(255,255,255,0.05) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(8px); }
-    .btn-action:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; }
+:root {
+    --deep-bg: #030712;
+    --glass-bg: rgba(17, 24, 39, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --neon-blue: #0ea5e9;
+    --neon-blue-glow: rgba(14, 165, 233, 0.4);
+    --neon-purple: #8b5cf6;
+    --neon-purple-glow: rgba(139, 92, 246, 0.4);
+    --neon-emerald: #10b981;
+    --neon-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+}
 
-    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-pending { background: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.2) !important; }
-    .badge-active { background: rgba(74, 222, 128, 0.1) !important; color: #4ade80 !important; border: 1px solid rgba(74, 222, 128, 0.2) !important; }
-    .badge-rejected { background: rgba(248, 113, 113, 0.1) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2) !important; }
+* { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
-    /* Login / Single Cards specific (Auth pages) */
-    .auth-card { background: rgba(30, 30, 30, 0.7) !important; backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important; }
+body {
+    background-color: var(--deep-bg);
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
 
-    /* Navigation Sidebar styling overrides */
-    aside nav button, aside nav a { border-radius: 8px !important; border: 1px solid transparent; transition: all 0.2s; }
-    aside nav button:hover:not(.bg-white\/10), aside nav a:hover:not(.bg-white\/10) { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.02); }
-    aside nav .bg-white\/10 { background: linear-gradient(90deg, rgba(14,165,233,0.15) 0%, transparent 100%) !important; border-left: 3px solid #0ea5e9 !important; border-radius: 4px !important; color: white !important; }
-    aside nav .text-fluent-textMuted { color: #94a3b8 !important; }
+/* Background AnimatedMesh */
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    filter: blur(80px);
+    animation: meshFlow 20s ease-in-out infinite alternate;
+}
+@keyframes meshFlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.1) translate(20px, 10px); }
+}
 
-    label { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; display: block; letter-spacing: 0.2px; }
+/* Glassmorphism Generic Card */
+.hyper-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-    /* Tables */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    th { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: #e2e8f0; transition: background 0.2s; }
-    tr { transition: transform 0.2s; }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
-    tr:last-child td { border-bottom: none; }
+/* Modern Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+/* Inputs Fix */
+.aegis-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+    padding: 12px 16px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+    color-scheme: dark;
+}
+.aegis-input:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+    transform: translateY(-1px);
+}
+
+/* Premium Buttons */
+.aegis-btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), #0284c7);
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px var(--neon-blue-glow);
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.aegis-btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px var(--neon-blue-glow);
+}
+.aegis-btn-primary:active { transform: translateY(1px); }
+
+.aegis-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.aegis-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-blue); }
+
+/* Toasts */
+#toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 14px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toast.show { transform: translateX(0); }
 </style>
-</head>
-
-<body class="p-4 md:p-8">
-    <div class="max-w-3xl mx-auto">
-
-        
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-4">
-                <a href="/" class="text-slate-600 hover:text-slate-300 transition-colors" title="Voltar ao Dashboard">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </a>
-                <div
-                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-xl font-bold text-white">
-                    {{ (user.display_name or user.username)[0].upper() }}
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-white">{{ user.display_name or user.username }}</h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <p class="text-sm text-slate-500">@{{ user.username }}</p>
-                        <span class="badge role-badge-{{ user.role }}">{{ user.role_info.label }}</span>
-                        {% if user.mfa_enabled %}<span class="badge badge-success">🔐 MFA Ativo</span>{% endif %}
-                    </div>
-                </div>
+    </head><body>
+    <div class="bg-mesh"></div>
+    <div class="max-w-4xl mx-auto py-10 px-6">
+        <div class="flex items-center gap-6 mb-12">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl">
+                {{ current_user[0].upper() }}
             </div>
-            
-            <div class="flex items-center gap-2 shrink-0">
-                {% if user.role in ['superadmin', 'admin'] %}
-                <a href="/admin/users"
-                    class="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-all">⚙️
-                    Admin</a>
-                {% endif %}
-                <a href="/logout"
-                    class="text-xs bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all">❌
-                    Sair</a>
+            <div>
+                <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
+                <p class="text-slate-400">Gerencie sua identidade e segurança na plataforma.</p>
             </div>
         </div>
 
-        <div class="grid gap-5">
-
-            
-            <div class="card p-6">
-                <p class="section-title">Informações Pessoais</p>
-                <form method="POST" action="/profile/update" class="grid sm:grid-cols-2 gap-4">
-                    <div>
-                        <label>Nome de exibição</label>
-                        <input name="display_name" type="text" class="fluent-input" value="{{ user.display_name or '' }}"
-                            placeholder="Seu nome completo" />
+        <div class="grid gap-6">
+            <div class="hyper-glass p-8">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
+                <form action="/profile/update" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm text-slate-400">Nome de Exibição</label>
+                        <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
                     </div>
-                    <div>
-                        <label>Usuário</label>
-                        <input type="text" class="fluent-input opacity-50" value="{{ user.username }}" disabled />
+                    <div class="space-y-2">
+                        <label class="text-sm text-slate-400">Nome de Usuário</label>
+                        <input type="text" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.username }}" disabled>
                     </div>
-                    <div class="sm:col-span-2">
-                        <label>Email atual</label>
-                        <input type="email" class="fluent-input opacity-50" value="{{ user.email or '' }}" disabled />
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm text-slate-400">Endereço de E-mail</label>
+                        <input type="email" class="aegis-input opacity-50 cursor-not-allowed" value="{{ user.email or 'N/A' }}" disabled>
                     </div>
-                    <div class="sm:col-span-2 flex justify-end">
-                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="aegis-btn-primary">Salvar Alterações</button>
                     </div>
                 </form>
             </div>
 
-            
-            <div class="card p-6">
-                <p class="section-title">Solicitar Troca de Email</p>
-                <form method="POST" action="/profile/request-email" class="flex gap-3">
-                    <div class="flex-1">
-                        <label>Novo email</label>
-                        <input name="new_email" type="email" class="fluent-input" placeholder="novo@email.com"
-                            required />
+            <div class="hyper-glass p-8">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-amber-500"></i> Segurança e Senha</h2>
+                <form action="/profile/change-password" method="POST" class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-sm text-slate-400">Senha Atual</label>
+                        <input type="password" name="current_password" class="aegis-input" required>
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="btn-primary whitespace-nowrap">Enviar Confirmação</button>
-                    </div>
-                </form>
-                <p class="text-xs text-slate-600 mt-3">Um link de confirmação será enviado ao email atual. O email só
-                    será alterado após confirmação.</p>
-            </div>
-
-            
-            <div class="card p-6">
-                <p class="section-title">Alterar Senha</p>
-                <form method="POST" action="/profile/change-password" class="space-y-3">
-                    <div>
-                        <label>Senha atual</label>
-                        <input name="current_password" type="password" class="fluent-input" required />
-                    </div>
-                    <div class="grid sm:grid-cols-2 gap-3">
-                        <div>
-                            <label>Nova senha</label>
-                            <input name="new_password" type="password" class="fluent-input"
-                                placeholder="Mínimo 8 caracteres" required />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Nova Senha</label>
+                            <input type="password" name="new_password" class="aegis-input" required>
                         </div>
-                        <div>
-                            <label>Confirmar senha</label>
-                            <input name="confirm_password" type="password" class="fluent-input" required />
+                        <div class="space-y-2">
+                            <label class="text-sm text-slate-400">Confirmar Nova Senha</label>
+                            <input type="password" name="confirm_password" class="aegis-input" required>
                         </div>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="btn-primary">Alterar Senha</button>
+                        <button type="submit" class="aegis-btn-primary">Atualizar Senha</button>
                     </div>
                 </form>
             </div>
 
-            
-            <div class="card p-6">
-                <div class="flex items-center justify-between mb-4">
+            <div class="hyper-glass p-8 border-l-4 border-l-purple-500">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <p class="section-title mb-1">Autenticação em Dois Fatores (MFA)</p>
-                        {% if user.mfa_enabled %}
-                        <p class="text-xs text-green-400">✅ MFA ativo — sua conta tem proteção extra</p>
-                        {% else %}
-                        <p class="text-xs text-amber-400">⚠️ MFA desativado — recomendamos ativar</p>
-                        {% endif %}
+                        <h2 class="text-xl font-bold mb-2">Autenticação de Dois Fatores (MFA)</h2>
+                        <p class="text-sm text-slate-400 max-w-lg">Proteja sua conta adicionando uma camada extra de segurança. Exigirá um código do seu aplicativo autenticador a cada login.</p>
                     </div>
-                    <a href="/mfa/setup" class="btn-primary text-sm">{{ '⚙️ Gerenciar' if user.mfa_enabled else '🔐
-                        Ativar MFA' }}</a>
+                    <a href="/mfa/setup" class="aegis-btn-primary !bg-purple-600 !shadow-purple-500/20">
+                        {{ 'Gerenciar MFA' if user.mfa_enabled else 'Ativar MFA Now' }}
+                    </a>
                 </div>
-                <p class="text-xs text-slate-500">Use o Google Authenticator, Authy ou qualquer app TOTP compatível para
-                    gerar códigos temporários.</p>
             </div>
-
             
-            <div class="card p-6">
-                <p class="section-title">Preferências de Notificação por Email</p>
-                <form method="POST" action="/profile/notifications" class="space-y-3">
-                    {% set prefs = user.notification_settings %}
-                    {% for key, label in [("new_incident","Novo incidente criado"),("agent_offline","Agente
-                    offline"),("high_severity","Evento de alta severidade"),("login_new_ip","Login de novo IP")] %}
-                    <div class="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                        <span class="text-sm text-slate-300">{{ label }}</span>
-                        <label class="toggle" style="margin:0;">
-                            <input type="checkbox" name="{{ key }}" {% if prefs.get(key, True) %}checked{% endif %} />
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    {% endfor %}
-                    <div class="flex justify-end pt-2">
-                        <button type="submit" class="btn-primary">Salvar Preferências</button>
-                    </div>
-                </form>
+            <div class="flex justify-center pt-6">
+                <a href="/" class="text-slate-500 hover:text-white flex items-center gap-2 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para Dashboard
+                </a>
             </div>
-
-            
-            <div class="card p-6">
-                <p class="section-title">Histórico de Acesso Recente</p>
-                {% if history %}
-                <div class="space-y-1">
-                    {% for h in history %}
-                    <div class="history-row flex items-center gap-3 px-3 py-2 rounded-lg">
-                        <span class="text-lg">{{ '✅' if h.success else '❌' }}</span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs text-slate-300 font-mono truncate">{{ h.ip_address }}</p>
-                            <p class="text-xs text-slate-600 truncate">{{ h.user_agent[:60] if h.user_agent else 'N/A'
-                                }}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <p class="text-xs text-slate-500">{{ h.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
-                            {% if not h.success and h.reason %}<p class="text-xs text-red-400">{{ h.reason }}</p>{%
-                            endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="text-sm text-slate-600">Nenhum histórico disponível.</p>
-                {% endif %}
-            </div>
-
         </div>
     </div>
-</body>
-
-</html>
+    <script>lucide.createIcons();</script>
+    
+    <div id="toast-container"></div>
+</body></html>
