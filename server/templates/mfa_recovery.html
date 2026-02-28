@@ -57,10 +57,47 @@
             display: block;
             text-align: center;
         }
-    </style>
+    
+    /* Premium Glassmorphism & Animations */
+    .glass {
+      background: rgba(13, 17, 23, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(14, 165, 233, 0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .glass-hover {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .glass-hover:hover {
+      border-color: rgba(14, 165, 233, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    
+    /* Toast System */
+    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+    .toast { background: rgba(20, 25, 35, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
+    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
+    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.15), rgba(20,25,35,0.95) 30%); }
+    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.15), rgba(20,25,35,0.95) 30%); }
+    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.15), rgba(20,25,35,0.95) 30%); }
+    
+    /* Base Input fixes */
+    input, select { color-scheme: dark; }
+
+    /* Button Animations */
+    button { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+    button:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+    .tab-btn { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+    .tab-btn:hover { transform: translateY(-2px); }
+
+</style>
 </head>
 
 <body>
+  <div id="toast-container"></div>
     <div class="card w-full max-w-md p-8">
         <div class="text-center mb-6">
             <div class="text-5xl mb-3">🔑</div>

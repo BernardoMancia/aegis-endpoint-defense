@@ -78,16 +78,9 @@
       background: #0ea5e9
     }
 
-    .glass {
-      background: rgba(13, 17, 23, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(14, 165, 233, 0.12)
-    }
+    
 
-    .glass-hover:hover {
-      border-color: rgba(14, 165, 233, 0.35);
-      transition: all 0.2s
-    }
+    
 
     .severity-CRITICAL {
       color: #f87171;
@@ -205,7 +198,7 @@
     .tab-btn.active {
       background: rgba(14, 165, 233, 0.2);
       color: #0ea5e9;
-      border: 1px solid rgba(14, 165, 233, 0.4)
+      border: 1px solid rgba(14, 165, 233, 0.4); box-shadow: 0 0 10px rgba(14,165,233,0.3);
     }
 
     .tab-btn:not(.active):hover {
@@ -290,10 +283,47 @@
       width: 90%;
       max-width: 900px
     }
-  </style>
+  
+    /* Premium Glassmorphism & Animations */
+    .glass {
+      background: rgba(13, 17, 23, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(14, 165, 233, 0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .glass-hover {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .glass-hover:hover {
+      border-color: rgba(14, 165, 233, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    
+    /* Toast System */
+    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+    .toast { background: rgba(20, 25, 35, 0.95); backdrop-filter: blur(16px); border-radius: 12px; padding: 14px 24px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transform: translateX(120%) scale(0.9); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: auto; }
+    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
+    .toast-error { border-left: 4px solid #f87171; background: linear-gradient(90deg, rgba(248,113,113,0.15), rgba(20,25,35,0.95) 30%); }
+    .toast-success { border-left: 4px solid #4ade80; background: linear-gradient(90deg, rgba(74,222,128,0.15), rgba(20,25,35,0.95) 30%); }
+    .toast-warning { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.15), rgba(20,25,35,0.95) 30%); }
+    
+    /* Base Input fixes */
+    input, select { color-scheme: dark; }
+
+    /* Button Animations */
+    button { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+    button:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+    .tab-btn { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+    .tab-btn:hover { transform: translateY(-2px); }
+
+</style>
 </head>
 
 <body>
+  <div id="toast-container"></div>
 
 
   <header class="glass h-[52px] flex items-center justify-between px-5 border-b border-white/5">
@@ -342,7 +372,7 @@
   </header>
 
 
-  <div class="grid-layout p-3 pt-2">
+  <div class="grid-layout p-4 pt-4">
 
 
     <div class="col-scroll">
@@ -395,7 +425,7 @@
 
         <div class="glass rounded-xl p-4 mt-3">
           <h3 class="text-sm font-semibold text-slate-300 mb-3">Ações SOAR</h3>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-5 gap-2">
             <button onclick="soarAction('screenshot')"
               class="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs py-2.5 px-3 rounded-lg hover:bg-blue-500/20 transition-all font-medium flex items-center gap-2 font-bold">🖥️
               Screenshot</button>
@@ -420,18 +450,18 @@
           <div class="grid grid-cols-1 gap-2">
             <div class="grid grid-cols-2 gap-2">
               <button onclick="soarAction('isolate')"
-                class="bg-red-500/20 border border-red-500/40 text-red-400 text-[10px] py-2 px-3 rounded-lg hover:bg-red-500/30 transition-all font-bold flex items-center justify-center gap-2">🔒
+                class="bg-red-500/10 border border-red-500/40 text-red-400 text-[10px] py-3 px-3 rounded-xl hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all font-bold flex items-center justify-center gap-2">🔒
                 ISOLAR AGENTE</button>
               <button onclick="soarAction('unisolate')"
-                class="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] py-2 px-3 rounded-lg hover:bg-slate-700 transition-all font-bold flex items-center justify-center gap-2">🔓
+                class="bg-dark-800 border border-dark-600 text-slate-300 text-[10px] py-3 px-3 rounded-xl hover:bg-dark-700 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all font-bold flex items-center justify-center gap-2">🔓
                 RETIRAR ISOLAMENTO</button>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <button onclick="soarAction('uninstall')"
-                class="bg-orange-500/20 border border-orange-500/40 text-orange-400 text-[10px] py-2.5 px-3 rounded-lg hover:bg-orange-500/30 transition-all font-black flex items-center justify-center gap-2">🗑️
+                class="bg-orange-500/10 border border-orange-500/40 text-orange-400 text-[10px] py-3 px-3 rounded-xl hover:bg-orange-500/20 hover:shadow-[0_0_15px_rgba(249,115,22,0.4)] transition-all font-black flex items-center justify-center gap-2">🗑️
                 DESINSTALAR AGENTE</button>
               <button onclick="soarAction('wipe')"
-                class="bg-red-600/20 border border-red-600/50 text-red-500 text-[10px] py-2.5 px-3 rounded-lg hover:bg-red-600/40 transition-all font-black flex items-center justify-center gap-2">💣
+                class="bg-red-600/10 border border-red-600/50 text-red-500 text-[10px] py-3 px-3 rounded-xl hover:bg-red-600/30 hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all font-black flex items-center justify-center gap-2">💣
                 WIPE COMPLETO DO ENDPOINT</button>
             </div>
           </div>
@@ -1018,7 +1048,7 @@
 
 
     async function sendCommand() {
-      if (!selectedAgent) { addTerminalLine('[ERRO] Selecione um agente primeiro.', '#f87171'); return; }
+      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
       const inp = document.getElementById('cmd-input');
       const cmd = inp.value.trim();
       if (!cmd) return;
@@ -1045,7 +1075,7 @@
 
 
     async function soarAction(action) {
-      if (!selectedAgent) { addTerminalLine('[ERRO] Selecione um agente primeiro.', '#f87171'); return; }
+      if (!selectedAgent) { showToast('[ERRO] Selecione um agente primeiro.', 'error'); return; }
       const id = selectedAgent.id;
       const name = selectedAgent.hostname;
 
@@ -1271,8 +1301,25 @@
     }
 
 
+    
     function showToast(message, type = 'info') {
-      console.log(`Toast (${type}): ${message}`);
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      if (message.includes('[ERRO]') && type === 'info') type = 'error';
+      message = message.replace('[ERRO]', '').trim();
+      const toast = document.createElement('div');
+      let typeClass = '';
+      let icon = 'ℹ️';
+      if (type === 'error' || type === 'danger') { typeClass = 'toast-error'; icon = '❌'; }
+      if (type === 'success') { typeClass = 'toast-success'; icon = '✅'; }
+      if (type === 'warning') { typeClass = 'toast-warning'; icon = '⚠️'; }
+      toast.className = `toast ${typeClass}`;
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 5000);
+    }
+): ${message}`);
 
 
 
