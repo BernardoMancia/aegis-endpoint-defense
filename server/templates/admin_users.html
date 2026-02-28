@@ -6,149 +6,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aegis SOC — Gestão de Usuários</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              fluent: { bg: '#111111', surface: '#242424', border: '#333333', primary: '#4cc2ff', text: '#e0e0e0', textMuted: '#9e9e9e' },
+              dark: { 900: '#111', 850: '#1a1a1a', 800: '#242424', 700: '#333333', 600: '#444' }
+            }
+          }
+        }
+      }
+    </script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #111111; color: #e0e0e0; margin: 0; min-height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 11px; font-weight: 500; color: #9e9e9e; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; text-align: left; border-bottom: 1px solid #333333; }
+        td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #333333; vertical-align: middle; color: #e0e0e0; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #080c14;
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
+        .fluent-card { background: #242424; border: 1px solid #333333; border-radius: 8px; }
+        
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .badge-active { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); }
+        .badge-rejected { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
 
-        .glass {
-            background: rgba(13, 17, 23, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(14, 165, 233, 0.12);
-        }
+        .fluent-btn { padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .btn-approve { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-color: rgba(74, 222, 128, 0.3); }
+        .btn-approve:hover { background: rgba(74, 222, 128, 0.2); }
+        .btn-reject { background: rgba(248, 113, 113, 0.1); color: #f87171; border-color: rgba(248, 113, 113, 0.3); }
+        .btn-reject:hover { background: rgba(248, 113, 113, 0.2); }
+        .btn-action { background: #333; color: #e0e0e0; border-color: #444; }
+        .btn-action:hover { background: #444; }
+        .btn-danger { background: rgba(248, 113, 113, 0.1); color: #f87171; border-color: rgba(248, 113, 113, 0.3); }
 
-        .badge-pending {
-            background: rgba(251, 191, 36, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .badge-active {
-            background: rgba(74, 222, 128, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(74, 222, 128, 0.3);
-        }
-
-        .badge-rejected {
-            background: rgba(248, 113, 113, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(248, 113, 113, 0.3);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .btn-approve {
-            background: rgba(74, 222, 128, 0.15);
-            border: 1px solid rgba(74, 222, 128, 0.4);
-            color: #4ade80;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-approve:hover {
-            background: rgba(74, 222, 128, 0.3);
-        }
-
-        .btn-reject {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            color: #f87171;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-reject:hover {
-            background: rgba(248, 113, 113, 0.25);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        td {
-            padding: 12px 12px;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            vertical-align: middle;
-        }
-
-        tr:hover td {
-            background: rgba(14, 165, 233, 0.03);
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .fluent-input { background: #111; border: 1px solid #333; color: #e0e0e0; outline: none; transition: border-color 0.2s; border-radius: 4px; padding: 8px 12px; w-full; }
+        .fluent-input:focus { border-color: #4cc2ff; }
+        
+        .section-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px; }
     </style>
 </head>
 
 <body>
+<div class="flex h-screen w-full">
+  
+  <aside class="w-[260px] bg-fluent-surface border-r border-fluent-border flex flex-col z-20 shrink-0">
+    <div class="h-14 flex items-center px-4 border-b border-fluent-border gap-3">
+       <div class="w-8 h-8 rounded bg-fluent-primary flex items-center justify-center">
+         <svg style="width:18px; height:18px;" class="text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+         </svg>
+       </div>
+       <span class="font-semibold text-white tracking-wide text-sm">Aegis Endpoint</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-4">Navegação</div>
+      <a href="/" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-fluent-text rounded hover:bg-white/5 transition-colors">
+        <span class="text-fluent-textMuted">↩️</span> Voltar ao Dashboard
+      </a>
+      <div class="text-[10px] font-bold text-fluent-textMuted uppercase tracking-widest px-3 mb-2 mt-6">Administração</div>
+      <a href="/admin/users" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-white rounded bg-white/10 font-semibold transition-colors">
+        <span class="text-fluent-textMuted">👥</span> Gestão de Usuários
+      </a>
+    </nav>
+  </aside>
 
-    <header class="glass h-[52px] flex items-center justify-between px-6 border-b border-white/5 sticky top-0 z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center">
-                <svg style="width:14px;height:14px;" fill="none" stroke="white" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-            </div>
-            <span class="font-bold text-white text-sm">AEGIS <span class="text-sky-400">SOC</span></span>
-            <span class="text-xs text-slate-600">/</span>
-            <span class="text-xs text-slate-400">Gestão de Usuários</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-xs text-slate-500">Admin: <span class="text-white font-medium">{{ current_user
-                    }}</span></span>
-            <a href="/" class="text-xs text-sky-400 hover:text-sky-300 transition-colors">← Voltar ao SOC</a>
-            <a href="/profile" class="text-xs text-slate-400 hover:text-white transition-colors">Meu Perfil</a>
-            <a href="/logout" class="text-xs text-slate-500 hover:text-red-400 transition-colors">Sair</a>
-        </div>
+  
+  <div class="flex-1 flex flex-col h-screen overflow-hidden bg-fluent-bg">
+    
+    <header class="h-14 bg-fluent-surface border-b border-fluent-border flex items-center justify-between px-6 shrink-0">
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-fluent-textMuted">Admin</span>
+        <span class="text-fluent-textMuted">/</span>
+        <span class="font-medium text-white">Usuários</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-xs text-fluent-textMuted">Admin: <span class="text-white font-medium">{{ current_user }}</span></span>
+        <a href="/profile" class="text-sm text-fluent-text hover:text-white transition-colors flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center border border-fluent-border">👤</div>
+        </a>
+        <a href="/logout" class="text-xs text-red-400 hover:text-red-300">Sair</a>
+      </div>
     </header>
 
-    <main class="max-w-6xl mx-auto p-6 space-y-6">
+    
+    <main class="flex-1 overflow-auto p-8 relative max-w-[1200px] mx-auto w-full space-y-8">
+      
+      <div>
+        <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">Gestão de Usuários</h1>
+        <p class="text-sm text-fluent-textMuted">Aprove, edite ou remova acessos ao painel SOC.</p>
+      </div>
 
         {% if pending %}
-        <section class="glass rounded-xl p-5">
+        <section class="fluent-card p-5">
             <div class="flex items-center gap-2 mb-4">
                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                 <h2 class="section-title">Aguardando Aprovação <span class="badge badge-pending ml-2">{{ pending|length
@@ -196,13 +154,13 @@
             </table>
         </section>
         {% else %}
-        <section class="glass rounded-xl p-5">
+        <section class="fluent-card p-5">
             <h2 class="section-title mb-3">Aguardando Aprovação</h2>
             <p class="text-sm text-slate-600 text-center py-6">Nenhuma solicitação pendente. 🎉</p>
         </section>
         {% endif %}
 
-        <section class="glass rounded-xl p-5">
+        <section class="fluent-card p-5">
             <h2 class="section-title mb-4">Usuários Ativos <span class="badge badge-active ml-2">{{ approved|length
                     }}</span></h2>
             {% if approved %}
@@ -266,21 +224,21 @@
             {% endif %}
         </section>
 
-        <!-- Password Modal -->
+        
         <div id="password-modal" style="display:none;"
             class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-            <div class="glass p-6 rounded-xl w-full max-w-sm">
+            <div class="fluent-card p-6 w-full max-w-sm">
                 <h3 class="text-lg font-bold text-white mb-2">Trocar Senha</h3>
                 <p class="text-xs text-slate-400 mb-4">Definir nova senha para <span id="pwd-username"
                         class="font-mono text-sky-400"></span></p>
                 <form id="pwd-form" method="POST" action="">
                     <input type="password" name="new_password" required placeholder="Nova Senha..."
-                        class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 mb-4" />
+                        class="fluent-input w-full mt-2 mb-4 block" />
                     <div class="flex justify-end gap-2">
                         <button type="button" onclick="closePasswordModal()"
                             class="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancelar</button>
                         <button type="submit"
-                            class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 text-white rounded font-medium transition-colors">Salvar
+                            class="fluent-btn bg-[#4cc2ff] text-black hover:bg-[#3bb1eb]">Salvar
                             Nova Senha</button>
                     </div>
                 </form>
@@ -299,7 +257,7 @@
         </script>
 
         {% if rejected %}
-        <section class="glass rounded-xl p-5">
+        <section class="fluent-card p-5">
             <h2 class="section-title mb-4">Recusados <span class="badge badge-rejected ml-2">{{ rejected|length
                     }}</span></h2>
             <table>
@@ -326,6 +284,8 @@
         {% endif %}
 
     </main>
+  </div>
+</div>
 </body>
 
 </html>

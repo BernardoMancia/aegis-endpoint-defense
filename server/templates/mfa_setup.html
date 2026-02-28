@@ -2,96 +2,35 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aegis SOC — Configurar MFA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet" />
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #080c14;
-            min-height: 100vh;
-            color: #e2e8f0;
-        }
-
-        .card {
-            background: rgba(13, 17, 23, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(14, 165, 233, 0.15);
-            border-radius: 16px;
-        }
-
-        .input-field {
-            background: rgba(22, 27, 36, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #e2e8f0;
-            padding: 12px 16px;
-            font-size: 18px;
-            font-family: 'JetBrains Mono', monospace;
-            text-align: center;
-            letter-spacing: 6px;
-            width: 100%;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .input-field:focus {
-            border-color: rgba(14, 165, 233, 0.5);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: white;
-            font-weight: 600;
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-            transform: translateY(-1px);
-        }
-
-        .step {
-            background: rgba(14, 165, 233, 0.08);
-            border: 1px solid rgba(14, 165, 233, 0.15);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .secret-box {
-            background: rgba(22, 27, 36, 0.9);
-            border: 1px dashed rgba(14, 165, 233, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: #7dd3fc;
-            letter-spacing: 2px;
-            text-align: center;
-            word-break: break-all;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aegis SOC — MFA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = { theme: { extend: { colors: { fluent: { bg: '#111111', surface: '#242424', border: '#333333', primary: '#4cc2ff' } } } } }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #111111; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+    .card { background: #242424; border: 1px solid #333333; border-radius: 8px; box-shadow: 0 12px 24px rgba(0,0,0,0.5); }
+    .input-field { background: #111111; border: 1px solid #333333; border-radius: 4px; color: #e0e0e0; padding: 10px 14px; font-size: 14px; width: 100%; outline: none; text-align: center; letter-spacing: 4px; font-weight: bold; }
+    .input-field:focus { border-color: #4cc2ff; }
+    .btn-primary { background: #4cc2ff; color: #000; font-weight: 600; padding: 12px 24px; border-radius: 4px; width: 100%; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary:hover { background: #3bb1eb; }
+    .btn-secondary { background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; padding: 12px 24px; width: 100%; text-align: center; }
+    .btn-secondary:hover { background: #444; border-color: #555; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; border-radius: 4px; padding: 12px 14px; font-size: 13px; }
+  </style>
 </head>
 
 <body class="p-6">
     <div class="max-w-lg mx-auto">
         <div class="flex items-center gap-3 mb-6">
             <div
-                class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center">
-                <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
+                class="w-10 h-10 rounded bg-[#4cc2ff] flex items-center justify-center">
+                <svg style="width:20px;height:20px;" fill="none" stroke="black" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>

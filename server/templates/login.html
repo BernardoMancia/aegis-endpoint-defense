@@ -7,170 +7,109 @@
   <meta name="description" content="Portal de acesso ao painel SOC da plataforma Aegis SIEM & EDR" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fluent: { bg: '#111111', surface: '#242424', border: '#333333', primary: '#4cc2ff', text: '#e0e0e0', textMuted: '#9e9e9e' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #080c14;
+      background: #111111;
+      color: #e0e0e0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-    }
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-    }
-    .glow-orb {
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
-      border-radius: 50%;
-      top: -100px;
-      left: -100px;
-      pointer-events: none;
-    }
-    .glow-orb-2 {
-      position: fixed;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
-      border-radius: 50%;
-      bottom: -80px;
-      right: -80px;
-      pointer-events: none;
+      margin: 0;
     }
     .card {
-      background: rgba(13,17,23,0.85);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(14,165,233,0.15);
-      border-radius: 20px;
-      box-shadow: 0 0 80px rgba(14,165,233,0.06), 0 32px 64px rgba(0,0,0,0.4);
+      background: #242424;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.5);
     }
     .input-field {
-      background: rgba(22,27,36,0.8);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      color: #e2e8f0;
-      padding: 12px 16px;
+      background: #111111;
+      border: 1px solid #333333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      padding: 10px 14px;
       font-size: 14px;
       transition: all 0.2s;
       width: 100%;
       outline: none;
     }
     .input-field:focus {
-      border-color: rgba(14,165,233,0.5);
-      box-shadow: 0 0 0 3px rgba(14,165,233,0.08);
+      border-color: #4cc2ff;
     }
-    .input-field::placeholder { color: #475569; }
+    .input-field::placeholder { color: #555555; }
     .btn-primary {
-      background: linear-gradient(135deg, #0ea5e9, #0284c7);
-      color: white;
+      background: #4cc2ff;
+      color: #000;
       font-weight: 600;
       padding: 12px 24px;
-      border-radius: 10px;
+      border-radius: 4px;
       width: 100%;
       border: none;
       cursor: pointer;
       font-size: 14px;
       transition: all 0.2s;
-      letter-spacing: 0.3px;
     }
     .btn-primary:hover {
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(14,165,233,0.35);
-    }
-    .btn-secondary {
-      background: transparent;
-      color: #64748b;
-      font-weight: 500;
-      padding: 10px 24px;
-      border-radius: 10px;
-      width: 100%;
-      border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s;
-    }
-    .btn-secondary:hover {
-      border-color: rgba(14,165,233,0.3);
-      color: #94a3b8;
-      background: rgba(14,165,233,0.04);
+      background: #3bb1eb;
     }
     .alert-error {
       background: rgba(239,68,68,0.1);
       border: 1px solid rgba(239,68,68,0.3);
       color: #fca5a5;
-      border-radius: 10px;
-      padding: 12px 16px;
+      border-radius: 4px;
+      padding: 12px 14px;
       font-size: 13px;
     }
     .alert-success {
       background: rgba(34,197,94,0.1);
       border: 1px solid rgba(34,197,94,0.3);
       color: #86efac;
-      border-radius: 10px;
-      padding: 12px 16px;
+      border-radius: 4px;
+      padding: 12px 14px;
       font-size: 13px;
     }
     .tab-btn {
-      padding: 8px 20px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 4px;
       font-size: 13px;
       font-weight: 500;
-      color: #64748b;
+      color: #9e9e9e;
       cursor: pointer;
       transition: all 0.2s;
       border: none;
       background: transparent;
     }
     .tab-btn.active {
-      background: rgba(14,165,233,0.15);
-      color: #0ea5e9;
-      border: 1px solid rgba(14,165,233,0.3);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
     }
-    .scan-line {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
-      animation: scan 4s linear infinite;
-      opacity: 0.4;
-    }
-    @keyframes scan {
-      0% { transform: translateY(-2px); }
-      100% { transform: translateY(100vh); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.5s ease-out forwards; }
-    label { font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 6px; display: block; letter-spacing: 0.5px; text-transform: uppercase; }
+    label { font-size: 12px; font-weight: 500; color: #9e9e9e; margin-bottom: 6px; display: block; }
   </style>
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <div class="glow-orb"></div>
-  <div class="glow-orb-2"></div>
-  <div class="scan-line"></div>
+  
 
-  <div class="card w-full max-w-md mx-4 p-8 fade-up">
+  <div class="card w-full max-w-md mx-4 p-10">
 
     <div class="flex items-center gap-3 mb-8">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center flex-shrink-0">
-        <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
+      <div class="w-10 h-10 rounded bg-[#4cc2ff] flex items-center justify-center flex-shrink-0">
+        <svg style="width:20px;height:20px;" fill="none" stroke="black" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
         </svg>
       </div>
@@ -180,7 +119,7 @@
       </div>
     </div>
 
-    <div class="flex gap-2 mb-6 p-1 bg-slate-900/50 rounded-xl">
+    <div class="flex gap-2 mb-6 p-1 bg-black rounded">
       <button id="tab-login-btn" class="tab-btn active flex-1" onclick="showTab('login')">Entrar</button>
       <button id="tab-register-btn" class="tab-btn flex-1" onclick="showTab('register')">Solicitar Acesso</button>
     </div>
@@ -251,3 +190,4 @@
   </script>
 </body>
 </html>
+

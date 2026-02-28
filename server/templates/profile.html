@@ -6,199 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aegis SOC — Meu Perfil</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = { theme: { extend: { colors: { fluent: { bg: '#111111', surface: '#242424', border: '#333333', primary: '#4cc2ff', text: '#e0e0e0', textMuted: '#9e9e9e' } } } } }
+    </script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #080c14;
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
-
-        .card {
-            background: rgba(13, 17, 23, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .7px;
-            color: #475569;
-            margin-bottom: 14px;
-        }
-
-        .input-field {
-            background: rgba(22, 27, 36, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #e2e8f0;
-            padding: 10px 14px;
-            font-size: 14px;
-            width: 100%;
-            outline: none;
-            transition: all .2s;
-        }
-
-        .input-field:focus {
-            border-color: rgba(14, 165, 233, 0.5);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: white;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all .2s;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.12);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            padding: 9px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all .2s;
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background: rgba(34, 197, 94, 0.15);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.25);
-        }
-
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-        }
-
-        .history-row:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .toggle {
-            position: relative;
-            width: 40px;
-            height: 22px;
-        }
-
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            inset: 0;
-            background: #1e293b;
-            border-radius: 22px;
-            cursor: pointer;
-            transition: .3s;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toggle input:checked+.slider {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background: white;
-            border-radius: 50%;
-            transition: .3s;
-        }
-
-        .toggle input:checked+.slider:before {
-            transform: translateX(18px);
-        }
-
-        label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #64748b;
-            letter-spacing: .4px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .role-badge-superadmin {
-            background: rgba(239, 68, 68, .15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, .25);
-        }
-
-        .role-badge-admin {
-            background: rgba(245, 158, 11, .15);
-            color: #fde68a;
-            border: 1px solid rgba(245, 158, 11, .25);
-        }
-
-        .role-badge-analyst {
-            background: rgba(14, 165, 233, .15);
-            color: #7dd3fc;
-            border: 1px solid rgba(14, 165, 233, .25);
-        }
-
-        .role-badge-operator {
-            background: rgba(99, 102, 241, .15);
-            color: #c4b5fd;
-            border: 1px solid rgba(99, 102, 241, .25);
-        }
-
-        .role-badge-viewer {
-            background: rgba(100, 116, 139, .15);
-            color: #94a3b8;
-            border: 1px solid rgba(100, 116, 139, .25);
-        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #111111; color: #e0e0e0; margin: 0; min-height: 100vh; overflow: hidden; }
+        .fluent-card { background: #242424; border: 1px solid #333333; border-radius: 8px; }
+        .fluent-input { background: #111; border: 1px solid #333; color: #e0e0e0; outline: none; border-radius: 4px; padding: 10px 12px; width: 100%; display: block; }
+        .fluent-input:focus { border-color: #4cc2ff; }
+        .btn-primary { background: #4cc2ff; color: #000; border: none; font-weight: 600; padding: 10px 16px; border-radius: 4px; }
+        .btn-primary:hover { background: #3bb1eb; }
+        .btn-action { background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; padding: 10px 16px; }
+        .btn-action:hover { background: #444; }
+        label { font-size: 12px; font-weight: 500; color: #9e9e9e; margin-bottom: 6px; display: block; }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
     <div class="max-w-3xl mx-auto">
 
-        <!-- Header -->
+        
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-4">
                 <a href="/" class="text-slate-600 hover:text-slate-300 transition-colors" title="Voltar ao Dashboard">
@@ -219,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Nav shortcuts -->
+            
             <div class="flex items-center gap-2 shrink-0">
                 {% if user.role in ['superadmin', 'admin'] %}
                 <a href="/admin/users"
@@ -234,7 +63,7 @@
 
         <div class="grid gap-5">
 
-            <!-- Informações pessoais -->
+            
             <div class="card p-6">
                 <p class="section-title">Informações Pessoais</p>
                 <form method="POST" action="/profile/update" class="grid sm:grid-cols-2 gap-4">
@@ -257,7 +86,7 @@
                 </form>
             </div>
 
-            <!-- Trocar Email -->
+            
             <div class="card p-6">
                 <p class="section-title">Solicitar Troca de Email</p>
                 <form method="POST" action="/profile/request-email" class="flex gap-3">
@@ -274,7 +103,7 @@
                     será alterado após confirmação.</p>
             </div>
 
-            <!-- Trocar Senha -->
+            
             <div class="card p-6">
                 <p class="section-title">Alterar Senha</p>
                 <form method="POST" action="/profile/change-password" class="space-y-3">
@@ -299,7 +128,7 @@
                 </form>
             </div>
 
-            <!-- MFA -->
+            
             <div class="card p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div>
@@ -317,7 +146,7 @@
                     gerar códigos temporários.</p>
             </div>
 
-            <!-- Preferências de notificação -->
+            
             <div class="card p-6">
                 <p class="section-title">Preferências de Notificação por Email</p>
                 <form method="POST" action="/profile/notifications" class="space-y-3">
@@ -338,7 +167,7 @@
                 </form>
             </div>
 
-            <!-- Histórico de logins -->
+            
             <div class="card p-6">
                 <p class="section-title">Histórico de Acesso Recente</p>
                 {% if history %}
