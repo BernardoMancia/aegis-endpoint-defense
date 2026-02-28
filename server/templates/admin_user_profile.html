@@ -164,12 +164,12 @@
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div>
                         <label>Nome de Exibição</label>
-                        <input name="display_name" type="text" class="input-field"
+                        <input name="display_name" type="text" class="fluent-input"
                             value="{{ target.display_name or '' }}" placeholder="{{ target.username }}" />
                     </div>
                     <div>
                         <label>Email</label>
-                        <input name="email" type="email" class="input-field" value="{{ target.email or '' }}"
+                        <input name="email" type="email" class="fluent-input" value="{{ target.email or '' }}"
                             placeholder="email@empresa.com" />
                     </div>
                 </div>
@@ -186,7 +186,7 @@
             <p class="text-xs text-slate-500">Não é possível alterar o nível de outro Super Administrador.</p>
             {% else %}
             <form method="POST" action="/admin/users/{{ target.id }}/role" class="flex items-center gap-3">
-                <select name="role" class="input-field">
+                <select name="role" class="fluent-input">
                     {% for role_key, role_data in all_roles.items() %}
                     <option value="{{ role_key }}" {% if target.role==role_key %}selected{% endif %}>{{ role_data.label
                         }}</option>
@@ -201,7 +201,7 @@
         <div class="card p-6">
             <p class="section-title">Redefinir Senha</p>
             <form method="POST" action="/admin/users/{{ target.id }}/password" class="flex gap-3">
-                <input name="new_password" type="text" class="input-field"
+                <input name="new_password" type="text" class="fluent-input"
                     placeholder="Nova senha (mín. 8 caracteres)" />
                 <button type="submit" class="btn-primary whitespace-nowrap">Redefinir</button>
             </form>

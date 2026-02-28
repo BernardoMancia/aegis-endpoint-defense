@@ -152,9 +152,9 @@
         <div class="auth-card p-5 mt-4">
             <p class="text-sm font-semibold text-red-400 mb-3">⚠️ Desativar MFA</p>
             <form method="POST" action="/mfa/disable" class="space-y-3">
-                <input name="password" type="password" class="input-field"
+                <input name="password" type="password" class="fluent-input"
                     style="letter-spacing:normal; font-size:14px;" placeholder="Sua senha atual" />
-                <input name="code" type="text" class="input-field" placeholder="Código TOTP" maxlength="6"
+                <input name="code" type="text" class="fluent-input" placeholder="Código TOTP" maxlength="6"
                     inputmode="numeric" />
                 <button type="submit"
                     class="w-full py-2 px-4 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors">Desativar
