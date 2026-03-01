@@ -32,13 +32,21 @@ class Agent(db.Model):
 
     def to_dict(self):
         from models.chat import AgentChat
-        last_seen_dt = self.last_seen or datetime.utcnow()
-        offline_threshold = datetime.utcnow() - timedelta(seconds=45)
-        computed_status = "uninstalled" if getattr(self, "is_uninstalled", False) else (
-            "isolated" if self.isolation_active else (
-                "online" if last_seen_dt > offline_threshold else "offline"
-            )
-        )
+        now = datetime.utcnow()
+        last_seen_dt = self.last_seen or now
+        
+        # 45 seconds tolerance for heartbeat (which is every 15s)
+        offline_threshold = now - timedelta(seconds=45)
+        
+        if getattr(self, "is_uninstalled", False):
+            computed_status = "uninstalled"
+        elif self.isolation_active:
+            computed_status = "isolated"
+        elif last_seen_dt > offline_threshold:
+            # If last_seen is very recent (or even slightly in the future due to drift), it's online
+            computed_status = "online"
+        else:
+            computed_status = "offline"
         return {
             "id": self.id,
             "original_hostname": self.original_hostname,
