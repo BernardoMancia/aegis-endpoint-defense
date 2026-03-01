@@ -448,7 +448,8 @@ def rebuild_dashboard():
                              <button onclick="quickCommand('PROCESSLIST')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Processes</button>
                              <button onclick="quickCommand('NETSTAT')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Network</button>
                              <button onclick="quickCommand('SYSINFO')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Sysinfo</button>
-                             <button onclick="quickCommand('USERS')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Users</button>
+                             <button onclick="quickCommand('SFC')" class="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 hover:bg-emerald-500/30 transition-all uppercase tracking-tighter">SFC Scan</button>
+                             <button onclick="quickCommand('NET_REPAIR')" class="px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20 text-[9px] font-bold text-sky-400 hover:bg-sky-500/30 transition-all uppercase tracking-tighter">Net Repair</button>
                         </div>
 
                         <div class="flex gap-2">
@@ -1459,6 +1460,57 @@ def rebuild_agent_detail():
 
                 <!-- Forensic / Commands Sidebar -->
                 <div class="space-y-8">
+                    <!-- Diagnostics & Repair -->
+                    <div class="hyper-glass p-8 border-sky-500/10">
+                        <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i data-lucide="wrench" class="w-4 h-4"></i> Diagnóstico e Reparo
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            <button onclick="runDetailCommand('SFC')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform"><i data-lucide="shield-check" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">SFC Scannow</div>
+                                    <div class="text-[8px] text-slate-500">Reparo de arquivos do sistema</div>
+                                </div>
+                            </button>
+                            <button onclick="runDetailCommand('DISM')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform"><i data-lucide="box" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">DISM Repair</div>
+                                    <div class="text-[8px] text-slate-500">Reparo de imagem do Windows</div>
+                                </div>
+                            </button>
+                            <button onclick="runDetailCommand('NET_REPAIR')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-sky-500/10 hover:border-sky-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-sky-500/10 text-sky-500 group-hover:scale-110 transition-transform"><i data-lucide="wifi" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">Reparar Rede</div>
+                                    <div class="text-[8px] text-slate-500">Reset de Winsock e Flush DNS</div>
+                                </div>
+                            </button>
+                            <button onclick="runDetailCommand('TEMP_CLEAN')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">Limpar Arquivos Temp</div>
+                                    <div class="text-[8px] text-slate-500">Remove arquivos de cache e dumps</div>
+                                </div>
+                            </button>
+                            <button onclick="runDetailCommand('TOP_CPU_PROCS')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-purple-500/10 hover:border-purple-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform"><i data-lucide="cpu" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">Top Processos (CPU)</div>
+                                    <div class="text-[8px] text-slate-500">Lista processos que mais consomem</div>
+                                </div>
+                            </button>
+                            <button onclick="runDetailCommand('AUDIT_LOGS')" class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all flex items-center gap-3 group text-left">
+                                <div class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 group-hover:scale-110 transition-transform"><i data-lucide="shield-alert" class="w-4 h-4"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-white uppercase">Eventos de Segurança</div>
+                                    <div class="text-[8px] text-slate-500">Últimas falhas de logon (SIEM)</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Control Panel -->
                     <div class="hyper-glass p-8 border-rose-500/10">
                         <h3 class="text-xs font-black text-rose-500 uppercase tracking-widest mb-6 flex items-center gap-2">

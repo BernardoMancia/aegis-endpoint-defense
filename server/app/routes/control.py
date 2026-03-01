@@ -22,18 +22,24 @@ def require_token(f):
 
 
 QUICK_COMMANDS = {
-    "PROCESSLIST": "tasklist /V /FO TABLE",
-    "NETSTAT": "netstat -ano",
-    "SYSINFO": "systeminfo",
-    "SERVICES": "sc queryex type= all state= all",
+    "PROCESSLIST": "powershell -ExecutionPolicy Bypass -Command \"Get-Process | Select-Object Name, Id, @{Name='Mem(MB)';Expression={[math]::Round($_.WS/1MB,1)}}, Path | Sort-Object Mem(MB) -Descending | Select-Object -First 30 | ft -AutoSize\"",
+    "NETSTAT": "powershell -ExecutionPolicy Bypass -Command \"Get-NetTCPConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, State, OwningProcess | ft -AutoSize\"",
+    "SYSINFO": "powershell -ExecutionPolicy Bypass -Command \"Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsArchitecture, CsModel, CsStatus | ft -AutoSize\"",
+    "SERVICES": "powershell -ExecutionPolicy Bypass -Command \"Get-Service | Where-Object {$_.Status -eq 'Running'} | Select-Object Name, DisplayName, Status | ft -AutoSize\"",
     "USERS": "net user",
     "LOCALGROUPS": "net localgroup administrators",
-    "STARTUP": "wmic startup get caption,command",
+    "STARTUP": "powershell -ExecutionPolicy Bypass -Command \"Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, User | ft -AutoSize\"",
     "SCHEDTASKS": "schtasks /query /fo TABLE /v",
     "SHARES": "net share",
     "FIREWALL": "netsh advfirewall show allprofiles",
     "ENVVARS": "set",
-    "HOTFIXES": "wmic qfe list brief",
+    "HOTFIXES": "powershell -ExecutionPolicy Bypass -Command \"Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object HotFixID, Description, InstalledOn -First 10 | ft -AutoSize\"",
+    "SFC": "sfc /scannow",
+    "DISM": "DISM.exe /Online /Cleanup-Image /RestoreHealth",
+    "NET_REPAIR": "ipconfig /release & ipconfig /renew & ipconfig /flushdns & netsh winsock reset",
+    "TEMP_CLEAN": "del /q /s /f %Temp%\\* & del /q /s /f C:\\Windows\\Temp\\*",
+    "TOP_CPU_PROCS": "powershell -ExecutionPolicy Bypass -Command \"Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 | Select-Object ProcessName, Id, CPU | ft -AutoSize\"",
+    "AUDIT_LOGS": "powershell -ExecutionPolicy Bypass -Command \"Get-WinEvent -FilterHashtable @{LogName='Security';ID=4625} -MaxEvents 10 -ErrorAction SilentlyContinue | Select-Object TimeCreated, Id, Message | ft -Wrap\"",
 }
 
 
