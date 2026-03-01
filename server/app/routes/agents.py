@@ -220,7 +220,7 @@ def stats():
     active_agents_ids = db.session.query(Agent.id).filter(Agent.is_uninstalled == False)
 
     total_agents = Agent.query.filter_by(is_uninstalled=False).count()
-    online_thresh = datetime.utcnow() - timedelta(minutes=3)
+    online_thresh = datetime.utcnow() - timedelta(seconds=45)
     online_agents = Agent.query.filter(Agent.last_seen > online_thresh, Agent.isolation_active == False, Agent.is_uninstalled == False).count()
     isolated_agents = Agent.query.filter_by(isolation_active=True, is_uninstalled=False).count()
 
