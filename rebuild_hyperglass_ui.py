@@ -148,13 +148,24 @@ body {
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
 
-/* Mobile Optimizations */
+/* Mobile Optimizations - Compact & Elegant */
 @media (max-width: 768px) {
     aside { display: none !important; }
-    main { padding: 1rem !important; margin-bottom: 5rem; }
+    main { padding: 0.75rem !important; margin-bottom: 4.5rem; margin-top: 3.5rem !important; }
     #agent-panel { width: 100% !important; border-left: none !important; }
-    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.5rem !important; }
-    #ai-chat-window { width: calc(100% - 2rem) !important; right: 1rem !important; bottom: 6rem !important; }
+    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.25rem !important; border-radius: 14px !important; }
+    #ai-chat-window { width: calc(100% - 1.5rem) !important; right: 0.75rem !important; bottom: 5rem !important; }
+    
+    /* Font Scaling */
+    h1 { font-size: 1.5rem !important; line-height: 2rem !important; }
+    h2 { font-size: 1.125rem !important; }
+    .text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+    .text-4xl { font-size: 1.75rem !important; line-height: 2.25rem !important; }
+    
+    /* Bento Density */
+    .hyper-glass { border-radius: 14px !important; }
+    .grid { gap: 1rem !important; }
+    .p-6, .p-8 { padding: 1rem !important; }
 }
 """
 
@@ -201,33 +212,33 @@ def get_sidebar(active_item):
     </aside>
 
     <!-- Mobile Top Nav -->
-    <header class="md:hidden fixed top-0 left-0 right-0 h-16 hyper-glass border-b border-white/5 flex items-center justify-between px-6 z-[100]">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <i data-lucide="shield" class="text-white w-4 h-4"></i>
+    <header class="md:hidden fixed top-0 left-0 right-0 h-14 hyper-glass border-b border-white/5 flex items-center justify-between px-5 z-[100]">
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <i data-lucide="shield" class="text-white w-3.5 h-3.5"></i>
             </div>
-            <span class="text-sm font-black tracking-tighter">AEGIS SOC</span>
+            <span class="text-[11px] font-black tracking-tighter">AEGIS SOC</span>
         </div>
-        <div class="flex items-center gap-4">
-            <a href="/profile" class="w-8 h-8 rounded-full border border-white/10 overflow-hidden">
+        <div class="flex items-center gap-3">
+            <a href="/profile" class="w-7 h-7 rounded-full border border-white/10 overflow-hidden">
                 <img src="https://api.dicebear.com/7.x/initials/svg?seed={{{{ session.get('soc_user', 'Aegis') }}}}" alt="Avatar">
             </a>
         </div>
     </header>
 
     <!-- Mobile Bottom Nav -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 hyper-glass border-t border-white/5 flex items-center justify-around px-6 z-[100] pb-safe">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-14 hyper-glass border-t border-white/5 flex items-center justify-around px-4 z-[100] pb-safe">
         <a href="/" class="p-2 {'text-sky-400' if active_item == 'dashboard' else 'text-slate-500'}" title="Dashboard">
-            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
         </a>
         <a href="/history" class="p-2 {'text-sky-400' if active_item == 'history' else 'text-slate-500'}" title="Histórico">
-            <i data-lucide="clock" class="w-6 h-6"></i>
+            <i data-lucide="clock" class="w-5 h-5"></i>
         </a>
         <a href="/admin/users" class="p-2 {'text-sky-400' if active_item == 'admin' else 'text-slate-500'}" title="Settings">
-            <i data-lucide="settings" class="w-6 h-6"></i>
+            <i data-lucide="settings" class="w-5 h-5"></i>
         </a>
         <a href="/logout" class="p-2 text-rose-500/50" title="Sair">
-            <i data-lucide="log-out" class="w-6 h-6"></i>
+            <i data-lucide="log-out" class="w-5 h-5"></i>
         </a>
     </nav>
     """
@@ -284,8 +295,8 @@ def rebuild_dashboard():
             </header>
 
             <!-- Bento Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <div onclick="showStatDetails('total')" class="hyper-glass p-6 cursor-pointer hover:border-sky-500/30 transition-all group">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
+                <div onclick="showStatDetails('total')" class="hyper-glass p-4 md:p-6 cursor-pointer hover:border-sky-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500 group-hover:scale-110 transition-transform"><i data-lucide="monitor" class="w-5 h-5"></i></div>
                         <span class="text-xs text-emerald-400 font-bold">+12%</span>
@@ -293,29 +304,29 @@ def rebuild_dashboard():
                     <h3 class="text-slate-500 text-sm font-medium">Endpoints Totais</h3>
                     <p class="text-3xl font-bold mt-1" id="stat-total-agents">--</p>
                 </div>
-                <div onclick="showStatDetails('online')" class="hyper-glass p-6 cursor-pointer hover:border-emerald-500/30 transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 group-hover:scale-110 transition-transform"><i data-lucide="wifi" class="w-5 h-5"></i></div>
-                        <span class="text-xs text-emerald-400 font-bold">Online</span>
+                <div onclick="showStatDetails('online')" class="hyper-glass p-4 md:p-6 cursor-pointer hover:border-emerald-500/30 transition-all group">
+                    <div class="flex justify-between items-start mb-3 md:mb-4">
+                        <div class="p-1.5 md:p-2 bg-emerald-500/10 rounded-lg text-emerald-500 group-hover:scale-110 transition-transform"><i data-lucide="wifi" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                        <span class="text-[10px] md:text-xs text-emerald-400 font-bold">Online</span>
                     </div>
-                    <h3 class="text-slate-500 text-sm font-medium">Agentes Online</h3>
-                    <p class="text-3xl font-bold mt-1 text-emerald-400" id="stat-online-agents">--</p>
+                    <h3 class="text-slate-500 text-[12px] md:text-sm font-medium">Agentes Online</h3>
+                    <p class="text-2xl md:text-3xl font-bold mt-1 text-emerald-400" id="stat-online-agents">--</p>
                 </div>
-                <div onclick="showStatDetails('incidents')" class="hyper-glass p-6 cursor-pointer hover:border-rose-500/30 transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400 group-hover:scale-110 transition-transform"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
-                        <span class="text-xs text-rose-400 font-bold">Crítico</span>
+                <div onclick="showStatDetails('incidents')" class="hyper-glass p-4 md:p-6 cursor-pointer hover:border-rose-500/30 transition-all group">
+                    <div class="flex justify-between items-start mb-3 md:mb-4">
+                        <div class="p-1.5 md:p-2 bg-rose-500/10 rounded-lg text-rose-400 group-hover:scale-110 transition-transform"><i data-lucide="shield-alert" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                        <span class="text-[10px] md:text-xs text-rose-400 font-bold">Crítico</span>
                     </div>
-                    <h3 class="text-slate-500 text-sm font-medium">Ameaças Ativas</h3>
-                    <p class="text-3xl font-bold mt-1 text-rose-500" id="stat-incidents">--</p>
+                    <h3 class="text-slate-500 text-[12px] md:text-sm font-medium">Ameaças Ativas</h3>
+                    <p class="text-2xl md:text-3xl font-bold mt-1 text-rose-500" id="stat-incidents">--</p>
                 </div>
-                <div onclick="showStatDetails('health')" class="hyper-glass p-6 cursor-pointer hover:border-indigo-500/30 transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 group-hover:scale-110 transition-transform"><i data-lucide="activity" class="w-5 h-5"></i></div>
-                        <span class="text-xs text-indigo-400">Normal</span>
+                <div onclick="showStatDetails('health')" class="hyper-glass p-4 md:p-6 cursor-pointer hover:border-indigo-500/30 transition-all group">
+                    <div class="flex justify-between items-start mb-3 md:mb-4">
+                        <div class="p-1.5 md:p-2 bg-indigo-500/10 rounded-lg text-indigo-400 group-hover:scale-110 transition-transform"><i data-lucide="activity" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                        <span class="text-[10px] md:text-xs text-indigo-400">Normal</span>
                     </div>
-                    <h3 class="text-slate-500 text-sm font-medium">Health Score</h3>
-                    <p class="text-3xl font-bold mt-1">98%</p>
+                    <h3 class="text-slate-500 text-[12px] md:text-sm font-medium">Health Score</h3>
+                    <p class="text-2xl md:text-3xl font-bold mt-1">98%</p>
                 </div>
             </div>
 
@@ -655,15 +666,15 @@ def rebuild_dashboard():
                 function renderAgents() {
                     const grid = document.getElementById('agents-grid');
                     grid.innerHTML = currentAgents.map(ag => `
-                        <div onclick="openAgentPanel(${ag.id})" ondblclick="window.location.href='/agent/${ag.id}'" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-2">
+                        <div onclick="openAgentPanel(${ag.id})" ondblclick="window.location.href='/agent/${ag.id}'" class="hyper-glass p-4 md:p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-1.5 md:mb-2">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : ag.status === 'isolated' ? 'bg-rose-500' : 'bg-slate-500'}"></span>
-                                    <span class="font-bold text-sm tracking-tight">${ag.hostname}</span>
+                                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : ag.status === 'isolated' ? 'bg-rose-500' : 'bg-slate-500'}"></span>
+                                    <span class="font-bold text-xs md:text-sm tracking-tight">${ag.hostname}</span>
                                 </div>
-                                <i data-lucide="${ag.platform.includes('win') ? 'monitor' : 'smartphone'}" class="w-4 h-4 text-slate-500"></i>
+                                <i data-lucide="${ag.platform.includes('win') ? 'monitor' : 'smartphone'}" class="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500"></i>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">${ag.ip_address || '0.0.0.0'}</p>
+                            <p class="text-[9px] md:text-[10px] text-slate-500 font-mono">${ag.ip_address || '0.0.0.0'}</p>
                             ${ag.status === 'isolated' ? '<div class="absolute inset-0 bg-rose-500/5 pointer-events-none"></div>' : ''}
                         </div>
                     `).join('');
@@ -673,16 +684,16 @@ def rebuild_dashboard():
                 function renderIncidents(incidents) {
                     const feed = document.getElementById('incidents-feed');
                     feed.innerHTML = incidents.map(inc => `
-                        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex gap-4 transition-all hover:bg-white/[0.08]">
+                        <div class="p-3 md:p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex gap-3 md:gap-4 transition-all hover:bg-white/[0.08]">
                             <div class="mt-1 ${inc.severity === 'CRITICAL' ? 'text-rose-500' : 'text-amber-500'}">
-                                <i data-lucide="${inc.severity === 'CRITICAL' ? 'shield-alert' : 'alert-triangle'}" class="w-5 h-5"></i>
+                                <i data-lucide="${inc.severity === 'CRITICAL' ? 'shield-alert' : 'alert-triangle'}" class="w-4 h-4 md:w-5 md:h-5"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-black tracking-tight">${inc.title}</h4>
-                                <p class="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">${inc.description}</p>
-                                <div class="flex gap-2 mt-3 items-center">
-                                    <span class="text-[9px] font-black px-2 py-0.5 rounded bg-white/5 border border-white/5 uppercase">${inc.severity}</span>
-                                    <span class="text-[9px] text-slate-600 font-mono">${new Date(inc.created_at).toLocaleTimeString()}</span>
+                                <h4 class="text-xs md:text-sm font-black tracking-tight">${inc.title}</h4>
+                                <p class="text-[10px] md:text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">${inc.description}</p>
+                                <div class="flex gap-2 mt-2 md:mt-3 items-center">
+                                    <span class="text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded bg-white/5 border border-white/5 uppercase">${inc.severity}</span>
+                                    <span class="text-[8px] md:text-[9px] text-slate-600 font-mono">${new Date(inc.created_at).toLocaleTimeString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -1330,7 +1341,7 @@ def rebuild_history():
 
 def rebuild_agent_detail():
     detail_html = """
-            <nav class="flex items-center gap-2 mb-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+            <nav class="flex items-center gap-2 mb-6 md:mb-8 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500">
                 <a href="/" class="hover:text-sky-400 transition-colors">Dashboard</a>
                 <i data-lucide="chevron-right" class="w-3 h-3"></i>
                 <span class="text-slate-300">Endpoint Detail</span>
@@ -1338,27 +1349,27 @@ def rebuild_agent_detail():
                 <span class="text-sky-400">{{ agent.hostname }}</span>
             </nav>
 
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                <div class="flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-sky-500/20">
-                        <i data-lucide="monitor" class="text-white w-8 h-8"></i>
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-10">
+                <div class="flex items-center gap-4 md:gap-5">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-sky-500/20">
+                        <i data-lucide="monitor" class="text-white w-6 h-6 md:w-8 md:h-8"></i>
                     </div>
                     <div>
-                        <div class="flex items-center gap-3">
-                            <h1 class="text-4xl font-black tracking-tight text-white">{{ agent.hostname }}</h1>
-                            <span id="agent-status-badge" class="px-3 py-1 rounded-full text-[10px] font-black uppercase border transition-all">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <h1 class="text-2xl md:text-4xl font-black tracking-tight text-white">{{ agent.hostname }}</h1>
+                            <span id="agent-status-badge" class="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase border transition-all">
                                 {{ agent.status }}
                             </span>
                         </div>
-                        <p class="text-slate-400 mt-1 font-mono text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
+                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[10px] md:text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
                     </div>
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="fetchFullDetail()" class="aegis-btn-secondary flex items-center gap-2">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> ATUALIZAR TELEMETRIA
+                <div class="flex gap-2 md:gap-3 w-full md:w-auto">
+                    <button onclick="fetchFullDetail()" class="flex-1 md:flex-none aegis-btn-secondary !text-[10px] md:!text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 md:w-4 md:h-4"></i> ATUALIZAR
                     </button>
-                    <button onclick="confirmUninstall({{ agent.id }})" class="aegis-btn-primary !bg-rose-600 shadow-rose-500/20">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> DESINSTALAR
+                    <button onclick="confirmUninstall({{ agent.id }})" class="flex-1 md:flex-none aegis-btn-primary !bg-rose-600 shadow-rose-500/20 !text-[10px] md:!text-xs justify-center">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5 md:w-4 md:h-4"></i> DESINSTALAR
                     </button>
                 </div>
             </header>
@@ -1389,22 +1400,22 @@ def rebuild_agent_detail():
                         </div>
 
                         <!-- Network Card -->
-                        <div class="hyper-glass p-8 group border-sky-500/10">
-                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <i data-lucide="globe" class="w-4 h-4 text-sky-400"></i> Interface de Rede
+                        <div class="hyper-glass p-6 md:p-8 group border-sky-500/10">
+                            <h3 class="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest mb-4 md:mb-6 flex items-center gap-2">
+                                <i data-lucide="globe" class="w-3.5 h-3.5 md:w-4 md:h-4 text-sky-400"></i> Interface de Rede
                             </h3>
-                            <div class="space-y-4">
+                            <div class="space-y-3 md:space-y-4">
                                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                                    <span class="text-slate-400 text-sm">IPv4 Local</span>
-                                    <span class="text-sky-400 font-mono text-sm font-bold">{{ agent.ip_address }}</span>
+                                    <span class="text-slate-400 text-[12px] md:text-sm">IPv4 Local</span>
+                                    <span class="text-sky-400 font-mono text-[12px] md:text-sm font-bold">{{ agent.ip_address }}</span>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                                    <span class="text-slate-400 text-sm">MAC Address</span>
-                                    <span class="text-slate-300 font-mono text-[11px]">{{ agent.mac_address }}</span>
+                                    <span class="text-slate-400 text-[12px] md:text-sm">MAC Address</span>
+                                    <span class="text-slate-300 font-mono text-[10px] md:text-[11px]">{{ agent.mac_address }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-sm">Status C2</span>
-                                    <span class="text-emerald-500 font-black text-[10px] uppercase">Encriptado (AES-256)</span>
+                                    <span class="text-slate-400 text-[12px] md:text-sm">Status C2</span>
+                                    <span class="text-emerald-500 font-black text-[9px] md:text-[10px] uppercase">Encriptado</span>
                                 </div>
                             </div>
                         </div>
