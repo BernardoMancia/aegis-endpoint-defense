@@ -186,7 +186,7 @@
             backdrop-filter: blur(10px);
             z-index: 2000;
             display: flex;
-            items-center: center;
+            align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
@@ -425,8 +425,9 @@
                                 {{ agent.status }}
                             </span>
                         </div>
-                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[9px] md:text-sm">UUID: {{ agent.id }} |
-                            Last Seen: {{ agent.last_seen }}</p>
+                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[9px] md:text-sm">UUID: <span
+                                id="det-id">{{ agent.id }}</span> |
+                            Last Seen: <span id="det-last-seen">{{ agent.last_seen }}</span></p>
                     </div>
                 </div>
                 <div class="flex gap-2 md:gap-3 w-full md:w-auto">
@@ -552,7 +553,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="shield-check" class="w-4 h-4"></i></div>
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">SFC Scannow</div>
                                     <div class="text-[8px] text-slate-500">Reparo de arquivos do sistema</div>
@@ -562,7 +564,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="box" class="w-4 h-4"></i></div>
+                                    <i data-lucide="box" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">DISM Repair</div>
                                     <div class="text-[8px] text-slate-500">Reparo de imagem do Windows</div>
@@ -572,7 +575,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-sky-500/10 hover:border-sky-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-sky-500/10 text-sky-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="wifi" class="w-4 h-4"></i></div>
+                                    <i data-lucide="wifi" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">Reparar Rede</div>
                                     <div class="text-[8px] text-slate-500">Reset de Winsock e Flush DNS</div>
@@ -582,7 +586,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i></div>
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">Limpar Arquivos Temp</div>
                                     <div class="text-[8px] text-slate-500">Remove arquivos de cache e dumps</div>
@@ -592,7 +597,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-purple-500/10 hover:border-purple-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="cpu" class="w-4 h-4"></i></div>
+                                    <i data-lucide="cpu" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">Top Processos (CPU)</div>
                                     <div class="text-[8px] text-slate-500">Lista processos que mais consomem</div>
@@ -602,7 +608,8 @@
                                 class="w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all flex items-center gap-3 group text-left">
                                 <div
                                     class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="shield-alert" class="w-4 h-4"></i></div>
+                                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                                </div>
                                 <div>
                                     <div class="text-[10px] font-black text-white uppercase">Eventos de Segurança</div>
                                     <div class="text-[8px] text-slate-500">Últimas falhas de logon (SIEM)</div>
@@ -622,7 +629,8 @@
                                 class="w-full p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-4 group">
                                 <div
                                     class="p-2 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="lock" class="w-5 h-5"></i></div>
+                                    <i data-lucide="lock" class="w-5 h-5"></i>
+                                </div>
                                 <div class="text-left">
                                     <div class="text-xs font-black text-white uppercase">Host Isolation</div>
                                     <div class="text-[9px] text-slate-500">Corta tráfego exceto com C2</div>
@@ -632,7 +640,8 @@
                                 class="w-full p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-sky-500/10 hover:border-sky-500/30 transition-all flex items-center gap-4 group">
                                 <div
                                     class="p-2 rounded-lg bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="database" class="w-5 h-5"></i></div>
+                                    <i data-lucide="database" class="w-5 h-5"></i>
+                                </div>
                                 <div class="text-left">
                                     <div class="text-xs font-black text-white uppercase">Coletar Artefatos</div>
                                     <div class="text-[9px] text-slate-500">Dump de logs e registros</div>
@@ -686,12 +695,16 @@
                             const data = await res.json();
                             const ag = data.agent;
 
+                            // Update Header Info
+                            document.getElementById('det-last-seen').innerText = new Date(ag.last_seen).toLocaleString();
+                            document.getElementById('det-id').innerText = ag.id;
+
                             // Update Status Badge
                             const badge = document.getElementById('agent-status-badge');
                             badge.innerText = ag.status;
                             badge.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase border transition-all ${ag.status === 'online' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                    ag.status === 'isolated' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.3)]' :
-                                        'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                                ag.status === 'isolated' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.3)]' :
+                                    'bg-slate-500/10 text-slate-500 border-slate-500/20'
                                 }`;
 
                             // Isolation button update
