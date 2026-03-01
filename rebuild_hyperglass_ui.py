@@ -847,11 +847,11 @@ def rebuild_profile():
         <div class="max-w-4xl mx-auto py-10 px-6">
             <div class="flex items-center gap-6 mb-12">
                 <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl overflow-hidden border-2 border-white/10">
-                    {{% if user and user.avatar_url %}}
-                    <img src="{{{{ user.avatar_url }}}}" class="w-full h-full object-cover" alt="Profile">
-                    {{% else %}}
-                    {{{{ (user.display_name if user else user.username if user else 'A')[0].upper() }}}}
-                    {{% endif %}}
+                    {% if user and user.avatar_url %}
+                    <img src="{{ user.avatar_url }}" class="w-full h-full object-cover" alt="Profile">
+                    {% else %}
+                    {{ (user.display_name if user else user.username if user else 'A')[0].upper() }}
+                    {% endif %}
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>
@@ -864,6 +864,7 @@ def rebuild_profile():
                 <div class="hyper-glass p-8">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
                     <form action="/profile/update" method="POST" class="space-y-6">
+                        {% if user %}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-sm text-slate-400">Nome de Exibição</label>
@@ -877,12 +878,14 @@ def rebuild_profile():
                         <div class="flex justify-end pt-4">
                             <button type="submit" class="aegis-btn-primary">SALVAR ALTERAÇÕES</button>
                         </div>
+                        {% endif %}
                     </form>
                 </div>
 
-                <!-- Account Data -->
+                <!-- Account Data (ReadOnly) -->
                 <div class="hyper-glass p-8 opacity-80">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-slate-400"></i> Dados de Acesso</h2>
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-slate-400"></i> Dados Globais</h2>
+                    {% if user %}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm text-slate-400">Nome de Usuário</label>
@@ -893,6 +896,7 @@ def rebuild_profile():
                             <input type="text" class="aegis-input cursor-not-allowed bg-white/5" value="{{ user.email or 'N/A' }}" disabled>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
 
                 <!-- Password -->
@@ -927,7 +931,7 @@ def rebuild_profile():
                             <p class="text-sm text-slate-400 max-w-lg">Proteja sua conta com uma camada extra de segurança.</p>
                         </div>
                         <a href="/mfa/setup" class="aegis-btn-primary !bg-purple-600">
-                            {{ 'Gerenciar MFA' if user.mfa_enabled else 'Ativar MFA Agora' }}
+                            {{ 'Gerenciar MFA' if user and user.mfa_enabled else 'Ativar MFA Agora' }}
                         </a>
                     </div>
                 </div>

@@ -46,27 +46,26 @@ def create_app(config_class=Config):
         app.register_blueprint(chat_bp)
         app.register_blueprint(profile_bp)
 
-        @app.context_processor
-        def inject_user():
-            from models.user import SocUser
-            from flask import session
+    @app.context_processor
+    def inject_user():
+        from models.user import SocUser
+        from flask import session
+        try:
             user = None
             if session.get("soc_user"):
                 user = SocUser.query.filter_by(username=session.get("soc_user")).first()
             return dict(user=user)
+        except Exception:
+            return dict(user=None)
 
     return app
 
 
 def init_db(app):
-    from models.ioc import IOC, AuditLog
-    from models.agent import Agent
-    from models.event import SecurityEvent
-    from models.incident import Incident
-    from models.chat import ChatMessage, AgentChat, AgentVulnerability
-    from models.user import SocUser, LoginHistory
+    from sqlalchemy.sql import text
+    from extensions import db, log
     from config import DB_PATH
-    from datetime import datetime
+    import sqlite3
 
     def enable_wal(connection, _):
         cursor = connection.cursor()
@@ -76,24 +75,34 @@ def init_db(app):
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
+    # Add avatar_url directly via sqlite3 if needed to be sure
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(soc_users)")
+        columns = [c[1] for c in cursor.fetchall()]
+        if 'avatar_url' not in columns:
+            cursor.execute("ALTER TABLE soc_users ADD COLUMN avatar_url VARCHAR(512)")
+            log.info("[DB] Migration: added avatar_url column to soc_users via sqlite3.")
+        
+        cursor.execute("PRAGMA table_info(agents)")
+        columns = [c[1] for c in cursor.fetchall()]
+        if 'is_uninstalled' not in columns:
+            cursor.execute("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0")
+            log.info("[DB] Migration: added is_uninstalled column to agents via sqlite3.")
+            
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log.error(f"[DB] Migration Error: {e}")
+
     with app.app_context():
+        from models.ioc import IOC
+        from models.user import SocUser
+        from datetime import datetime
+        
         sa_event.listen(db.engine, "connect", enable_wal)
         db.create_all()
-
-        # Migrations
-        try:
-            db.session.execute(text("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0"))
-            db.session.commit()
-            log.info("[DB] Migração: adicionado is_uninstalled em agents.")
-        except Exception:
-            db.session.rollback()
-
-        try:
-            db.session.execute(text("ALTER TABLE soc_users ADD COLUMN avatar_url VARCHAR(512)"))
-            db.session.commit()
-            log.info("[DB] Migração: adicionado avatar_url em soc_users.")
-        except Exception:
-            db.session.rollback()
 
         if IOC.query.count() == 0:
             sample_iocs = [
