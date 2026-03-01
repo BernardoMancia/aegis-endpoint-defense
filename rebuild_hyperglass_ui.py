@@ -165,9 +165,9 @@ def get_sidebar(active_item):
             <a href="/" class="p-3 {'hyper-glass text-sky-400' if active_item == 'dashboard' else 'text-slate-500'} cursor-pointer hover:text-white transition-colors" title="Dashboard">
                 <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
             </a>
-            <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Incidentes (Em breve)">
-                <i data-lucide="alert-circle" class="w-6 h-6"></i>
-            </div>
+            <a href="/history" class="p-3 {'hyper-glass text-sky-400' if active_item == 'history' else 'text-slate-500'} cursor-pointer hover:text-white transition-colors" title="Histórico de Incidentes">
+                <i data-lucide="clock" class="w-6 h-6"></i>
+            </a>
             <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Threat Intel (Em breve)">
                 <i data-lucide="crosshairs" class="w-6 h-6"></i>
             </div>
@@ -1213,6 +1213,79 @@ def rebuild_login():
     """
     write_file("login.html", apply_layout(login_html, "Aegis SOC — Login"))
 
+def rebuild_history():
+    history_html = """
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Histórico de Incidentes</h1>
+                    <p class="text-slate-400">Log forense de todas as ameaças detectadas (Ativos e Removidos).</p>
+                </div>
+            </header>
+
+            <div class="hyper-glass overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/5 bg-white/5 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                                <th class="p-4">Timestamp</th>
+                                <th class="p-4">Título / Ameaça</th>
+                                <th class="p-4">Endpoint</th>
+                                <th class="p-4">Severidade</th>
+                                <th class="p-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                async function fetchHistory() {
+                    try {
+                        const response = await fetch('/api/incidents?include_uninstalled=true&per_page=100');
+                        const data = await response.json();
+                        const tbody = document.getElementById('history-table-body');
+                        tbody.innerHTML = '';
+
+                        data.incidents.forEach(inc => {
+                            const tr = document.createElement('tr');
+                            tr.className = "border-b border-white/5 hover:bg-white/5 transition-colors group";
+                            
+                            const severityClass = inc.severity === 'CRITICAL' ? 'text-rose-500' : 
+                                                 (inc.severity === 'HIGH' ? 'text-orange-500' : 'text-sky-400');
+                            
+                            const statusLabel = inc.status === 'OPEN' ? 
+                                '<span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold border border-rose-500/20">ABERTO</span>' :
+                                '<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold border border-emerald-500/20">RESOLVIDO</span>';
+
+                            const agentStatus = inc.agent_uninstalled ? 
+                                '<span class="ml-2 px-1.5 py-0.5 bg-slate-800 text-slate-500 text-[8px] rounded border border-white/5">REMOVIDO</span>' : '';
+
+                            tr.innerHTML = `
+                                <td class="p-4 text-xs font-mono text-slate-500">${new Date(inc.created_at).toLocaleString()}</td>
+                                <td class="p-4 font-bold text-sm text-slate-200">${inc.title}</td>
+                                <td class="p-4">
+                                    <div class="text-sm font-medium text-sky-400">${inc.hostname || 'Unknown'}</div>
+                                    ${agentStatus}
+                                </td>
+                                <td class="p-4">
+                                    <span class="text-[10px] font-black uppercase ${severityClass}">${inc.severity}</span>
+                                </td>
+                                <td class="p-4">${statusLabel}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } catch (err) {
+                        console.error("Erro ao buscar histórico:", err);
+                    }
+                }
+                fetchHistory();
+            </script>
+    """
+    write_file("history.html", apply_layout(history_html, "Aegis SOC — Histórico Forense", active_item="history"))
+
 def rebuild_mfa_flow():
     # Setup MFA
     mfa_setup = """
@@ -1304,6 +1377,7 @@ def rebuild_mfa_flow():
 
 if __name__ == "__main__":
     rebuild_dashboard()
+    rebuild_history()
     rebuild_profile()
     rebuild_login()
     rebuild_admin_users()

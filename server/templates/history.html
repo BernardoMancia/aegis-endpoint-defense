@@ -4,7 +4,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis SOC — Editar</title>
+    <title>Aegis SOC — Histórico Forense</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -168,7 +168,7 @@ body {
             <a href="/" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Dashboard">
                 <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
             </a>
-            <a href="/history" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Histórico de Incidentes">
+            <a href="/history" class="p-3 hyper-glass text-sky-400 cursor-pointer hover:text-white transition-colors" title="Histórico de Incidentes">
                 <i data-lucide="clock" class="w-6 h-6"></i>
             </a>
             <div class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Threat Intel (Em breve)">
@@ -177,7 +177,7 @@ body {
         </nav>
         
         <div class="flex flex-col gap-4">
-            <a href="/admin/users" class="p-3 hyper-glass text-sky-400 cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
+            <a href="/admin/users" class="p-3 text-slate-500 cursor-pointer hover:text-white transition-colors" title="Gestão de Usuários">
                 <i data-lucide="settings" class="w-6 h-6"></i>
             </a>
             <a href="/profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
@@ -195,57 +195,74 @@ body {
     
             <main class="flex-1 p-8 overflow-y-auto">
                 
-        <div class="max-w-4xl mx-auto py-10 px-6">
-            <div class="flex items-center gap-4 mb-10">
-                 <a href="/admin/users" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-500 hover:text-white">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </a>
-                <h1 class="text-3xl font-bold text-white">Editar Profile: <span class="text-sky-500 underline">{{ target.username }}</span></h1>
-            </div>
-
-            <div class="grid gap-6">
-                <div class="hyper-glass p-8">
-                    <form action="/admin/users/{{ target.id }}/profile/update" method="POST" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="text-sm text-slate-400">Display Name</label>
-                                <input type="text" name="display_name" class="aegis-input" value="{{ target.display_name or '' }}">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-sm text-slate-400">Email Contact</label>
-                                <input type="email" name="email" class="aegis-input" value="{{ target.email or '' }}">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-sm text-slate-400">Role Authorization</label>
-                                <select name="role" class="aegis-input">
-                                    <option value="user" {% if target.role == 'user' %}selected{% endif %}>User (Restricted)</option>
-                                    <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin (Full Control)</option>
-                                    <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
-                                </select>
-                            </div>
-                             <div class="space-y-2">
-                                <label class="text-sm text-slate-400">MFA Status</label>
-                                <div class="aegis-input opacity-60 flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500' if target.mfa_enabled else 'bg-slate-600' }}"></span>
-                                    {{ 'Ativo' if target.mfa_enabled else 'Desativado' }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pt-4 flex justify-end gap-3">
-                            <button type="submit" class="aegis-btn-primary">Update Authorization</button>
-                        </div>
-                    </form>
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Histórico de Incidentes</h1>
+                    <p class="text-slate-400">Log forense de todas as ameaças detectadas (Ativos e Removidos).</p>
                 </div>
+            </header>
 
-                <div class="hyper-glass p-8 border-l-4 border-l-rose-500">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-rose-500"><i data-lucide="key" class="w-5 h-5"></i> Force Password Reset</h3>
-                    <form action="/admin/users/{{ target.id }}/password" method="POST" class="flex gap-4">
-                        <input type="password" name="new_password" class="aegis-input flex-1" placeholder="Enter new strong password..." required>
-                        <button type="submit" class="aegis-btn-secondary border-rose-500/30 text-rose-500 hover:bg-rose-500/10">Reset Now</button>
-                    </form>
+            <div class="hyper-glass overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/5 bg-white/5 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                                <th class="p-4">Timestamp</th>
+                                <th class="p-4">Título / Ameaça</th>
+                                <th class="p-4">Endpoint</th>
+                                <th class="p-4">Severidade</th>
+                                <th class="p-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
+
+            <script>
+                async function fetchHistory() {
+                    try {
+                        const response = await fetch('/api/incidents?include_uninstalled=true&per_page=100');
+                        const data = await response.json();
+                        const tbody = document.getElementById('history-table-body');
+                        tbody.innerHTML = '';
+
+                        data.incidents.forEach(inc => {
+                            const tr = document.createElement('tr');
+                            tr.className = "border-b border-white/5 hover:bg-white/5 transition-colors group";
+                            
+                            const severityClass = inc.severity === 'CRITICAL' ? 'text-rose-500' : 
+                                                 (inc.severity === 'HIGH' ? 'text-orange-500' : 'text-sky-400');
+                            
+                            const statusLabel = inc.status === 'OPEN' ? 
+                                '<span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold border border-rose-500/20">ABERTO</span>' :
+                                '<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold border border-emerald-500/20">RESOLVIDO</span>';
+
+                            const agentStatus = inc.agent_uninstalled ? 
+                                '<span class="ml-2 px-1.5 py-0.5 bg-slate-800 text-slate-500 text-[8px] rounded border border-white/5">REMOVIDO</span>' : '';
+
+                            tr.innerHTML = `
+                                <td class="p-4 text-xs font-mono text-slate-500">${new Date(inc.created_at).toLocaleString()}</td>
+                                <td class="p-4 font-bold text-sm text-slate-200">${inc.title}</td>
+                                <td class="p-4">
+                                    <div class="text-sm font-medium text-sky-400">${inc.hostname || 'Unknown'}</div>
+                                    ${agentStatus}
+                                </td>
+                                <td class="p-4">
+                                    <span class="text-[10px] font-black uppercase ${severityClass}">${inc.severity}</span>
+                                </td>
+                                <td class="p-4">${statusLabel}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } catch (err) {
+                        console.error("Erro ao buscar histórico:", err);
+                    }
+                }
+                fetchHistory();
+            </script>
     
             </main>
         </div>

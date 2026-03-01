@@ -32,7 +32,8 @@ class Incident(db.Model):
             "severity": self.severity,
             "status": self.status,
             "agent_id": self.agent_id,
-            "agent_hostname": agent.hostname if agent else "N/A",
+            "hostname": agent.hostname if agent else "N/A",
+            "agent_uninstalled": agent.is_uninstalled if agent else True,
             "mitre_technique": self.mitre_technique,
             "mitre_tactic": self.mitre_tactic,
             "events_linked": json.loads(self.events_linked or "[]"),
@@ -40,7 +41,7 @@ class Incident(db.Model):
             "assigned_to": self.assigned_to,
             "soar_actions": json.loads(self.soar_actions or "[]"),
             "notes": self.notes,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if self.created_at else datetime.utcnow().isoformat(),
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None,
         }

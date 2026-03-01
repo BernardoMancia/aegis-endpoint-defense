@@ -12,11 +12,16 @@ def list_incidents():
     from models.agent import Agent
     status_filter = request.args.get("status")
     agent_id = request.args.get("agent_id", type=int)
+    include_uninstalled = request.args.get("include_uninstalled", "false").lower() == "true"
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 50, type=int), 200)
 
-    # Filter incidents to only include those from non-uninstalled agents
-    q = Incident.query.join(Agent).filter(Agent.is_uninstalled == False)
+    # Base query
+    q = Incident.query.join(Agent)
+    
+    # By default, filter out incidents from uninstalled agents unless explicitly requested
+    if not include_uninstalled:
+        q = q.filter(Agent.is_uninstalled == False)
     
     if status_filter:
         q = q.filter(Incident.status == status_filter)

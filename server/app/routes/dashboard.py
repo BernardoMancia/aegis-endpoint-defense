@@ -20,3 +20,12 @@ def index():
                            current_user=session.get("soc_user"),
                            current_role=session.get("soc_role"),
                            current_display=session.get("soc_display"))
+
+
+@dashboard_bp.route("/history")
+@require_auth
+def history():
+    return render_template("history.html",
+                           current_user=session.get("soc_user"),
+                           current_role=session.get("soc_role"),
+                           current_display=session.get("soc_display"))
