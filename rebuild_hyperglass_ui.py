@@ -449,6 +449,7 @@ def rebuild_dashboard():
                              <button onclick="quickCommand('NETSTAT')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Network</button>
                              <button onclick="quickCommand('SYSINFO')" class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-slate-400 hover:bg-sky-500/20 hover:text-sky-400 transition-all uppercase tracking-tighter">Sysinfo</button>
                              <button onclick="quickCommand('SFC')" class="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 hover:bg-emerald-500/30 transition-all uppercase tracking-tighter">SFC Scan</button>
+                             <button onclick="quickCommand('DISM')" class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-400 hover:bg-amber-500/30 transition-all uppercase tracking-tighter">DISM Repair</button>
                              <button onclick="quickCommand('NET_REPAIR')" class="px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20 text-[9px] font-bold text-sky-400 hover:bg-sky-500/30 transition-all uppercase tracking-tighter">Net Repair</button>
                         </div>
 
@@ -1367,7 +1368,7 @@ def rebuild_agent_detail():
                                 {{ agent.status }}
                             </span>
                         </div>
-                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[9px] md:text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
+                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[9px] md:text-sm">UUID: <span id="det-id">{{ agent.id }}</span> | Last Seen: <span id="det-last-seen">{{ agent.last_seen }}</span></p>
                     </div>
                 </div>
                 <div class="flex gap-2 md:gap-3 w-full md:w-auto">
@@ -1572,6 +1573,10 @@ def rebuild_agent_detail():
                             const data = await res.json();
                             const ag = data.agent;
                             
+                            // Update Header Info
+                            document.getElementById('det-id').innerText = ag.id;
+                            document.getElementById('det-last-seen').innerText = new Date(ag.last_seen).toLocaleString();
+                            
                             // Update Status Badge
                             const badge = document.getElementById('agent-status-badge');
                             badge.innerText = ag.status;
@@ -1600,17 +1605,25 @@ def rebuild_agent_detail():
                             document.getElementById('det-arch').innerText = data.extra_data?.arch || '---';
                             document.getElementById('det-path').innerText = data.extra_data?.execution_path || '---';
 
-                            // Screenshot
+                            // Screenshot logic fix
                             const img = document.getElementById('det-screenshot');
                             const placeholder = document.getElementById('det-no-screenshot');
-                            if(ag.last_screenshot) {
-                                const snapRes = await fetch(`/api/screenshot/${currentId}`);
-                                if(snapRes.ok) {
-                                    const snapData = await snapRes.json();
-                                    img.src = `data:image/png;base64,${snapData.screenshot_b64}`;
-                                    img.classList.remove('hidden');
-                                    placeholder.classList.add('hidden');
-                                }
+                            if (ag.last_screenshot) {
+                                try {
+                                    const snapRes = await fetch(`/api/screenshot/${currentId}`);
+                                    if (snapRes.ok) {
+                                        const snapData = await snapRes.json();
+                                        if (snapData.screenshot_b64) {
+                                            img.src = `data:image/png;base64,${snapData.screenshot_b64}`;
+                                            img.classList.remove('hidden');
+                                            placeholder.classList.add('hidden');
+                                        }
+                                    }
+                                } catch (e) { console.error("Screenshot Load Error:", e); }
+                            } else {
+                                img.classList.add('hidden');
+                                placeholder.classList.remove('hidden');
+                                img.src = "";
                             }
 
                             // Incidents

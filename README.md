@@ -6,114 +6,86 @@
 
 ## Português
 
-Aegis é uma plataforma SIEM & EDR de código aberto projetada para monitoramento de segurança, detecção de ameaças e resposta automatizada (SOAR) em endpoints Windows.
+Aegis é uma plataforma robusta de **SIEM & EDR (Endpoint Detection and Response)** projetada para monitoramento em tempo real, detecção proativa de ameaças e resposta automatizada (SOAR) em ambientes Windows. Com uma interface moderna "Hyper-Glass", o Aegis oferece visibilidade total e controle granular sobre seus endpoints.
 
-### 🚀 Funcionalidades Principais
-- **Dashboard SOC Integrado**: Gerenciamento centralizado de múltiplos agentes.
-- **Ações SOAR Interativas**: 
-    - Scan de Vulnerabilidades (UAC, Defender, Firewall).
-    - Verificação de Integridade de Arquivos (FIM).
-    - Scan de Portas e Conexões de Rede (Netstat).
-    - Dump remoto de Event Logs do Windows.
-- **Área Crítica de Segurança**: Isolamento de host via Firewall e Wipe remoto com 3 níveis de confirmação.
-- **Chat SOC Admin-Agente**: Comunicação direta e persistente entre a equipe de segurança e o usuário final.
-- **Aegis AI Assistant**: Chatbot inteligente com contexto total do agente para análise de ameaças.
+### 🚀 Funcionalidades SOC & EDR
+- **Dashboard em Tempo Real**: Visão holística de todos os agentes online/offline com métricas de saúde do ambiente.
+- **Aegis Forensic — Visão Detalhada**: 
+    - Sincronização em tempo real de status e metadados.
+    - Captura de tela remota para evidência visual instantânea.
+    - Lista dinâmica de processos, serviços e conexões de rede operacionais.
+- **Capacidades SOAR & Reparo**:
+    - **Diagnóstico do Sistema**: Atalhos para `SFC /scannow` e reparo de imagem com `DISM`.
+    - **Manutenção de Rede**: Reset de Winsock, Flush DNS e renovação de IP com um clique.
+    - **Forense Digital**: Coleta de Event Logs (SIEM), Dump de arquivos temporários e análise de processos por CPU.
+- **Contenção de Ameaças**:
+    - **Host Isolation**: Isolamento imediato via Firewall (bloqueia todo tráfego exceto com o C2).
+    - **Wipe Remoto**: Desinstalação forçada e auto-remoção do agente em caso de comprometimento total.
+- **Aegis AI Copilot**: Assistente de IA integrado com contexto total do agente para auxiliar na triagem de incidentes.
 
-### 🛠️ Instalação (Servidor C2)
+### 🛠️ Instalação do Servidor C2
 
-#### Via Docker (Recomendado para Produção)
+#### 🐳 Via Docker (Produção)
+A forma mais rápida e segura de rodar o Aegis no seu servidor VPS.
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
-O servidor estará disponível em `http://localhost:5000`.
+O painel estará disponível em `http://82.112.245.99:5000` (substitua pelo IP do seu servidor).
 
-#### Manual (Desenvolvimento)
-1. Instale as dependências: `pip install -r server_vps/requirements.txt`
-2. Configure o `.env` seguindo o `.env.example`.
-3. Rode o servidor: `python server_vps/app.py`
+#### 🏗️ Manual (Desenvolvimento)
+1. Instale os requisitos: `pip install -r requirements.txt`
+2. Configure as credenciais: Use o `.env.example` para criar seu arquivo `.env`.
+3. Inicie o servidor: `python server/app.py`
 
-### 💻 Agente Windows
-O agente pode ser instalado de duas formas:
-1. **Instalador MSI (Recomendado)**: Execute o arquivo `.msi` gerado na pasta `dist/` para uma instalação limpa no Windows.
-2. **Manual**: Execute `python client_pc/agent_gui.py` (requer Python 3.x e permissões de Admin).
+### 💻 Compilação do Agente
+O agente Aegis deve ser compilado como um executável furtivo para Windows.
+1. Navegue até a pasta do agente: `cd agent`
+2. Compile o MSI/EXE: `python setup.py build`
+3. Os binários estarão na pasta `build/` ou `dist/`.
 
-### 🌐 Deploy em Produção (Sem Domínio / IP:Porta)
-
-#### Linux Server (Ubuntu/Debian)
-1. Certifique-se de que as portas `5000` (API/Dashboard) estão abertas no firewall:
-   ```bash
-   sudo ufw allow 5000/tcp
-   ```
-2. No arquivo `.env`, configure o `SERVER_IP` com o IP público do seu servidor.
-3. Suba o ambiente: `docker-compose up -d`.
-
-#### Windows Server
-1. Para rodar o servidor em produção no Windows sem Docker, recomenda-se o uso do `Waitress`:
-   ```bash
-   pip install waitress
-   waitress-serve --port=5000 server_vps.app:app
-   ```
-2. Para manter o servidor rodando como um serviço, utilize o [NSSM](https://nssm.cc/):
-   ```bash
-   nssm install AegisServer
-   ```
-   (Selecione o caminho do python.exe e o script app.py).
-3. Abra a porta `5000` no Windows Defender Firewall.
+> [!IMPORTANT]
+> O arquivo `.env` nunca deve ser enviado para o Git. Use o `.env.example` como guia.
 
 ---
 
 ## English
 
-Aegis is an open-source SIEM & EDR platform designed for security monitoring, threat detection, and automated response (SOAR) on Windows endpoints.
+Aegis is a robust **SIEM & EDR (Endpoint Detection and Response)** platform designed for real-time monitoring, proactive threat detection, and automated orchestration (SOAR) in Windows environments. Featuring a modern "Hyper-Glass" UI, Aegis provides full visibility and granular control over your endpoints.
 
-### 🚀 Key Features
-- **Integrated SOC Dashboard**: Centralized management of multiple agents.
-- **Interactive SOAR Actions**: 
-    - Vulnerability Scanning (UAC, Defender, Firewall).
-    - File Integrity Monitoring (FIM).
-    - Network Port and Connection Scanning (Netstat).
-    - Remote Windows Event Log dumping.
-- **Critical Security Area**: Host isolation via Firewall and remote Wipe with 3 confirmation levels.
-- **SOC Admin-Agent Chat**: Direct and persistent communication between the security team and the end-user.
-- **Aegis AI Assistant**: Intelligent chatbot with full agent context for threat analysis.
+### 🚀 SOC & EDR Features
+- **Real-Time Dashboard**: Holistic view of all online/offline agents with environment health metrics.
+- **Aegis Forensic — Detailed View**:
+    - Real-time synchronization of status and metadata.
+    - Remote screenshot capture for instant visual evidence.
+    - Dynamic lists of processes, services, and live network connections.
+- **SOAR & Repair Capabilities**:
+    - **System Diagnostics**: Shortcuts for `SFC /scannow` and image repair via `DISM`.
+    - **Network Maintenance**: One-click Winsock reset, DNS Flush, and IP renewal.
+    - **Digital Forensics**: Event Log collection (SIEM), temporary file dumping, and CPU-based process analysis.
+- **Threat Containment**:
+    - **Host Isolation**: Immediate firewall-based isolation (blocks all traffic except C2 communication).
+    - **Remote Wipe**: Forced uninstallation and self-removal in case of total compromise.
+- **Aegis AI Copilot**: Integrated AI assistant with full agent context to assist in incident triage.
 
-### 🛠️ Installation (C2 Server)
+### 🛠️ C2 Server Installation
 
-#### Via Docker (Recommended for Production)
+#### 🐳 Via Docker (Production)
+The fastest and most secure way to run Aegis on your VPS.
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
-The server will be available at `http://localhost:5000`.
+The dashboard will be available at `http://82.112.245.99:5000` (replace with your server IP).
 
-#### Manual (Development)
-1. Install dependencies: `pip install -r server_vps/requirements.txt`
-2. Configure `.env` following `.env.example`.
-3. Run the server: `python server_vps/app.py`
+#### 🏗️ Manual (Development)
+1. Install requirements: `pip install -r requirements.txt`
+2. Setup Credentials: Use `.env.example` to create your `.env` file.
+3. Start Server: `python server/app.py`
 
-### 💻 Windows Agent
-The agent can be installed in two ways:
-1. **MSI Installer (Recommended)**: Run the `.msi` file from the `dist/` folder for a clean installation.
-2. **Manual**: Run `python client_pc/agent_gui.py` (requires Python 3.x and Admin privileges).
+### 💻 Agent Compilation
+The Aegis agent should be compiled as a stealth Windows executable.
+1. Navigate to agent folder: `cd agent`
+2. Build MSI/EXE: `python setup.py build`
+3. Binaries will be available in `build/` or `dist/` folders.
 
-### 🌐 Production Deployment (No Domain / IP:Port)
-
-#### Linux Server (Ubuntu/Debian)
-1. Ensure port `5000` (API/Dashboard) is open in the firewall:
-   ```bash
-   sudo ufw allow 5000/tcp
-   ```
-2. In the `.env` file, set `SERVER_IP` to your server's public IP.
-3. Start the environment: `docker-compose up -d`.
-
-#### Windows Server
-1. To run the server in production on Windows without Docker, it's recommended to use `Waitress`:
-   ```bash
-   pip install waitress
-   waitress-serve --port=5000 server_vps.app:app
-   ```
-2. To keep the server running as a service, use [NSSM](https://nssm.cc/):
-   ```bash
-   nssm install AegisServer
-   ```
-   (Select the python.exe path and the app.py script).
-3. Open port `5000` in Windows Defender Firewall.
+> [!IMPORTANT]
+> The `.env` file must never be committed to Git. Always use `.env.example` as a template for keys and credentials.
