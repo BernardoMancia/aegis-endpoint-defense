@@ -614,7 +614,7 @@ def rebuild_dashboard():
                 function renderAgents() {
                     const grid = document.getElementById('agents-grid');
                     grid.innerHTML = currentAgents.map(ag => `
-                        <div onclick="openAgentPanel(${ag.id})" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
+                        <div onclick="openAgentPanel(${ag.id})" ondblclick="window.location.href='/agent/${ag.id}'" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
                             <div class="flex justify-between items-start mb-2">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : ag.status === 'isolated' ? 'bg-rose-500' : 'bg-slate-500'}"></span>
@@ -1286,6 +1286,309 @@ def rebuild_history():
     """
     write_file("history.html", apply_layout(history_html, "Aegis SOC — Histórico Forense", active_item="history"))
 
+def rebuild_agent_detail():
+    detail_html = """
+            <nav class="flex items-center gap-2 mb-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <a href="/" class="hover:text-sky-400 transition-colors">Dashboard</a>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                <span class="text-slate-300">Endpoint Detail</span>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                <span class="text-sky-400">{{ agent.hostname }}</span>
+            </nav>
+
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-sky-500/20">
+                        <i data-lucide="monitor" class="text-white w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-4xl font-black tracking-tight text-white">{{ agent.hostname }}</h1>
+                            <span id="agent-status-badge" class="px-3 py-1 rounded-full text-[10px] font-black uppercase border transition-all">
+                                {{ agent.status }}
+                            </span>
+                        </div>
+                        <p class="text-slate-400 mt-1 font-mono text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="fetchFullDetail()" class="aegis-btn-secondary flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> ATUALIZAR TELEMETRIA
+                    </button>
+                    <button onclick="confirmUninstall({{ agent.id }})" class="aegis-btn-primary !bg-rose-600 shadow-rose-500/20">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> DESINSTALAR
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Main Info Bento -->
+                <div class="md:col-span-2 space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- System Card -->
+                        <div class="hyper-glass p-8 group">
+                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-4 h-4"></i> Especificações do Sistema
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span class="text-slate-400 text-sm">Plataforma</span>
+                                    <span class="text-white font-mono text-sm font-bold">{{ agent.platform }}</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span class="text-slate-400 text-sm">Arquitetura</span>
+                                    <span class="text-white font-mono text-sm" id="det-arch">---</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400 text-sm">Path Execução</span>
+                                    <span class="text-white font-mono text-[10px]" id="det-path">---</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Network Card -->
+                        <div class="hyper-glass p-8 group border-sky-500/10">
+                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i data-lucide="globe" class="w-4 h-4 text-sky-400"></i> Interface de Rede
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span class="text-slate-400 text-sm">IPv4 Local</span>
+                                    <span class="text-sky-400 font-mono text-sm font-bold">{{ agent.ip_address }}</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span class="text-slate-400 text-sm">MAC Address</span>
+                                    <span class="text-slate-300 font-mono text-[11px]">{{ agent.mac_address }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400 text-sm">Status C2</span>
+                                    <span class="text-emerald-500 font-black text-[10px] uppercase">Encriptado (AES-256)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Process List / Large Data -->
+                    <div class="hyper-glass p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="list" class="w-4 h-4 text-indigo-400"></i> Processos e Serviços Ativos
+                            </h3>
+                            <div class="flex gap-2">
+                                <button onclick="runDetailCommand('PROCESSLIST')" class="text-[10px] font-black hover:text-white text-slate-500 transition-colors uppercase">Atualizar Lista</button>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl bg-black/40 border border-white/5 p-6 h-96 overflow-y-auto custom-scrollbar font-mono text-[11px] text-slate-400" id="det-process-terminal">
+                            Aguardando requisição de telemetria de processos...
+                        </div>
+                    </div>
+                    
+                    <!-- Screenshot -->
+                    <div class="hyper-glass p-8">
+                         <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i data-lucide="image" class="w-4 h-4 text-emerald-400"></i> Evidência Visual (Última Captura)
+                        </h3>
+                        <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/20 aspect-video flex items-center justify-center relative group">
+                            <img id="det-screenshot" src="" class="w-full h-full object-contain hidden group-hover:scale-105 transition-transform duration-700" />
+                            <div id="det-no-screenshot" class="text-slate-600 text-xs italic flex flex-col items-center gap-3">
+                                <i data-lucide="camera-off" class="w-12 h-12 opacity-20"></i>
+                                Nenhuma captura disponível
+                            </div>
+                            <button onclick="runSoarAction('screenshot')" class="absolute bottom-6 right-6 aegis-btn-primary opacity-0 group-hover:opacity-100 transition-opacity">CAPTURAR AGORA</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forensic / Commands Sidebar -->
+                <div class="space-y-8">
+                    <!-- Control Panel -->
+                    <div class="hyper-glass p-8 border-rose-500/10">
+                        <h3 class="text-xs font-black text-rose-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4"></i> Comandos de Contenção
+                        </h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button id="det-btn-isolate" onclick="toggleIsolate()" class="w-full p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-4 group">
+                                <div class="p-2 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform"><i data-lucide="lock" class="w-5 h-5"></i></div>
+                                <div class="text-left">
+                                    <div class="text-xs font-black text-white uppercase">Host Isolation</div>
+                                    <div class="text-[9px] text-slate-500">Corta tráfego exceto com C2</div>
+                                </div>
+                            </button>
+                            <button onclick="runSoarAction('force_logs')" class="w-full p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-sky-500/10 hover:border-sky-500/30 transition-all flex items-center gap-4 group">
+                                <div class="p-2 rounded-lg bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform"><i data-lucide="database" class="w-5 h-5"></i></div>
+                                <div class="text-left">
+                                    <div class="text-xs font-black text-white uppercase">Coletar Artefatos</div>
+                                    <div class="text-[9px] text-slate-500">Dump de logs e registros</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Incident Feed for this Agent -->
+                    <div class="hyper-glass p-8">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i data-lucide="history" class="w-4 h-4 text-amber-500"></i> Histórico do Endpoint
+                        </h3>
+                        <div id="det-incidents-feed" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-xs">
+                            <!-- JS populate -->
+                            <div class="text-center py-10 text-slate-600 italic">Carregando histórico...</div>
+                        </div>
+                    </div>
+
+                    <!-- C2 Terminal Detail -->
+                    <div class="hyper-glass p-8 bg-black/20">
+                        <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="terminal" class="w-4 h-4"></i> Direct C2 Shell
+                        </h3>
+                        <div class="rounded-xl bg-black border border-white/5 p-4 h-48 font-mono text-[10px] text-emerald-500/80 overflow-y-auto mb-4 custom-scrollbar" id="det-terminal-out">
+                            Handshake estabelecido. Pronto para comandos.
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="det-terminal-in" class="aegis-input !py-2 !text-[10px] !bg-black" placeholder="Command..." onkeydown="if(event.key==='Enter')sendDetCommand()">
+                            <button onclick="sendDetCommand()" class="p-2 bg-sky-600 rounded-lg text-white hover:bg-sky-500 transition-colors"><i data-lucide="send" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const currentId = {{ agent.id }};
+                let lastTimestamp = null;
+
+                async function fetchFullDetail() {
+                    try {
+                        const res = await fetch(`/api/agent/${currentId}/detail`);
+                        if(res.ok) {
+                            const data = await res.json();
+                            const ag = data.agent;
+                            
+                            // Update Status Badge
+                            const badge = document.getElementById('agent-status-badge');
+                            badge.innerText = ag.status;
+                            badge.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase border transition-all ${
+                                ag.status === 'online' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                ag.status === 'isolated' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 
+                                'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                            }`;
+
+                            // Isolation button update
+                            const isoBtn = document.getElementById('det-btn-isolate');
+                            if(ag.isolation_active) {
+                                isoBtn.onclick = () => runSoarAction('unisolate');
+                                isoBtn.querySelector('.text-white').innerText = "Remove Isolation";
+                                isoBtn.querySelector('.bg-rose-500/10').className = "p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform";
+                                isoBtn.querySelector('i').setAttribute('data-lucide', 'shield-off');
+                            } else {
+                                isoBtn.onclick = () => runSoarAction('isolate');
+                                isoBtn.querySelector('.text-white').innerText = "Host Isolation";
+                                isoBtn.querySelector('.bg-emerald-500/10')?.classList.replace('bg-emerald-500/10', 'bg-rose-500/10');
+                                isoBtn.querySelector('.text-emerald-500')?.classList.replace('text-emerald-500', 'text-rose-500');
+                                isoBtn.querySelector('i').setAttribute('data-lucide', 'lock');
+                            }
+
+                            // Extra Info
+                            document.getElementById('det-arch').innerText = data.extra_data?.arch || '---';
+                            document.getElementById('det-path').innerText = data.extra_data?.execution_path || '---';
+
+                            // Screenshot
+                            const img = document.getElementById('det-screenshot');
+                            const placeholder = document.getElementById('det-no-screenshot');
+                            if(ag.last_screenshot) {
+                                const snapRes = await fetch(`/api/screenshot/${currentId}`);
+                                if(snapRes.ok) {
+                                    const snapData = await snapRes.json();
+                                    img.src = `data:image/png;base64,${snapData.screenshot_b64}`;
+                                    img.classList.remove('hidden');
+                                    placeholder.classList.add('hidden');
+                                }
+                            }
+
+                            // Incidents
+                            const feed = document.getElementById('det-incidents-feed');
+                            if(data.open_incidents && data.open_incidents.length > 0) {
+                                feed.innerHTML = data.open_incidents.map(inc => `
+                                    <div class="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-bold text-slate-200">${inc.title}</span>
+                                            <span class="text-[8px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 border border-rose-500/20">${inc.severity}</span>
+                                        </div>
+                                        <p class="text-slate-500 text-[10px] leading-relaxed">${inc.description}</p>
+                                        <div class="text-[8px] text-slate-600 font-mono">${new Date(inc.created_at).toLocaleString()}</div>
+                                    </div>
+                                `).join('');
+                            } else {
+                                feed.innerHTML = '<div class="text-center py-10 text-slate-600 italic">Nenhum incidente ativo para este endpoint.</div>';
+                            }
+
+                            // Terminal results
+                            if(data.last_command_result && data.agent.command_result_time !== lastTimestamp) {
+                                lastTimestamp = data.agent.command_result_time;
+                                const out = document.getElementById('det-terminal-out');
+                                const resData = data.last_command_result;
+                                out.innerHTML += `<div class="mt-2 text-slate-500 border-t border-white/5 pt-2">
+                                    <span class="text-sky-400">OUTPUT [${new Date(lastTimestamp).toLocaleTimeString()}] ></span><br>
+                                    <pre class="whitespace-pre-wrap">${resData.output || 'No output'}</pre>
+                                </div>`;
+                                out.scrollTop = out.scrollHeight;
+                                
+                                // Specific for process list update
+                                if(resData.command === 'PROCESSLIST' || resData.command === 'NETSTAT' || resData.command === 'SYSINFO' || resData.command === 'USERS') {
+                                     document.getElementById('det-process-terminal').innerHTML = `<pre class="whitespace-pre-wrap text-[10px]">${resData.output}</pre>`;
+                                }
+                            }
+                            
+                            lucide.createIcons();
+                        }
+                    } catch(err) { console.error("Forensic Fetch Error:", err); }
+                }
+
+                async function runSoarAction(action) {
+                    try {
+                        const res = await fetch(`/api/soar/${currentId}`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({action})
+                        });
+                        if(res.ok) fetchFullDetail();
+                    } catch(e) {}
+                }
+
+                async function runDetailCommand(type) {
+                    try {
+                        await fetch('/control/quick_command', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({agent_id: currentId, type})
+                        });
+                        document.getElementById('det-process-terminal').innerHTML = `<div class="flex items-center gap-2 text-sky-400 animate-pulse"><i data-lucide="loader" class="w-4 h-4"></i> REQUISITANDO DADOS AO AGENTE...</div>`;
+                        lucide.createIcons();
+                    } catch(e) {}
+                }
+
+                async function sendDetCommand() {
+                    const input = document.getElementById('det-terminal-in');
+                    const cmd = input.value;
+                    if(!cmd) return;
+                    input.value = '';
+                    try {
+                        await fetch('/control/command', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({agent_id: currentId, command: cmd})
+                        });
+                        const out = document.getElementById('det-terminal-out');
+                        out.innerHTML += `<div class="text-white mt-1 font-bold">> ${cmd}</div>`;
+                        out.scrollTop = out.scrollHeight;
+                    } catch(e) {}
+                }
+
+                // Poll detail every 3s
+                fetchFullDetail();
+                setInterval(fetchFullDetail, 3000);
+            </script>
+    """
+    write_file("agent_detail.html", apply_layout(detail_html, "Aegis Forensic — {{ agent.hostname }}", active_item="dashboard"))
+
 def rebuild_mfa_flow():
     # Setup MFA
     mfa_setup = """
@@ -1377,6 +1680,7 @@ def rebuild_mfa_flow():
 
 if __name__ == "__main__":
     rebuild_dashboard()
+    rebuild_agent_detail()
     rebuild_history()
     rebuild_profile()
     rebuild_login()

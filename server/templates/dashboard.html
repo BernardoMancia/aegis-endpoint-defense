@@ -580,7 +580,7 @@ body {
                 function renderAgents() {
                     const grid = document.getElementById('agents-grid');
                     grid.innerHTML = currentAgents.map(ag => `
-                        <div onclick="openAgentPanel(${ag.id})" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
+                        <div onclick="openAgentPanel(${ag.id})" ondblclick="window.location.href='/agent/${ag.id}'" class="hyper-glass p-5 cursor-pointer border-l-4 ${ag.status === 'online' ? 'border-l-emerald-500' : ag.status === 'isolated' ? 'border-l-rose-500' : 'border-l-slate-700'} group hover:scale-[1.02] transition-all relative overflow-hidden">
                             <div class="flex justify-between items-start mb-2">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full ${ag.status === 'online' ? 'bg-emerald-500' : ag.status === 'isolated' ? 'bg-rose-500' : 'bg-slate-500'}"></span>

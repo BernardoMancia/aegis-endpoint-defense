@@ -29,3 +29,15 @@ def history():
                            current_user=session.get("soc_user"),
                            current_role=session.get("soc_role"),
                            current_display=session.get("soc_display"))
+
+
+@dashboard_bp.route("/agent/<int:agent_id>")
+@require_auth
+def agent_detail(agent_id):
+    from models.agent import Agent
+    agent = Agent.query.get_or_404(agent_id)
+    return render_template("agent_detail.html",
+                           agent=agent,
+                           current_user=session.get("soc_user"),
+                           current_role=session.get("soc_role"),
+                           current_display=session.get("soc_display"))
