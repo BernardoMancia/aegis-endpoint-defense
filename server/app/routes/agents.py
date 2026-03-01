@@ -212,37 +212,56 @@ def command_output():
 def stats():
     agent_id = request.args.get("agent_id", type=int)
     from sqlalchemy import func
+    from models.event import SecurityEvent
+    from models.incident import Incident
+    from models.ioc import IOC
+
+    # Base active agents subquery or filter
+    active_agents_ids = db.session.query(Agent.id).filter(Agent.is_uninstalled == False)
+
     total_agents = Agent.query.filter_by(is_uninstalled=False).count()
     online_thresh = datetime.utcnow() - timedelta(minutes=3)
     online_agents = Agent.query.filter(Agent.last_seen > online_thresh, Agent.isolation_active == False, Agent.is_uninstalled == False).count()
     isolated_agents = Agent.query.filter_by(isolation_active=True, is_uninstalled=False).count()
-    evt_q = SecurityEvent.query
+
+    # Event queries filtered by active agents
+    evt_q = SecurityEvent.query.join(Agent).filter(Agent.is_uninstalled == False)
     if agent_id:
-        evt_q = evt_q.filter_by(agent_id=agent_id)
+        evt_q = evt_q.filter(SecurityEvent.agent_id == agent_id)
+
     total_events = evt_q.count()
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     events_today = evt_q.filter(SecurityEvent.timestamp >= today_start).count()
-    by_severity = dict(db.session.query(SecurityEvent.severity, func.count()).group_by(SecurityEvent.severity).all())
-    by_category = dict(db.session.query(SecurityEvent.category, func.count()).group_by(SecurityEvent.category).all())
+
+    by_severity = dict(db.session.query(SecurityEvent.severity, func.count())
+                       .join(Agent).filter(Agent.is_uninstalled == False)
+                       .group_by(SecurityEvent.severity).all())
+    
+    by_category = dict(db.session.query(SecurityEvent.category, func.count())
+                       .join(Agent).filter(Agent.is_uninstalled == False)
+                       .group_by(SecurityEvent.category).all())
+
     hours_data = []
     for h in range(23, -1, -1):
         start = datetime.utcnow() - timedelta(hours=h + 1)
         end = datetime.utcnow() - timedelta(hours=h)
-        q = SecurityEvent.query.filter(SecurityEvent.timestamp.between(start, end))
+        q = SecurityEvent.query.join(Agent).filter(Agent.is_uninstalled == False, SecurityEvent.timestamp.between(start, end))
         if agent_id:
-            q = q.filter_by(agent_id=agent_id)
+            q = q.filter(SecurityEvent.agent_id == agent_id)
         hours_data.append({"hour": end.strftime("%H:%M"), "count": q.count()})
-    mitre_rows = db.session.query(
-        SecurityEvent.mitre_technique, func.count()
-    ).filter(SecurityEvent.mitre_technique.isnot(None)).group_by(
-        SecurityEvent.mitre_technique
-    ).order_by(func.count().desc()).limit(10).all()
-    from models.incident import Incident
-    from models.ioc import IOC
-    open_incidents = Incident.query.filter_by(status="OPEN").count()
-    critical_incidents = Incident.query.filter(Incident.severity == "CRITICAL", Incident.status == "OPEN").count()
+
+    mitre_rows = db.session.query(SecurityEvent.mitre_technique, func.count())\
+        .join(Agent).filter(Agent.is_uninstalled == False, SecurityEvent.mitre_technique.isnot(None))\
+        .group_by(SecurityEvent.mitre_technique)\
+        .order_by(func.count().desc()).limit(10).all()
+
+    # Incident queries filtered by active agents
+    open_incidents = Incident.query.join(Agent).filter(Agent.is_uninstalled == False, Incident.status == "OPEN").count()
+    critical_incidents = Incident.query.join(Agent).filter(Agent.is_uninstalled == False, Incident.severity == "CRITICAL", Incident.status == "OPEN").count()
+
     ioc_count = IOC.query.filter_by(active=True).count()
     ioc_hits = db.session.query(func.sum(IOC.hit_count)).scalar() or 0
+
     return jsonify({
         "agents": {"total": total_agents, "online": online_agents, "isolated": isolated_agents},
         "events": {"total": total_events, "today": events_today, "by_severity": by_severity, "by_category": by_category},

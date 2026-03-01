@@ -9,15 +9,20 @@ incidents_bp = Blueprint("incidents", __name__)
 
 @incidents_bp.route("/api/incidents")
 def list_incidents():
+    from models.agent import Agent
     status_filter = request.args.get("status")
     agent_id = request.args.get("agent_id", type=int)
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 50, type=int), 200)
-    q = Incident.query
+
+    # Filter incidents to only include those from non-uninstalled agents
+    q = Incident.query.join(Agent).filter(Agent.is_uninstalled == False)
+    
     if status_filter:
-        q = q.filter_by(status=status_filter)
+        q = q.filter(Incident.status == status_filter)
     if agent_id:
-        q = q.filter_by(agent_id=agent_id)
+        q = q.filter(Incident.agent_id == agent_id)
+    
     paginated = q.order_by(Incident.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     return jsonify({"incidents": [i.to_dict() for i in paginated.items], "total": paginated.total})
 
