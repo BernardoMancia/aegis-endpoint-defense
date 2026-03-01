@@ -148,24 +148,29 @@ body {
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
 
-/* Mobile Optimizations - Compact & Elegant */
+/* Extreme Mobile Optimization - Hyper Compact */
 @media (max-width: 768px) {
-    aside { display: none !important; }
-    main { padding: 0.75rem !important; margin-bottom: 4.5rem; margin-top: 3.5rem !important; }
-    #agent-panel { width: 100% !important; border-left: none !important; }
-    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.25rem !important; border-radius: 14px !important; }
-    #ai-chat-window { width: calc(100% - 1.5rem) !important; right: 0.75rem !important; bottom: 5rem !important; }
+    aside { display: none !important; visibility: hidden !important; width: 0 !important; }
+    main { padding: 0.5rem !important; margin-bottom: 4rem; margin-top: 3rem !important; }
+    .bg-mesh { opacity: 0.5; }
     
-    /* Font Scaling */
-    h1 { font-size: 1.5rem !important; line-height: 2rem !important; }
-    h2 { font-size: 1.125rem !important; }
-    .text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-    .text-4xl { font-size: 1.75rem !important; line-height: 2.25rem !important; }
+    /* Strict Component Scaling */
+    .hyper-glass { border-radius: 12px !important; padding: 0.75rem !important; }
+    .grid { gap: 0.75rem !important; }
     
-    /* Bento Density */
-    .hyper-glass { border-radius: 14px !important; }
-    .grid { gap: 1rem !important; }
-    .p-6, .p-8 { padding: 1rem !important; }
+    /* Typography Downscaling */
+    h1 { font-size: 1.25rem !important; line-height: 1.5rem !important; letter-spacing: -0.02em !important; }
+    h2 { font-size: 1rem !important; line-height: 1.25rem !important; }
+    h3 { font-size: 0.875rem !important; }
+    .text-4xl { font-size: 1.5rem !important; }
+    .text-3xl { font-size: 1.25rem !important; }
+    .text-2xl { font-size: 1.125rem !important; }
+    
+    /* Buttons */
+    .aegis-btn-primary, .aegis-btn-secondary { padding: 8px 16px !important; font-size: 10px !important; border-radius: 10px !important; }
+    
+    /* Form Scaling */
+    .aegis-input { padding: 10px !important; font-size: 12px !important; }
 }
 """
 
@@ -212,33 +217,33 @@ def get_sidebar(active_item):
     </aside>
 
     <!-- Mobile Top Nav -->
-    <header class="md:hidden fixed top-0 left-0 right-0 h-14 hyper-glass border-b border-white/5 flex items-center justify-between px-5 z-[100]">
+    <header class="md:hidden fixed top-0 left-0 right-0 h-12 hyper-glass border-b border-white/5 flex items-center justify-between px-4 z-[100]">
         <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <i data-lucide="shield" class="text-white w-3.5 h-3.5"></i>
+            <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <i data-lucide="shield" class="text-white w-3 h-3"></i>
             </div>
-            <span class="text-[11px] font-black tracking-tighter">AEGIS SOC</span>
+            <span class="text-[10px] font-black tracking-tighter">AEGIS SOC</span>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="/profile" class="w-7 h-7 rounded-full border border-white/10 overflow-hidden">
+        <div class="flex items-center gap-2">
+            <a href="/profile" class="w-6 h-6 rounded-full border border-white/10 overflow-hidden">
                 <img src="https://api.dicebear.com/7.x/initials/svg?seed={{{{ session.get('soc_user', 'Aegis') }}}}" alt="Avatar">
             </a>
         </div>
     </header>
 
     <!-- Mobile Bottom Nav -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-14 hyper-glass border-t border-white/5 flex items-center justify-around px-4 z-[100] pb-safe">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-12 hyper-glass border-t border-white/5 flex items-center justify-around px-4 z-[100] pb-safe">
         <a href="/" class="p-2 {'text-sky-400' if active_item == 'dashboard' else 'text-slate-500'}" title="Dashboard">
-            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
         </a>
         <a href="/history" class="p-2 {'text-sky-400' if active_item == 'history' else 'text-slate-500'}" title="Histórico">
-            <i data-lucide="clock" class="w-5 h-5"></i>
+            <i data-lucide="clock" class="w-4 h-4"></i>
         </a>
         <a href="/admin/users" class="p-2 {'text-sky-400' if active_item == 'admin' else 'text-slate-500'}" title="Settings">
-            <i data-lucide="settings" class="w-5 h-5"></i>
+            <i data-lucide="settings" class="w-4 h-4"></i>
         </a>
         <a href="/logout" class="p-2 text-rose-500/50" title="Sair">
-            <i data-lucide="log-out" class="w-5 h-5"></i>
+            <i data-lucide="log-out" class="w-4 h-4"></i>
         </a>
     </nav>
     """
@@ -258,7 +263,7 @@ def apply_layout(content, title, active_item=None):
         body_content = f"""
         <div class="flex flex-col md:flex-row h-screen overflow-hidden">
             {sidebar}
-            <main class="flex-1 p-6 md:p-8 mt-16 md:mt-0 overflow-y-auto custom-scrollbar">
+            <main class="flex-1 p-3 md:p-8 mt-12 md:mt-0 overflow-y-auto custom-scrollbar">
                 {content}
             </main>
         </div>
@@ -281,10 +286,10 @@ def apply_layout(content, title, active_item=None):
 
 def rebuild_dashboard():
     dashboard_html = """
-            <header class="flex justify-between items-center mb-10">
+            <header class="flex justify-between items-center mb-6 md:mb-10">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight">Status do Ambiente</h1>
-                    <p class="text-slate-400">Visão geral em tempo real dos seus endpoints gerenciados.</p>
+                    <h1 class="text-xl md:text-3xl font-bold tracking-tight">Status do Ambiente</h1>
+                    <p class="text-slate-400 text-[10px] md:text-base">Visão geral em tempo real.</p>
                 </div>
                 <div class="flex gap-4">
                     <div class="hyper-glass px-4 py-2 flex items-center gap-2 border-emerald-500/20">
@@ -1341,7 +1346,7 @@ def rebuild_history():
 
 def rebuild_agent_detail():
     detail_html = """
-            <nav class="flex items-center gap-2 mb-6 md:mb-8 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500">
+            <nav class="flex items-center gap-1.5 mb-4 md:mb-8 text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-500">
                 <a href="/" class="hover:text-sky-400 transition-colors">Dashboard</a>
                 <i data-lucide="chevron-right" class="w-3 h-3"></i>
                 <span class="text-slate-300">Endpoint Detail</span>
@@ -1349,19 +1354,19 @@ def rebuild_agent_detail():
                 <span class="text-sky-400">{{ agent.hostname }}</span>
             </nav>
 
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-10">
-                <div class="flex items-center gap-4 md:gap-5">
-                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-sky-500/20">
-                        <i data-lucide="monitor" class="text-white w-6 h-6 md:w-8 md:h-8"></i>
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 mb-6 md:mb-10">
+                <div class="flex items-center gap-3 md:gap-5">
+                    <div class="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-sky-500/20">
+                        <i data-lucide="monitor" class="text-white w-5 h-5 md:w-8 md:h-8"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 md:gap-3">
-                            <h1 class="text-2xl md:text-4xl font-black tracking-tight text-white">{{ agent.hostname }}</h1>
-                            <span id="agent-status-badge" class="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase border transition-all">
+                            <h1 class="text-xl md:text-4xl font-black tracking-tight text-white">{{ agent.hostname }}</h1>
+                            <span id="agent-status-badge" class="px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase border transition-all">
                                 {{ agent.status }}
                             </span>
                         </div>
-                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[10px] md:text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
+                        <p class="text-slate-400 mt-0.5 md:mt-1 font-mono text-[9px] md:text-sm">UUID: {{ agent.id }} | Last Seen: {{ agent.last_seen }}</p>
                     </div>
                 </div>
                 <div class="flex gap-2 md:gap-3 w-full md:w-auto">
@@ -1379,22 +1384,22 @@ def rebuild_agent_detail():
                 <div class="lg:col-span-2 space-y-8">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <!-- System Card -->
-                        <div class="hyper-glass p-8 group">
-                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <i data-lucide="cpu" class="w-4 h-4"></i> Especificações do Sistema
+                        <div class="hyper-glass p-4 md:p-8 group shadow-inner">
+                            <h3 class="text-[9px] md:text-xs font-black text-slate-500 uppercase tracking-widest mb-4 md:mb-6 flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-3.5 h-3.5 md:w-4 md:h-4 text-sky-400"></i> Especificações
                             </h3>
-                            <div class="space-y-4">
+                            <div class="space-y-3 md:space-y-4">
                                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                                    <span class="text-slate-400 text-sm">Plataforma</span>
-                                    <span class="text-white font-mono text-sm font-bold">{{ agent.platform }}</span>
+                                    <span class="text-slate-400 text-[10px] md:text-sm">Plataforma</span>
+                                    <span class="text-white font-bold text-[10px] md:text-sm">{{ agent.platform }}</span>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                                    <span class="text-slate-400 text-sm">Arquitetura</span>
-                                    <span class="text-white font-mono text-sm" id="det-arch">---</span>
+                                    <span class="text-slate-400 text-[10px] md:text-sm">Arquitetura</span>
+                                    <span class="text-slate-300 font-mono text-[10px] md:text-sm" id="det-arch">---</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-sm">Path Execução</span>
-                                    <span class="text-white font-mono text-[10px]" id="det-path">---</span>
+                                    <span class="text-slate-400 text-[10px] md:text-sm">Execução</span>
+                                    <span class="text-white font-mono text-[9px] md:text-[10px] truncate ml-4" id="det-path">---</span>
                                 </div>
                             </div>
                         </div>

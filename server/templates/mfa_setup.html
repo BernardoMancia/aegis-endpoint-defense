@@ -152,24 +152,29 @@ body {
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
 
-/* Mobile Optimizations - Compact & Elegant */
+/* Extreme Mobile Optimization - Hyper Compact */
 @media (max-width: 768px) {
-    aside { display: none !important; }
-    main { padding: 0.75rem !important; margin-bottom: 4.5rem; margin-top: 3.5rem !important; }
-    #agent-panel { width: 100% !important; border-left: none !important; }
-    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.25rem !important; border-radius: 14px !important; }
-    #ai-chat-window { width: calc(100% - 1.5rem) !important; right: 0.75rem !important; bottom: 5rem !important; }
+    aside { display: none !important; visibility: hidden !important; width: 0 !important; }
+    main { padding: 0.5rem !important; margin-bottom: 4rem; margin-top: 3rem !important; }
+    .bg-mesh { opacity: 0.5; }
     
-    /* Font Scaling */
-    h1 { font-size: 1.5rem !important; line-height: 2rem !important; }
-    h2 { font-size: 1.125rem !important; }
-    .text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-    .text-4xl { font-size: 1.75rem !important; line-height: 2.25rem !important; }
+    /* Strict Component Scaling */
+    .hyper-glass { border-radius: 12px !important; padding: 0.75rem !important; }
+    .grid { gap: 0.75rem !important; }
     
-    /* Bento Density */
-    .hyper-glass { border-radius: 14px !important; }
-    .grid { gap: 1rem !important; }
-    .p-6, .p-8 { padding: 1rem !important; }
+    /* Typography Downscaling */
+    h1 { font-size: 1.25rem !important; line-height: 1.5rem !important; letter-spacing: -0.02em !important; }
+    h2 { font-size: 1rem !important; line-height: 1.25rem !important; }
+    h3 { font-size: 0.875rem !important; }
+    .text-4xl { font-size: 1.5rem !important; }
+    .text-3xl { font-size: 1.25rem !important; }
+    .text-2xl { font-size: 1.125rem !important; }
+    
+    /* Buttons */
+    .aegis-btn-primary, .aegis-btn-secondary { padding: 8px 16px !important; font-size: 10px !important; border-radius: 10px !important; }
+    
+    /* Form Scaling */
+    .aegis-input { padding: 10px !important; font-size: 12px !important; }
 }
 </style>
     
