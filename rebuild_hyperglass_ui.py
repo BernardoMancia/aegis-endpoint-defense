@@ -147,6 +147,15 @@ body {
   50% { transform: translateX(0); }
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    aside { display: none !important; }
+    main { padding: 1rem !important; margin-bottom: 5rem; }
+    #agent-panel { width: 100% !important; border-left: none !important; }
+    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.5rem !important; }
+    #ai-chat-window { width: calc(100% - 2rem) !important; right: 1rem !important; bottom: 6rem !important; }
+}
 """
 
 def write_file(name, txt):
@@ -156,7 +165,8 @@ def write_file(name, txt):
 
 def get_sidebar(active_item):
     return f"""
-    <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:flex w-20 flex-col items-center py-8 gap-6 z-50 border-r border-white/5">
         <a href="/" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
             <i data-lucide="shield" class="text-white w-6 h-6"></i>
         </a>
@@ -189,6 +199,37 @@ def get_sidebar(active_item):
             </a>
         </div>
     </aside>
+
+    <!-- Mobile Top Nav -->
+    <header class="md:hidden fixed top-0 left-0 right-0 h-16 hyper-glass border-b border-white/5 flex items-center justify-between px-6 z-[100]">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <i data-lucide="shield" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="text-sm font-black tracking-tighter">AEGIS SOC</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/profile" class="w-8 h-8 rounded-full border border-white/10 overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{{{ session.get('soc_user', 'Aegis') }}}}" alt="Avatar">
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 hyper-glass border-t border-white/5 flex items-center justify-around px-6 z-[100] pb-safe">
+        <a href="/" class="p-2 {'text-sky-400' if active_item == 'dashboard' else 'text-slate-500'}" title="Dashboard">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+        </a>
+        <a href="/history" class="p-2 {'text-sky-400' if active_item == 'history' else 'text-slate-500'}" title="Histórico">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+        </a>
+        <a href="/admin/users" class="p-2 {'text-sky-400' if active_item == 'admin' else 'text-slate-500'}" title="Settings">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+        </a>
+        <a href="/logout" class="p-2 text-rose-500/50" title="Sair">
+            <i data-lucide="log-out" class="w-6 h-6"></i>
+        </a>
+    </nav>
     """
 
 def apply_layout(content, title, active_item=None):
@@ -204,9 +245,9 @@ def apply_layout(content, title, active_item=None):
     if active_item:
         sidebar = get_sidebar(active_item)
         body_content = f"""
-        <div class="flex h-screen overflow-hidden">
+        <div class="flex flex-col md:flex-row h-screen overflow-hidden">
             {sidebar}
-            <main class="flex-1 p-8 overflow-y-auto">
+            <main class="flex-1 p-6 md:p-8 mt-16 md:mt-0 overflow-y-auto custom-scrollbar">
                 {content}
             </main>
         </div>
@@ -243,7 +284,7 @@ def rebuild_dashboard():
             </header>
 
             <!-- Bento Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 <div onclick="showStatDetails('total')" class="hyper-glass p-6 cursor-pointer hover:border-sky-500/30 transition-all group">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500 group-hover:scale-110 transition-transform"><i data-lucide="monitor" class="w-5 h-5"></i></div>
@@ -302,7 +343,7 @@ def rebuild_dashboard():
             </div>
 
             <!-- Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Endpoint Grid -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center justify-between mb-6">
@@ -414,7 +455,7 @@ def rebuild_dashboard():
                     <!-- SOAR Actions -->
                     <div class="space-y-4 pb-10">
                         <h3 class="text-sm font-black flex items-center gap-2"><i data-lucide="play" class="w-4 h-4 text-emerald-500"></i> Ações de Orquestração</h3>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <button onclick="soarAction('screenshot')" class="aegis-btn-secondary !text-[11px] !py-3 flex items-center justify-center gap-2 hover:border-sky-500/50"><i data-lucide="camera" class="w-4 h-4 text-sky-400"></i> Screenshot</button>
                             <button onclick="soarAction('force_scan_vulns')" class="aegis-btn-secondary !text-[11px] !py-3 flex items-center justify-center gap-2 hover:border-emerald-500/50"><i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Vulnerabilidades</button>
                             <button onclick="soarAction('force_scan_fim')" class="aegis-btn-secondary !text-[11px] !py-3 flex items-center justify-center gap-2 hover:border-purple-500/50"><i data-lucide="file-check" class="w-4 h-4 text-purple-400"></i> FIM Scan</button>
@@ -865,7 +906,7 @@ def rebuild_profile():
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="user" class="w-5 h-5 text-sky-400"></i> Informações da Conta</h2>
                     <form action="/profile/update" method="POST" class="space-y-6">
                         {% if user %}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-sm text-slate-400">Nome de Exibição</label>
                                 <input type="text" name="display_name" class="aegis-input" value="{{ user.display_name or '' }}" placeholder="Ex: Analista SOC 01">
@@ -907,7 +948,7 @@ def rebuild_profile():
                             <label class="text-sm text-slate-400">Senha Atual</label>
                             <input type="password" name="current_password" class="aegis-input" required>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-sm text-slate-400">Nova Senha</label>
                                 <input type="password" name="new_password" class="aegis-input" required>
@@ -956,7 +997,8 @@ def rebuild_admin_users():
                         <h2 class="text-sm font-bold text-sky-400">Analistas Registrados</h2>
                         <span class="text-[10px] bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded">{{ approved|length }}</span>
                     </div>
-                    <table class="w-full text-left">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left min-w-[600px]">
                         <thead class="bg-white/[0.03] border-b border-white/10 text-[10px] uppercase text-slate-500 tracking-widest font-bold">
                             <tr>
                                 <th class="px-6 py-4">Usuário / Identidade</th>
@@ -1167,7 +1209,7 @@ def rebuild_login():
                             <label class="text-[10px] text-slate-500 font-bold uppercase">ID de Usuário</label>
                             <input type="text" name="username" class="aegis-input" placeholder="ex: j.silva" required>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase">Nome Completo</label>
                                 <input type="text" name="display_name" class="aegis-input" placeholder="João Silva" required>
@@ -1223,8 +1265,8 @@ def rebuild_history():
             </header>
 
             <div class="hyper-glass overflow-hidden shadow-2xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                             <tr class="border-b border-white/5 bg-white/5 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
                                 <th class="p-4">Timestamp</th>
@@ -1321,9 +1363,9 @@ def rebuild_agent_detail():
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Main Info Bento -->
-                <div class="md:col-span-2 space-y-8">
+                <div class="lg:col-span-2 space-y-8">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <!-- System Card -->
                         <div class="hyper-glass p-8 group">

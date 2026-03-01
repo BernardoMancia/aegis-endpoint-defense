@@ -151,6 +151,15 @@ body {
   50% { transform: translateX(0); }
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    aside { display: none !important; }
+    main { padding: 1rem !important; margin-bottom: 5rem; }
+    #agent-panel { width: 100% !important; border-left: none !important; }
+    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.5rem !important; }
+    #ai-chat-window { width: calc(100% - 2rem) !important; right: 1rem !important; bottom: 6rem !important; }
+}
 </style>
     
 </head>

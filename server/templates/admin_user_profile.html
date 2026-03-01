@@ -151,15 +151,25 @@ body {
   50% { transform: translateX(0); }
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    aside { display: none !important; }
+    main { padding: 1rem !important; margin-bottom: 5rem; }
+    #agent-panel { width: 100% !important; border-left: none !important; }
+    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.5rem !important; }
+    #ai-chat-window { width: calc(100% - 2rem) !important; right: 1rem !important; bottom: 6rem !important; }
+}
 </style>
     
 </head>
 <body>
     <div class="bg-mesh"></div>
     
-        <div class="flex h-screen overflow-hidden">
+        <div class="flex flex-col md:flex-row h-screen overflow-hidden">
             
-    <aside class="w-20 flex flex-col items-center py-8 gap-6 z-50">
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:flex w-20 flex-col items-center py-8 gap-6 z-50 border-r border-white/5">
         <a href="/" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 mb-4 cursor-pointer hover:scale-110 transition-transform">
             <i data-lucide="shield" class="text-white w-6 h-6"></i>
         </a>
@@ -192,8 +202,39 @@ body {
             </a>
         </div>
     </aside>
+
+    <!-- Mobile Top Nav -->
+    <header class="md:hidden fixed top-0 left-0 right-0 h-16 hyper-glass border-b border-white/5 flex items-center justify-between px-6 z-[100]">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <i data-lucide="shield" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="text-sm font-black tracking-tighter">AEGIS SOC</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/profile" class="w-8 h-8 rounded-full border border-white/10 overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 hyper-glass border-t border-white/5 flex items-center justify-around px-6 z-[100] pb-safe">
+        <a href="/" class="p-2 text-slate-500" title="Dashboard">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+        </a>
+        <a href="/history" class="p-2 text-slate-500" title="Histórico">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+        </a>
+        <a href="/admin/users" class="p-2 text-sky-400" title="Settings">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+        </a>
+        <a href="/logout" class="p-2 text-rose-500/50" title="Sair">
+            <i data-lucide="log-out" class="w-6 h-6"></i>
+        </a>
+    </nav>
     
-            <main class="flex-1 p-8 overflow-y-auto">
+            <main class="flex-1 p-6 md:p-8 mt-16 md:mt-0 overflow-y-auto custom-scrollbar">
                 
         <div class="max-w-4xl mx-auto py-10 px-6">
             <div class="flex items-center gap-4 mb-10">

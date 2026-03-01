@@ -151,6 +151,15 @@ body {
   50% { transform: translateX(0); }
 }
 .animate-headShake { animation: headShake 0.6s ease-in-out; }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    aside { display: none !important; }
+    main { padding: 1rem !important; margin-bottom: 5rem; }
+    #agent-panel { width: 100% !important; border-left: none !important; }
+    .modal-content { width: 95% !important; max-height: 90vh !important; padding: 1.5rem !important; }
+    #ai-chat-window { width: calc(100% - 2rem) !important; right: 1rem !important; bottom: 6rem !important; }
+}
 </style>
     
 </head>
@@ -221,7 +230,7 @@ body {
                             <label class="text-[10px] text-slate-500 font-bold uppercase">ID de Usuário</label>
                             <input type="text" name="username" class="aegis-input" placeholder="ex: j.silva" required>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase">Nome Completo</label>
                                 <input type="text" name="display_name" class="aegis-input" placeholder="João Silva" required>
