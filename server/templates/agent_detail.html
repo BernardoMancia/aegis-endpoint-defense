@@ -423,9 +423,9 @@ body {
                         </h3>
                         <div class="grid grid-cols-1 gap-4">
                             <button id="det-btn-isolate" onclick="toggleIsolate()" class="w-full p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all flex items-center gap-4 group">
-                                <div class="p-2 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform"><i data-lucide="lock" class="w-5 h-5"></i></div>
+                                <div id="det-iso-icon-bg" class="p-2 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform"><i id="det-iso-icon" data-lucide="lock" class="w-5 h-5"></i></div>
                                 <div class="text-left">
-                                    <div class="text-xs font-black text-white uppercase">Host Isolation</div>
+                                    <div id="det-iso-text" class="text-xs font-black text-white uppercase">Host Isolation</div>
                                     <div class="text-[9px] text-slate-500">Corta tráfego exceto com C2</div>
                                 </div>
                             </button>
@@ -492,17 +492,20 @@ body {
 
                             // Isolation button update
                             const isoBtn = document.getElementById('det-btn-isolate');
+                            const isoText = document.getElementById('det-iso-text');
+                            const isoIcon = document.getElementById('det-iso-icon');
+                            const isoIconBg = document.getElementById('det-iso-icon-bg');
+                            
                             if(ag.isolation_active) {
                                 isoBtn.onclick = () => runSoarAction('unisolate');
-                                isoBtn.querySelector('.text-white').innerText = "Remove Isolation";
-                                isoBtn.querySelector('.bg-rose-500/10').className = "p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform";
-                                isoBtn.querySelector('i').setAttribute('data-lucide', 'shield-off');
+                                if(isoText) isoText.innerText = "Remove Isolation";
+                                if(isoIconBg) isoIconBg.className = "p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform";
+                                if(isoIcon) isoIcon.setAttribute('data-lucide', 'shield-off');
                             } else {
                                 isoBtn.onclick = () => runSoarAction('isolate');
-                                isoBtn.querySelector('.text-white').innerText = "Host Isolation";
-                                isoBtn.querySelector('.bg-emerald-500/10')?.classList.replace('bg-emerald-500/10', 'bg-rose-500/10');
-                                isoBtn.querySelector('.text-emerald-500')?.classList.replace('text-emerald-500', 'text-rose-500');
-                                isoBtn.querySelector('i').setAttribute('data-lucide', 'lock');
+                                if(isoText) isoText.innerText = "Host Isolation";
+                                if(isoIconBg) isoIconBg.className = "p-2 rounded-lg bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform";
+                                if(isoIcon) isoIcon.setAttribute('data-lucide', 'lock');
                             }
 
                             // Extra Info
