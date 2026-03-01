@@ -152,6 +152,18 @@ def upload_screenshot(agent_id):
     return jsonify({"status": "ok"})
 
 
+@control_bp.route("/api/screenshot/<string:hostname>", methods=["POST"])
+@require_token
+def upload_screenshot_by_hostname(hostname):
+    agent = Agent.query.filter_by(original_hostname=hostname).order_by(Agent.id.desc()).first()
+    if not agent:
+        return jsonify({"error": "Agent not found"}), 404
+    data = request.get_json(silent=True) or {}
+    agent.last_screenshot = data.get("screenshot_b64")
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+
 @control_bp.route("/api/screenshot/<int:agent_id>", methods=["GET"])
 @require_operator
 def get_screenshot(agent_id):
@@ -171,6 +183,7 @@ def soar_action(agent_id):
         "force_scan_vulns": {"type": "force_scan_vulns"},
         "force_scan_fim": {"type": "force_scan_fim"},
         "force_logs": {"type": "force_logs"},
+        "screenshot": {"command": "SCREENSHOT"},
         "force_scan_network": {"command": "SHELL", "args": "netstat -ano | findstr LISTENING"},
     }
     if action not in soar_map:

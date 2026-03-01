@@ -4,7 +4,7 @@ from cx_Freeze import setup, Executable
 # Dependencies are automatically detected, but it might need
 # fine tuning.
 build_options = {
-    "packages": ["os", "sys", "ctypes", "logging", "threading", "psutil", "requests", "json", "uuid", "socket", "platform", "subprocess"],
+    "packages": ["os", "sys", "ctypes", "logging", "threading", "psutil", "requests", "json", "uuid", "socket", "platform", "subprocess", "PIL"],
     "excludes": ["unittest"],
     "include_files": ["aegis_icon.ico"]
 }
