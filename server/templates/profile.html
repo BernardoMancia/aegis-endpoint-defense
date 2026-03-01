@@ -181,7 +181,7 @@ body {
                 <i data-lucide="settings" class="w-6 h-6"></i>
             </a>
             <a href="/profile" class="w-10 h-10 rounded-full border-2 border-sky-500 shadow-[0_0_10px_var(--neon-blue-glow)] overflow-hidden hover:border-sky-500 transition-colors" title="Meu Perfil">
-                {% if user.avatar_url %}
+                {% if user and user.avatar_url %}
                 <img src="{{ user.avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
                 {% else %}
                 <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ session.get('soc_user', 'Aegis') }}" alt="Avatar">
@@ -198,11 +198,11 @@ body {
         <div class="max-w-4xl mx-auto py-10 px-6">
             <div class="flex items-center gap-6 mb-12">
                 <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold shadow-xl overflow-hidden border-2 border-white/10">
-                    {% if user.avatar_url %}
-                    <img src="{{ user.avatar_url }}" class="w-full h-full object-cover" alt="Profile">
-                    {% else %}
-                    {{ (user.display_name or user.username or 'A')[0].upper() }}
-                    {% endif %}
+                    {{% if user and user.avatar_url %}}
+                    <img src="{{{{ user.avatar_url }}}}" class="w-full h-full object-cover" alt="Profile">
+                    {{% else %}}
+                    {{{{ (user.display_name if user else user.username if user else 'A')[0].upper() }}}}
+                    {{% endif %}}
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-white">Configurações de Perfil</h1>

@@ -46,6 +46,15 @@ def create_app(config_class=Config):
         app.register_blueprint(chat_bp)
         app.register_blueprint(profile_bp)
 
+        @app.context_processor
+        def inject_user():
+            from models.user import SocUser
+            from flask import session
+            user = None
+            if session.get("soc_user"):
+                user = SocUser.query.filter_by(username=session.get("soc_user")).first()
+            return dict(user=user)
+
     return app
 
 
@@ -71,14 +80,20 @@ def init_db(app):
         sa_event.listen(db.engine, "connect", enable_wal)
         db.create_all()
 
+        # Migrations
         try:
             db.session.execute(text("ALTER TABLE agents ADD COLUMN is_uninstalled BOOLEAN DEFAULT 0"))
             db.session.commit()
-            log.info("[DB] Schema SQLite atualizado com sucesso: adicionado is_uninstalled.")
-        except Exception as e:
+            log.info("[DB] Migração: adicionado is_uninstalled em agents.")
+        except Exception:
             db.session.rollback()
-            if "duplicate column name" not in str(e).lower():
-                log.error(f"[DB] Erro ao tentar migrar tabela: {e}")
+
+        try:
+            db.session.execute(text("ALTER TABLE soc_users ADD COLUMN avatar_url VARCHAR(512)"))
+            db.session.commit()
+            log.info("[DB] Migração: adicionado avatar_url em soc_users.")
+        except Exception:
+            db.session.rollback()
 
         if IOC.query.count() == 0:
             sample_iocs = [
