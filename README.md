@@ -1,7 +1,7 @@
 # Aegis Endpoint Defense 🛡️
-[![Aegis Build](https://img.shields.io/badge/Aegis-v1.0.0--Stable-0ea5e9?style=for-the-badge&logo=shippable)](https://github.com/BernardoMancia/aegis-endpoint-defense)
+[![Aegis Build](https://img.shields.io/badge/Aegis-v1.2.0--Stable-0ea5e9?style=for-the-badge&logo=shippable)](https://github.com/BernardoMancia/aegis-endpoint-defense)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Android-white?style=for-the-badge&logo=windows)](https://github.com/BernardoMancia/aegis-endpoint-defense)
-[![C2 Status](https://img.shields.io/badge/C2_Server-<YOUR_C2_SERVER_IP>-emerald?style=for-the-badge&logo=linux)](http://<YOUR_C2_SERVER_IP>:5000)
+[![C2 Status](https://img.shields.io/badge/C2_Network-Operational-emerald?style=for-the-badge&logo=linux)](https://github.com/BernardoMancia/aegis-endpoint-defense)
 
 [Português](#português) | [English](#english)
 
@@ -9,70 +9,68 @@
 
 ## Português
 
-Aegis é uma plataforma avançada de **SIEM & EDR (Endpoint Detection and Response)** de código aberto, projetada para fornecer visibilidade total, proteção proativa e resposta automatizada contra ameaças em larga escala. Com uma arquitetura focada em **Furtividade (Stealth)** e **Forense Digital**, o Aegis é a sentinela definitiva para seus endpoints.
+Aegis é uma plataforma avançada de **Next-Gen EDR (Endpoint Detection and Response)** e **SIEM**, projetada para fornecer visibilidade profunda, proteção adaptativa e resposta automatizada (SOAR) contra adversários modernos. Com foco em **Furtividade Operacional** e **Forense Digital**, o Aegis transforma cada endpoint em uma sentinela inteligente.
 
-### 🛡️ Engenharia de Furtividade & Proteção
-- **Silent Execution**: O agente Windows opera sem janelas (`CREATE_NO_WINDOW`), garantindo que processos de defesa e coleta de evidências rodem de forma invisível.
-- **Resiliência a Travamentos**: Gerenciamento agressivo de *file locks* com `psutil`, permitindo manipulação de arquivos críticos e desinstalação limpa via scripts temporários em `%TEMP%`.
-- **Política de Soft Delete**: Dados de agentes não são apagados fisicamente do banco de dados (SQLite/SQLAlchemy). O Aegis usa estados lógicos (`is_uninstalled=True`), preservando o histórico para análise forense e trilhas de auditoria do SIEM.
+### 🛡️ Engenharia de Defesa & Furtividade
+- **Invisible Sentinel**: O agente Windows opera em modo infra-estrutural, sem janelas interativas (`CREATE_NO_WINDOW`), garantindo que a coleta de evidências e a monitoração ocorram de forma totalmente transparente e protegida.
+- **Resiliência a File Locks**: Utiliza lógica avançada via `psutil` para gerenciar processos travados, permitindo remediação e desinstalação segura mesmo em sistemas sob estresse.
+- **Integridade de Dados (Soft Delete)**: O Aegis prioriza a retenção forense. Dados de agentes não são purgados, mas sim marcados para preservação de histórico e trilhas de auditoria SIEM completas.
 
 ### 🚀 Capacidades SOC & SOAR
-- **Hyper-Glass Forensic UI**: Dashboard responsivo com sincronização em tempo real (polling de 3s) de status, screenshots e metadados.
-- **Exploração Forense**: Lista dinâmica de processos, conexões de rede ativas e serviços do sistema.
-- **Ações de Resposta (SOAR)**:
-    - **Host Isolation**: Isolamento imediato via Firewall do Windows (regra Zero-Trust).
-    - **System Repair**: Atalhos para reparo de integridade (`SFC /scannow`) e imagem (`DISM`).
-    - **Remediação de Rede**: Reset de stack Winsock e DNS Flush centralizado.
-- **IA Integrada**: Copilot de segurança com contexto total do endpoint para triagem acelerada.
+- **Hyper-Glass Forensic Interface**: Interface de alto desempenho com sincronização em tempo real (polling de 3s) para visualização de status, telemetria e screenshots instantâneos.
+- **Análise Forense Dinâmica**: Monitoramento contínuo de árvores de processos, conexões de rede e integridade de serviços.
+- **Orquestração de Resposta**:
+    - **Host Isolation**: Isolamento imediato de ameaças via Firewall (Política Zero-Trust).
+    - **System Recovery**: Reparo automatizado de integridade e imagem (`SFC`/`DISM`).
+    - **Digital Wipe**: Desinstalação remota blindada para cenários de comprometimento total.
+- **IA Copilot**: Assistente especializado com contexto total do endpoint para auxílio em triagens complexas.
 
-### ⚙️ Infraestrutura C2 (Centrífuga)
-O servidor central está hospedado em: **`<YOUR_C2_SERVER_IP>`**
-- **Porta Padrão**: `5000` (Dashboard / API)
-- **Deploy**: Recomendado via Docker para isolamento e escalabilidade.
+### ⚙️ Implantação C2
+- **Arquitetura**: Projetado para rodar em clusters Docker, garantindo alta disponibilidade e isolamento de processos.
+- **Configuração**: Use o arquivo `.env` para definir os parâmetros de conexão do seu ambiente.
 
 ---
 
 ## English
 
-Aegis is an advanced open-source **SIEM & EDR (Endpoint Detection and Response)** platform, designed to provide total visibility, proactive protection, and automated threat response at scale. Built with a core focus on **Stealth Engineering** and **Digital Forensics**, Aegis is the ultimate sentinel for your endpoints.
+Aegis is an advanced **Next-Gen EDR (Endpoint Detection and Response)** and **SIEM** platform, designed to provide deep visibility, adaptive protection, and automated response (SOAR) against modern adversaries. Focused on **Operational Stealth** and **Digital Forensics**, Aegis transforms every endpoint into an intelligent sentinel.
 
-### 🛡️ Stealth Engineering & Protection
-- **Silent Execution**: The Windows agent operates entirely without console windows (`CREATE_NO_WINDOW`), ensuring defense and evidence collection processes run invisibly to the end-user.
-- **Process Resilience**: Aggressive *file lock* management using `psutil`, enabling manipulation of critical files and clean uninstallation via temporary scripts in `%TEMP%`.
-- **Soft Delete Policy**: Agent data is never physically purged from the database (SQLite/SQLAlchemy). Aegis utilizes logical states (`is_uninstalled=True`), preserving historical data for forensic analysis and SIEM audit trails.
+### 🛡️ Defense Engineering & Stealth
+- **Invisible Sentinel**: The Windows agent operates in infrastructure mode, without interactive windows (`CREATE_NO_WINDOW`), ensuring that evidence collection and monitoring occur in a fully transparent and protected manner.
+- **File Lock Resilience**: Uses advanced logic via `psutil` to manage locked processes, allowing safe remediation and uninstallation even on stressed systems.
+- **Data Integrity (Soft Delete)**: Aegis prioritizes forensic retention. Agent data is not purged, but rather flagged for historical preservation and comprehensive SIEM audit trails.
 
 ### 🚀 SOC & SOAR Capabilities
-- **Hyper-Glass Forensic UI**: Responsive dashboard with real-time synchronization (3s polling) for status, screenshots, and metadata.
-- **Forensic Exploration**: Dynamic lists of processes, active network connections, and system services.
-- **Response Actions (SOAR)**:
-    - **Host Isolation**: Immediate isolation via Windows Firewall (Zero-Trust policy).
-    - **System Repair**: Shortcuts for integrity repair (`SFC /scannow`) and image restoration (`DISM`).
-    - **Network Remediation**: Centralized Winsock stack reset and DNS Flush.
-- **Integrated AI**: Security Copilot with full endpoint context for accelerated incident triage.
+- **Hyper-Glass Forensic Interface**: High-performance UI with real-time synchronization (3s polling) for status, telemetry, and instant screenshots.
+- **Dynamic Forensic Analysis**: Continuous monitoring of process trees, network connections, and service integrity.
+- **Response Orchestration**:
+    - **Host Isolation**: Immediate threat isolation via Firewall (Zero-Trust Policy).
+    - **System Recovery**: Automated integrity and image repair (`SFC`/`DISM`).
+    - **Digital Wipe**: Shielded remote uninstallation for total compromise scenarios.
+- **IA Copilot**: Specialized assistant with full endpoint context to assist in complex triage.
 
-### ⚙️ C2 Infrastructure (Centrifuge)
-The official central server is hosted at: **`<YOUR_C2_SERVER_IP>`**
-- **Default Port**: `5000` (Dashboard / API)
-- **Deployment**: Docker-based deployment is highly recommended for security and scalability.
+### ⚙️ C2 Deployment
+- **Architecture**: Designed to run in Docker clusters, ensuring high availability and process isolation.
+- **Configuration**: Use the `.env` file to define your environment's connection parameters.
 
 ---
 
 ### 🛠️ Quick Start / Início Rápido
 
-**1. Clone & Configure:**
+**1. Setup Environment:**
 ```bash
 git clone https://github.com/BernardoMancia/aegis-endpoint-defense.git
-cp .env.example .env # NUNCA envie o .env para o Git / NEVER commit .env
+cp .env.example .env
 ```
 
-**2. Deploy Server (Docker):**
+**2. Deploy Infrastructure:**
 ```bash
 docker-compose up -d --build
 ```
 
-**3. Build Agent (Windows):**
+**3. Compile Agent:**
 ```bash
 cd agent
+# Recomenda-se compilação estática / Static build recommended
 python setup.py build
-# Binaries ready in build/dist folders
 ```
