@@ -132,7 +132,7 @@ body {
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7);
     backdrop-filter: blur(10px); z-index: 2000;
-    display: flex; items-center: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none; transition: all 0.3s ease;
 }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -251,6 +251,15 @@ body {
     </nav>
     
             <main class="flex-1 p-3 md:p-8 mt-12 md:mt-0 overflow-y-auto custom-scrollbar">
+                {% if session.get('soc_role') == 'viewer' %}
+                <div class="mb-6 hyper-glass border-l-4 border-l-amber-500 bg-amber-500/10 px-6 py-4 flex items-center gap-4 animate-pulse">
+                    <i data-lucide="eye" class="text-amber-500 w-6 h-6"></i>
+                    <div>
+                        <h4 class="text-amber-500 font-bold text-sm tracking-tight uppercase">Modo de Apenas Leitura</h4>
+                        <p class="text-amber-500/70 text-[10px] font-medium">Você tem permissão apenas para visualizar dados. Alterações e ações do SOAR estão desabilitadas para o seu nível de acesso.</p>
+                    </div>
+                </div>
+                {% endif %}
                 
         <div class="max-w-4xl mx-auto py-10 px-6">
             <div class="flex items-center gap-4 mb-10">
@@ -275,9 +284,11 @@ body {
                             <div class="space-y-2">
                                 <label class="text-sm text-slate-400">Role Authorization</label>
                                 <select name="role" class="aegis-input">
-                                    <option value="user" {% if target.role == 'user' %}selected{% endif %}>User (Restricted)</option>
-                                    <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin (Full Control)</option>
-                                    <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                                    <option value="viewer" {% if target.role == 'viewer' %}selected{% endif %}>Viewer (Apenas Leitura)</option>
+                                    <option value="operator" {% if target.role == 'operator' %}selected{% endif %}>Operator (Resposta Básica)</option>
+                                    <option value="analyst" {% if target.role == 'analyst' %}selected{% endif %}>Analyst (SOC Forense)</option>
+                                    <option value="admin" {% if target.role == 'admin' %}selected{% endif %}>Admin (Gestão Geral)</option>
+                                    <option value="superadmin" {% if target.role == 'superadmin' %}selected{% endif %}>Super Admin (Controle Total)</option>
                                 </select>
                             </div>
                              <div class="space-y-2">

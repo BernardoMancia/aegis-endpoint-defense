@@ -66,11 +66,8 @@ def change_role(user_id):
     if new_role not in ROLES:
         flash("Role inválida.", "danger")
         return redirect(url_for("admin.users"))
-    if target.role == "superadmin" and target.id != actor.id:
-        flash("Não é possível alterar a role de outro Super Administrador.", "danger")
-        return redirect(url_for("admin.users"))
-    if new_role == "superadmin" and actor.role != "superadmin":
-        flash("Apenas um Super Administrador pode promover outros ao nível Super Admin.", "danger")
+    if target.id == actor.id and new_role != "superadmin":
+        flash("Você não pode reduzir sua própria role de Super Administrador para evitar o bloqueio da conta.", "danger")
         return redirect(url_for("admin.users"))
 
     old_role = target.role
@@ -101,9 +98,6 @@ def delete_user(user_id):
     user = SocUser.query.get_or_404(user_id)
     if user.id == actor.id:
         flash("Não é possível deletar sua própria conta.", "danger")
-        return redirect(url_for("admin.users"))
-    if user.role == "superadmin":
-        flash("Não é possível deletar outro Super Administrador.", "danger")
         return redirect(url_for("admin.users"))
     username = user.username
     db.session.delete(user)
@@ -169,11 +163,18 @@ def update_user_profile(user_id):
 
     display_name = request.form.get("display_name", "").strip()
     email = request.form.get("email", "").strip()
+    new_role = request.form.get("role", "").strip()
 
     if display_name:
         target.display_name = display_name
     if email and "@" in email:
         target.email = email
+    
+    if new_role and new_role in ROLES and actor.can_manage(target):
+        if target.id == actor.id and new_role != target.role:
+           flash("Você não pode alterar sua própria role através desta interface.", "warning")
+        else:
+            target.role = new_role
 
     db.session.commit()
     audit("ADMIN_USER_PROFILE_UPDATE", actor=_actor(), target_type="user", target_id=user_id,
