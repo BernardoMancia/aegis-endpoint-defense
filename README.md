@@ -1,7 +1,7 @@
 # Aegis Endpoint Defense 🛡️
 [![Aegis Build](https://img.shields.io/badge/Aegis-v1.0.0--Stable-0ea5e9?style=for-the-badge&logo=shippable)](https://github.com/BernardoMancia/aegis-endpoint-defense)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Android-white?style=for-the-badge&logo=windows)](https://github.com/BernardoMancia/aegis-endpoint-defense)
-[![C2 Status](https://img.shields.io/badge/C2_Server-82.112.245.99-emerald?style=for-the-badge&logo=linux)](http://82.112.245.99:5000)
+[![C2 Status](https://img.shields.io/badge/C2_Server-<YOUR_C2_SERVER_IP>-emerald?style=for-the-badge&logo=linux)](http://<YOUR_C2_SERVER_IP>:5000)
 
 [Português](#português) | [English](#english)
 
@@ -26,7 +26,7 @@ Aegis é uma plataforma avançada de **SIEM & EDR (Endpoint Detection and Respon
 - **IA Integrada**: Copilot de segurança com contexto total do endpoint para triagem acelerada.
 
 ### ⚙️ Infraestrutura C2 (Centrífuga)
-O servidor central está hospedado em: **`82.112.245.99`**
+O servidor central está hospedado em: **`<YOUR_C2_SERVER_IP>`**
 - **Porta Padrão**: `5000` (Dashboard / API)
 - **Deploy**: Recomendado via Docker para isolamento e escalabilidade.
 
@@ -51,7 +51,7 @@ Aegis is an advanced open-source **SIEM & EDR (Endpoint Detection and Response)*
 - **Integrated AI**: Security Copilot with full endpoint context for accelerated incident triage.
 
 ### ⚙️ C2 Infrastructure (Centrifuge)
-The official central server is hosted at: **`82.112.245.99`**
+The official central server is hosted at: **`<YOUR_C2_SERVER_IP>`**
 - **Default Port**: `5000` (Dashboard / API)
 - **Deployment**: Docker-based deployment is highly recommended for security and scalability.
 
