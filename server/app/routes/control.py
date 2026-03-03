@@ -54,6 +54,14 @@ def send_command():
     agent = Agent.query.get_or_404(agent_id)
     agent.pending_command = json.dumps({"command": "SHELL", "args": command_str})
     agent.pending_command_time = datetime.utcnow()
+    
+    # Rastreamento de Status do Comando
+    extra = json.loads(agent.extra_data or "{}")
+    extra["cmd_status"] = "SENT"
+    extra["cmd_timestamp"] = agent.pending_command_time.isoformat()
+    extra["cmd_string"] = command_str
+    agent.extra_data = json.dumps(extra)
+    
     db.session.commit()
     audit("COMMAND_SENT", target_type="agent", target_id=agent_id, details=command_str[:100])
     return jsonify({"status": "ok", "message": f"Comando enviado para {agent.hostname}"})
@@ -71,6 +79,14 @@ def quick_command():
     cmd_str = QUICK_COMMANDS[cmd_type]
     agent.pending_command = json.dumps({"command": "SHELL", "args": cmd_str})
     agent.pending_command_time = datetime.utcnow()
+    
+    # Rastreamento de Status do Comando
+    extra = json.loads(agent.extra_data or "{}")
+    extra["cmd_status"] = "SENT"
+    extra["cmd_timestamp"] = agent.pending_command_time.isoformat()
+    extra["cmd_string"] = cmd_str
+    agent.extra_data = json.dumps(extra)
+    
     db.session.commit()
     audit("QUICK_COMMAND", target_type="agent", target_id=agent_id, details=f"{cmd_type}: {cmd_str}")
     return jsonify({"status": "ok", "command": cmd_str, "type": cmd_type})

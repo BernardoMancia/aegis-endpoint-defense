@@ -1646,13 +1646,32 @@ def rebuild_agent_detail():
                                 feed.innerHTML = '<div class="text-center py-10 text-slate-600 italic">Nenhum incidente ativo para este endpoint.</div>';
                             }
 
-                            // Terminal results
+                            // Visual Command Tracking (SENT/EXECUTING)
+                            const out = document.getElementById('det-terminal-out');
+                            if (data.extra_data && data.extra_data.cmd_status) {
+                                const st = data.extra_data.cmd_status;
+                                const cmdStr = data.extra_data.cmd_string || "...";
+                                const cmdTime = data.extra_data.cmd_timestamp;
+                                
+                                // Only draw if it's a new tracking event we haven't rendered
+                                if (!window.lastCmdTracker || window.lastCmdTracker !== cmdTime + st) {
+                                    window.lastCmdTracker = cmdTime + st;
+                                    
+                                    if (st === "SENT") {
+                                        out.innerHTML += `<div class="text-amber-500 mt-2 font-bold flex items-center gap-2"><i data-lucide="send" class="w-3 h-3"></i> [ENVIADO - AGUARDANDO AGENTE] > <span class="text-slate-400 font-normal">${cmdStr}</span></div>`;
+                                    } else if (st === "EXECUTING") {
+                                        out.innerHTML += `<div class="text-purple-400 mt-2 font-bold flex items-center gap-2 animate-pulse"><i data-lucide="loader" class="w-3 h-3"></i> [AGENTE EXECUTANDO...] > <span class="text-slate-400 font-normal">${cmdStr}</span></div>`;
+                                    }
+                                    out.scrollTop = out.scrollHeight;
+                                }
+                            }
+
+                            // Terminal final results (COMPLETED)
                             if(data.last_command_result && data.agent.command_result_time !== lastTimestamp) {
                                 lastTimestamp = data.agent.command_result_time;
-                                const out = document.getElementById('det-terminal-out');
                                 const resData = data.last_command_result;
                                 out.innerHTML += `<div class="mt-2 text-slate-500 border-t border-white/5 pt-2">
-                                    <span class="text-sky-400">OUTPUT [${new Date(lastTimestamp).toLocaleTimeString()}] ></span><br>
+                                    <span class="text-emerald-400 font-bold flex items-center gap-2"><i data-lucide="check-circle" class="w-3 h-3"></i> [CONCLUÍDO - OUTPUT RECEBIDO] ></span><br>
                                     <pre class="whitespace-pre-wrap">${resData.output || 'No output'}</pre>
                                 </div>`;
                                 out.scrollTop = out.scrollHeight;

