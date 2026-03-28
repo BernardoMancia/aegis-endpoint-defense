@@ -13,6 +13,7 @@ import json
 import hashlib
 import logging
 import secrets
+import bcrypt
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from functools import wraps
@@ -354,11 +355,20 @@ class SocUser(db.Model):
 
     @staticmethod
     def hash_password(password: str) -> str:
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+    @staticmethod
+    def _legacy_hash(password: str) -> str:
         salt = os.getenv("AEGIS_SECRET_KEY", "aegis-salt")
         return hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
 
     def check_password(self, password: str) -> bool:
-        return self.password_hash == SocUser.hash_password(password)
+        if self.password_hash.startswith("$2b$"):
+            return bcrypt.checkpw(password.encode(), self.password_hash.encode())
+        if self.password_hash == SocUser._legacy_hash(password):
+            self.password_hash = SocUser.hash_password(password)
+            return True
+        return False
 
     def to_dict(self):
         return {
@@ -401,7 +411,7 @@ def require_token(f):
     def decorated(*args, **kwargs):
         auth = request.headers.get("Authorization", "")
         token = auth.replace("Bearer ", "").strip()
-        print(f"[AUTH DEBUG] Recebido: '{token}' | Esperado: '{API_TOKEN}' | Iguais: {token == API_TOKEN}")
+        log.debug(f"[AUTH] Token recebido: '{token[:4]}...' | Esperado: '{API_TOKEN[:4]}...' | Iguais: {token == API_TOKEN}")
         if token != API_TOKEN:
             audit("UNAUTHORIZED_ACCESS", actor="unknown", target_type="api",
                   details=f"Tentativa com token inválido: {token[:8]}...")
@@ -915,9 +925,9 @@ def resolve_soc_chat():
 
 
 
-@app.route("/api/register", methods=["POST"])
+@app.route("/api/agent/shell", methods=["POST"])
 @require_token
-def register_agent():
+def agent_shell():
     data = request.get_json(silent=True) or {}
     agent_id = data.get("agent_id")
     command_str = data.get("command", "").strip()

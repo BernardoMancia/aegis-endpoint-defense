@@ -70,7 +70,7 @@ def handle_command(agent: AegisAgentCore, cmd_data: dict):
             
         try:
             agent.send_command_result("UNINSTALL", "[UNINSTALL_OK] Processo de auto-destruição iniciado nas chaves de registro e binários.", 0)
-        except:
+        except Exception:
             pass
         
         import tempfile
@@ -102,7 +102,7 @@ if %errorlevel% equ 0 rmdir /s /q "{exe_dir}" > nul 2>&1
         import psutil
         try:
             psutil.Process(os.getpid()).kill()
-        except:
+        except Exception:
             os._exit(0)
 
     elif cmd_type == "WIPE":

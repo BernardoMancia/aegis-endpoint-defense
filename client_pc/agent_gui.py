@@ -520,6 +520,18 @@ class AegisAgentCore:
         self.running = False
         self.notify("[AEGIS] Agente parado.")
 
+    def request_chat_support(self):
+        try:
+            res = requests.post(
+                f"{self.server_url}/api/agent/request_chat",
+                json={"original_hostname": self.original_hostname},
+                headers=self.headers, timeout=10
+            )
+            if res.status_code == 200:
+                self.notify("[CHAT] Solicitação de suporte enviada ao SOC!")
+        except Exception as e:
+            self.notify(f"Erro ao solicitar suporte: {e}", "error")
+
 
 
 
@@ -617,7 +629,7 @@ class AegisGUI(ctk.CTk):
         ctk.CTkButton(input_frame, text="Enviar", fg_color=self.COLORS["accent"], width=80, command=self._send_chat_msg).pack(side="right")
 
         self.agent.chat_queue.append("[SYSTEM] O usuário abriu a aba de suporte e aguarda contato.")
-        self.agent.request_soc_chat()
+        self.agent.request_chat_support()
 
 
     def _send_chat_msg(self):
